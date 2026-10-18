@@ -126,7 +126,7 @@ def main_menu(sock: socket.socket, ip: str) -> None:
             log.info("PAT-Index-Test (schickt 0x01 mit Index 0–5) …")
             for idx in range(6):
                 with lock:
-                    protocol.send_recv(sock, protocol.cmd_tune(idx), 0, f"0x01 idx={idx}")
+                    protocol.send_recv(sock, protocol.cmd_tune(idx), 2, f"0x01 idx={idx}")
                 log.info("Index %d gesendet – jetzt UDP-Block prüfen", idx)
                 input("  Enter für nächsten Index …")
 
