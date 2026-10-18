@@ -4,10 +4,10 @@ stream.py – Kanal-Prepare und MPEG-TS-Stream
 prepare_channel    – 0x03 → 0x32/0x33 → 0x02 (Signal prüfen)
 stream             – Tune + UDP-MPEG-TS-Stream
 
-Fixes aus PROBLEME.md:
-  Problem 1: on_dead-Event wenn tcp_sock nach Tune abbricht (erwartet)
-  Problem 2: Speedtest-Response-Filter (48205 Byte) + Request-Response-Pull
-  Problem 3: Re-Tune + Stream-Freigabe auf stream_ka_sock nach Verbindungsaufbau
+Fixes aus PCAP-Analyse:
+  - Korrekte Reihenfolge laut PCAP: 0x01 → 0xF8/0x07 → 0xF9/0x01 (first) → 0x17 confirm
+  - Kein separater 0xF9/0x02 UDP-Init (nicht im PCAP-Ablauf belegt)
+  - Keine zweite TCP-Verbindung / Re-Tune (nicht im PCAP belegt, verursachte Speedtest-Response)
 
 Keep-Alive-Logik ist in keepalive.py ausgelagert.
 """
@@ -105,25 +105,13 @@ def stream(
         )
         ka.start()
 
-    stream_ka_stop: Optional[threading.Event] = None
-    stream_ka: Optional[threading.Thread] = None
-    stream_ka_sock: Optional[socket.socket] = None
-    stream_ka_lock: Optional[threading.Lock] = None
-
-    # UDP-Socket VOR dem ersten TCP-Befehl binden (Problem 3: zu spätes Bind).
+    # UDP-Socket VOR dem ersten TCP-Befehl binden.
     udp = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
     udp.setsockopt(socket.SOL_SOCKET, socket.SO_RCVBUF, 8 * 1024 * 1024)
     udp.bind(("", 0))
     udp.settimeout(0.1)
 
     try:
-        # UDP-Initialisierung
-        udp.sendto(protocol.cmd_udp_init(), (dongle_ip, protocol.UDP_PORT))
-        try:
-            udp.recvfrom(256)
-        except socket.timeout:
-            pass
-
         # Tune (TCP 0xF6/0x01)
         with lock:
             protocol.send_recv(tcp_sock, protocol.cmd_tune(svc.pat_index), 2, "0x01 tune")
@@ -133,44 +121,15 @@ def stream(
         with lock:
             protocol.send_recv(tcp_sock, protocol.cmd_stream_release(), 0, "0xF8/0x07 release")
 
-        # Erster UDP-Pull (first=True → byte21=0x00)
+        # Erster UDP-Pull (first=True → byte21=0x00) – vor 0x17 confirm laut PCAP
         udp.sendto(protocol.cmd_udp_ts_block(first=True), (dongle_ip, protocol.UDP_PORT))
         pull_count = 1
         log.debug("0xF9/0x01 Pull #1 (first) gesendet")
 
-        # Tune bestätigen (TCP 0xF6/0x17)
+        # Tune bestätigen (TCP 0xF6/0x17) – nach erstem Pull laut PCAP
         with lock:
             r = protocol.send_recv(tcp_sock, protocol.cmd_17_confirm(), 4, "0x17 confirm")
         log.info("0x17 confirm: 0x%02X", r[2] if len(r) > 2 else 0xFF)
-
-        # Problem 3: Zweite TCP-Verbindung aufbauen.
-        result = protocol.connect(dongle_ip)
-        if result is None:
-            raise ConnectionError("Keep-Alive-Verbindung nach Tune fehlgeschlagen.")
-        stream_ka_sock = result
-        stream_ka_lock = threading.Lock()
-
-        try:
-            with stream_ka_lock:
-                protocol.send_recv(
-                    stream_ka_sock, protocol.cmd_tune(svc.pat_index), 2,
-                    "0x01 re-tune KA",
-                )
-                protocol.send_recv(
-                    stream_ka_sock, protocol.cmd_stream_release(), 0,
-                    "0xF8/0x07 re-release KA",
-                )
-            log.info("Re-Tune + Stream-Freigabe auf KA-Socket erfolgreich.")
-        except OSError as e:
-            log.warning("Re-Tune auf KA-Socket fehlgeschlagen (weiter): %s", e)
-
-        stream_ka_stop = threading.Event()
-        stream_ka = threading.Thread(
-            target=_keepalive_worker,
-            args=(stream_ka_sock, stream_ka_lock, stream_ka_stop),
-            daemon=True,
-        )
-        stream_ka.start()
 
         out = open(output_path, "wb") if output_path != "-" else sys.stdout.buffer
         log.info("Stream → %s  (STRG+C zum Beenden)", output_path)
@@ -296,10 +255,4 @@ def stream(
         stop.set()
         if ka is not None:
             ka.join(timeout=4.0)
-        if stream_ka_stop is not None:
-            stream_ka_stop.set()
-        if stream_ka is not None:
-            stream_ka.join(timeout=4.0)
-        if stream_ka_sock is not None:
-            protocol.disconnect(stream_ka_sock)
         udp.close()
