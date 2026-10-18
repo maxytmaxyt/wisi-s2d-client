@@ -84,9 +84,20 @@ def cmd_chinfo_size(prog_idx: int) -> bytes:
 def cmd_chinfo_data(prog_idx: int, length: int) -> bytes:
     return build_usbc(length, 0x80, 0xF6, 0x33, struct.pack(">I", prog_idx))
 
-def cmd_tune(pat_index: int) -> bytes:
-    """0x01 – Kanal aktivieren. Byte[1] = PAT-Array-Index."""
-    return build_usbc(2, 0x80, 0xF6, 0x01, bytes([0x00, pat_index & 0xFF]))
+def cmd_tune(channel_index: int) -> bytes:
+    """0x01 – Kanal aktivieren.
+
+    channel_index ist der interne 16-Bit Program-Index (prog_idx) des Dongles –
+    also die Position in der vom Dongle verwalteten Senderliste, NICHT die DVB
+    Service-ID. Der Index wird Big-Endian in Byte 21 (High) und Byte 22 (Low)
+    des USBC-Blocks kodiert.
+
+    Beispiel: ZDF hat prog_idx=4 → payload 0x00 0x04.
+    Kanal 50 → payload 0x00 0x32.
+    Kanal 300 → payload 0x01 0x2C.
+    """
+    return build_usbc(2, 0x80, 0xF6, 0x01,
+                      struct.pack(">H", channel_index & 0xFFFF))
 
 def cmd_probe(opcode: int) -> bytes:
     """Sendet einen unbekannten Opcode (0xF6) mit minimalen Daten – für Opcode-Scan."""

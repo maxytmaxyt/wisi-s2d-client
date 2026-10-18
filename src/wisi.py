@@ -33,7 +33,8 @@ def main(argv: Sequence[str] | None = None) -> int:
     )
     parser.add_argument("--output", default="stream.ts", help="Stream-Datei oder - für stdout")
     parser.add_argument("--duration", type=float, default=0.0, help="Streamdauer in Sekunden")
-    parser.add_argument("--pat-idx", type=int, default=4, help="PAT-Index für --stream")
+    parser.add_argument("--pat-idx", type=int, default=4,
+                        help="Interner Kanal-Index des Dongles (0–65535) für --stream")
     parser.add_argument("--epg-output", default="epg.json", help="EPG-Datei oder - für stdout")
     parser.add_argument("--epg-limit", type=int, help="EPG nur für die ersten N Sender laden")
     parser.add_argument("--pcap-extract", help="0xF9/0x0A-Antwort zusätzlich in diese Datei schreiben")
@@ -44,8 +45,8 @@ def main(argv: Sequence[str] | None = None) -> int:
         logging.getLogger().setLevel(logging.DEBUG)
     if args.duration < 0:
         parser.error("--duration darf nicht negativ sein.")
-    if args.pat_idx < 0 or args.pat_idx > 255:
-        parser.error("--pat-idx muss zwischen 0 und 255 liegen.")
+    if args.pat_idx < 0 or args.pat_idx > 65535:
+        parser.error("--pat-idx muss zwischen 0 und 65535 liegen.")
 
     try:
         if args.channels:

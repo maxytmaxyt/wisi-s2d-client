@@ -46,7 +46,8 @@ def main() -> None:
     p.add_argument("--ip", default=DEFAULT_IP)
     p.add_argument("--debug", action="store_true")
     p.add_argument("--stream", action="store_true", help="Direkt streamen")
-    p.add_argument("--pat-idx", type=int, default=4, help="PAT-Index für --stream")
+    p.add_argument("--pat-idx", type=int, default=4,
+                   help="Interner Kanal-Index des Dongles (0–65535) für --stream")
     p.add_argument("--output", default="stream.ts")
     p.add_argument("--duration", type=float, default=0.0)
     args = p.parse_args()
@@ -75,7 +76,7 @@ def main() -> None:
             services = channels_to_services(channels) if channels else [FALLBACK_SERVICE]
             svc = next((s for s in services if s.pat_index == args.pat_idx), None)
             if svc is None:
-                log.warning("PAT-Index %d nicht gefunden – nutze Fallback.", args.pat_idx)
+                log.warning("Kanal-Index %d nicht in Senderliste – nutze Fallback.", args.pat_idx)
                 svc = ServiceEntry(**{**FALLBACK_SERVICE.__dict__, "pat_index": args.pat_idx})
             prepare_channel(sock, lock, svc)
             stream(sock, lock, svc, args.output, args.duration, keepalive_active=True)

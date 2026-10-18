@@ -38,20 +38,16 @@ Dieses Repo enthält einen reverse-engineerten Python-Client für den **WISI OR 
 
 ## Nächste Schritte (Priorität)
 
-### 🔴 1 – `0x01`-Payload für Kanalwechsel klären
+### ✅ 1 – `0x01`-Payload für Kanalwechsel geklärt (Oktober 2026)
 
-**Problem:** Der aktuelle Client verwendet hardcodierten `pat_idx=4`. Kanalwechsel zu anderen Sendern funktioniert vermutlich nicht.
+**Ergebnis:** Die zwei Payload-Bytes (USBC Byte 21 + 22) kodieren den **internen 16-Bit Kanal-Index** des Dongles als Big-Endian-Wert – **nicht** die DVB Service-ID, nicht den PAT-Array-Index.
 
-**Was zu tun ist:**
-- Neues PCAP aufzeichnen: In der TV2Smart-App auf einen *anderen* Sender wechseln (z. B. Kanal 2, dann Kanal 50)
-- In `research/PCAPdroid_12_Okt._16_28_17.pcap` sind die `0x01`-Bytes `00 04` – das entspricht PAT-Index 4. Vergleich mit einem zweiten PCAP würde zeigen, ob sich Byte[21] oder Byte[22] im USBC ändert.
-- Alternativ: `src/wisi_probe.py` erweitern, um `0x01` mit verschiedenen Payloads zu senden und die USBS-Antwort zu vergleichen.
-- Zieldatei: `src/wisi_client.py` → Methode `_cmd_tune()` bzw. `_cmd_prepare()`.
+Der Dongle verwaltet eine Senderliste im Flash-Speicher. `0x00 0x04` = Kanal-Index 4 = ZDF. Kanal 50 → `0x00 0x32`. Kanal 300 → `0x01 0x2C`. Die TV2Smart-App zerlegt den Integer via `(index >> 8) & 0xFF` / `index & 0xFF`.
 
-**Hypothesen (aus `research/neue_erkenntnisse.md`):**
-- Payload könnte `[s_id_hi, s_id_lo]` (Service-ID) sein
-- Oder `[prog_idx_byte3, slot]`
-- Oder LNB-Voltage + DiSEqC-Port (weniger wahrscheinlich da konstant)
+**Was geändert wurde:**
+- `src/protocol.py`: `cmd_tune(pat_index)` → `cmd_tune(channel_index)`, Payload jetzt `struct.pack(">H", ...)` statt `bytes([0x00, pat_index & 0xFF])` (vorher fehlte High-Byte bei Index > 255)
+- `src/wisi.py` + `src/wisi_client.py`: Bereichsprüfung auf 0–65535 erweitert
+- `src/stream.py`: Logmeldung auf `channel_index` umbenannt
 
 ---
 
@@ -69,7 +65,7 @@ Dieses Repo enthält einen reverse-engineerten Python-Client für den **WISI OR 
 
 ### 🟡 3 – Scan-PCAP aufzeichnen
 
-**Problem:** Es existiert kein Mitschnitt eines Sendersuchlaufs. Ein Scan-PCAP würde die `0x01`-Payload-Frage (Schritt 1) direkt lösen, weil alle Kanäle sequenziell durchlaufen werden.
+**Problem:** Es existiert kein Mitschnitt eines Sendersuchlaufs. Ein Scan-PCAP würde zeigen welche Kanal-Indizes den einzelnen Transpondern zugeordnet werden und ob der Dongle zwischen Indizes und LCNs unterscheidet.
 
 **Was zu tun ist:**
 - PCAPdroid auf Android starten

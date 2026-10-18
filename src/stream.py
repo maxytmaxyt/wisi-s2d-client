@@ -127,7 +127,7 @@ def stream(
         # Tune (TCP 0xF6/0x01)
         with lock:
             protocol.send_recv(tcp_sock, protocol.cmd_tune(svc.pat_index), 2, "0x01 tune")
-        log.info("Tune: pat_index=%d  sid=%d  (%s)", svc.pat_index, svc.service_id, svc.name)
+        log.info("Tune: channel_index=%d  sid=%d  (%s)", svc.pat_index, svc.service_id, svc.name)
 
         # Stream-Freigabe (TCP 0xF8/0x07)
         with lock:
