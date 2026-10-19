@@ -1,6 +1,6 @@
 # Research-Zusammenfassung: WISI OR S2D
 
-> Stand: 15. Oktober 2026. Kompakte Übersicht aller verifizierten Erkenntnisse.
+> Stand: 19. Oktober 2026. Kompakte Übersicht aller verifizierten Erkenntnisse.
 > Detailbelege in den verlinkten Einzeldokumenten.
 
 ---
@@ -39,9 +39,9 @@ Keine Auth-Extension (66 Byte, 46 Byte USBS) in den vorhandenen PCAPs.
 
 | Opcode | Funktion | Antwort |
 |---|---|---|
-| `0x16` | Init / Keep-Alive (alle ~2 s) | 12 B: Byte[0] = 0x00 (warten) → 0x01 (bereit) |
+| `0x16` | Init/Statusabfrage; Python-Client sendet ihn periodisch | 12 B: Byte[0] = 0x00 (warten) → 0x01 (bereit). Periodischer App-Heartbeat während des Streamings nicht belegt. |
 | `0x17` | Init Phase 2 / Tune-Bestätigung | 4 B |
-| `0x01` | **Kanal aktivieren (Tune)** | USBS; Payload = `[0x00, pat_index]` |
+| `0x01` | **Kanal aktivieren (Tune)** | USBS; Payload = interner 16-Bit-Kanalindex des Dongles, Big-Endian (im Beispiel `00 04`) |
 | `0x02` | Signal-Status-Poll (alle ~3 s) | 13 B: Byte[1]=Stärke%, Byte[2]=Qualität |
 | `0x03` | Kanal vorbereiten (prepare tune) | USBS |
 | `0x20` | ch_List-Größe abfragen | 8 B: XML-Größe BE uint32 |
@@ -63,7 +63,7 @@ Keine Auth-Extension (66 Byte, 46 Byte USBS) in den vorhandenen PCAPs.
 | Opcode | Funktion | Antwort |
 |---|---|---|
 | `0x02` | Stream initialisieren (einmalig) | – |
-| `0x01` | **MPEG-TS-Block anfordern** | ~32.740 B (174 × 188 B TS-Pakete) |
+| `0x01` | **DVB-Block per Pull anfordern** | Request `data_len=0xBC00`; vollständige Antwort im Stream-PCAP nicht sichtbar |
 | `0x0A` | Speedtest (APK: `getSpeedTestMbps()`) | 48.143 B (48.130 Daten + 13 USBS) |
 
 ### Discovery (Prefix 0xFA, Beobachtung aus OR-S2D-PCAPs)
@@ -85,7 +85,7 @@ Phase 2 – Senderliste laden (TCP, 440 Kanäle)
   → 0x20          XML-Größe (61.348 Byte)
   → 0x21          <ch_List> XML mit 440 Einträgen
   → 0x22          Abschluss
-  → 0x16          Keep-Alive (alle 2 s, während der gesamten Session)
+  → 0x16          weitere Status-/Init-Abfrage; periodischer Stream-Heartbeat in der App nicht belegt
 
 Phase 3 – Kanal vorbereiten (TCP)
   → 0x03 [prog_idx]     Kanal vorauswählen
@@ -93,14 +93,18 @@ Phase 3 – Kanal vorbereiten (TCP)
   → 0x02 (alle 3 s)     Signal pollen
 
 Phase 4 – Tune + Stream (TCP + UDP)
-  → 0x01 [0x00, pat_idx]   Kanal aktivieren (PAT-Index, nicht Service-ID!)
+  → 0x01 [index_hi, index_lo] interner 16-Bit-Kanalindex des Dongles (Beispiel: `00 04`)
   → 0xF8/0x07              Stream-Freigabe
-  → 0xF9/0x01 [byte21=0x00] Erster MPEG-TS-Block
-  ← 32.740 Byte MPEG-TS    174 Pakete
+  → 0xF9/0x01 [data_len=0xBC00, byte21=0x00] erster DVB-Pull
   → 0x17 [01 00 00 00]     Tune bestätigen
-  → 0xF9/0x01 [byte21=0x01] Weitere Blöcke (Loop)
-  → 0x16 (alle 2 s)        Keep-Alive
+  → 0xF9/0x01 [data_len=0xBC00, byte21=0x01] weitere DVB-Pulls
 ```
+
+Im Stream-PCAP sind 48 ausgehende `F9/01`-Requests belegt: 11 mit Byte 21 = `00`, 37 mit `01`. Der vollständige große UDP-TS-Antwortblock fehlt in dieser Aufzeichnung; sichtbar ist nur eine 13-Byte-`USBS`-Antwort von Port 8800. Damit ist der Pull-Aufruf, nicht aber der komplette MPEG-TS-Empfang in diesem Mitschnitt belegt.
+
+`data_len=0xBC00` (48.128) wird auch vom separaten `F9/0A`-Speedtest verwendet. Die Opcode-/Aufrufpfade unterscheiden sich; die Länge allein nicht. Der APK-Empfangspfad reserviert bei `F9/01` zusätzlich 64 + 13 Byte, also insgesamt 48.205 Byte Pufferkapazität. Das ist keine gemessene Nutzdaten- oder Antwortgröße.
+
+Keep-Alive-Arten nicht gleichsetzen: `Socket.setKeepAlive(true)` ist die TCP-Option des Betriebssystems; `F6/16` ist ein APIX-Kommando; SDK-Service-Kommandos wie `CMD_KEEP_ALIVE_STBMODE_RESET` sind ein dritter Namensraum. Ein periodischer APIX-Heartbeat während des Streamings ist noch nicht durch APK-Aufrufstelle und PCAP-Zeitfolge bestätigt.
 
 ---
 
@@ -179,8 +183,8 @@ Die frühere Hypothese `MD5(Challenge ‖ SharedSecret ‖ Timestamp)` ist falsc
 
 | Priorität | Thema |
 |---|---|
-| 🔴 | `0xF6/0x01`-Payload für Kanalwechsel: Payload `00 04` = PAT-Index 4, aber wie ändert sich das für andere Kanäle? |
-| 🔴 | Live-Stream-Erfolg nicht bestätigt: bekannte Bugs (USBS-Lese-Timing, zu spätes UDP-Bind) |
+| 🔴 | Weitere `0xF6/0x01`-Payloads live prüfen: `00 04` ist im Beispiel der interne 16-Bit-Kanalindex 4; nicht DVB-Service-ID und nicht PAT-Array-Index. |
+| 🔴 | Live-Stream nicht vollständig end-to-end bestätigt: Stream-PCAP zeigt Pull-Requests, aber keine großen TS-Antworten |
 | 🟡 | Scan-PCAP fehlt (würde `0x01`-Payload-Frage lösen) |
 | 🟡 | `0xF6/0x22` nach ch_List: nötig oder optional? |
 | 🟢 | Unbekannte Opcodes `0x04`–`0x1F` (z. B. `CMD_GET_ABOUT_DONGLE_INFO`) per Probe finden |

@@ -3,7 +3,7 @@ pcap_parser.py – PCAP-Parsing und APIX-Analyse
 ================================================
 Packet      – NamedTuple für ein dekodiertes IP-Paket
 packets()   – Iterator über alle IP-Pakete einer klassischen PCAP-Datei
-analyze()   – Zählt APIX-Befehle und 0xF9/0x0A-Blobs in einer PCAP-Datei
+analyze()   – Zählt APIX-Befehle und 0xF9/0x0A-Geräteantworten in einer PCAP-Datei
 
 Die CLI (main, run, run_service_db) befindet sich in wisi_pcap.py.
 """
@@ -15,7 +15,7 @@ from collections.abc import Iterator
 from pathlib import Path
 from typing import NamedTuple
 
-from channels import parse_service_db
+from protocol import UDP_PORT
 
 
 class Packet(NamedTuple):
@@ -108,10 +108,10 @@ def packets(path: Path) -> Iterator[Packet]:
 
 
 def analyze(path: Path) -> dict[str, object]:
-    """Analysiert eine PCAP-Datei: zählt APIX-Befehle und Service-DB-Blobs."""
+    """Analysiert APIX-Befehle und F9/0A-Antworten des Dongles."""
     counts: collections.Counter[str] = collections.Counter()
     commands: collections.Counter[str] = collections.Counter()
-    service_db_blobs: list[bytes] = []
+    f9_0a_replies: list[bytes] = []
     packet_count = 0
 
     for pkt in packets(path):
@@ -119,8 +119,12 @@ def analyze(path: Path) -> dict[str, object]:
         transport = "TCP" if pkt.protocol == 6 else "UDP"
         counts[f"{transport} {pkt.source_port} -> {pkt.destination_port}"] += 1
         payload = pkt.payload
-        if transport == "UDP" and payload.startswith(b"\xf9\x0a"):
-            service_db_blobs.append(payload)
+        if (
+            transport == "UDP"
+            and pkt.source_port == UDP_PORT
+            and payload.startswith(b"\xf9\x0a")
+        ):
+            f9_0a_replies.append(payload)
         start = 0
         while (offset := payload.find(b"USBC", start)) >= 0:
             start = offset + 4
@@ -135,22 +139,10 @@ def analyze(path: Path) -> dict[str, object]:
         "ipv4_packets": packet_count,
         "flows": dict(sorted(counts.items())),
         "apiX_commands": dict(sorted(commands.items())),
-        "service_db_responses": len(service_db_blobs),
+        "f9_0a_device_replies": len(f9_0a_replies),
     }
-    if service_db_blobs:
-        largest = max(service_db_blobs, key=len)
-        services = parse_service_db(largest)
-        result["largest_service_db_response_bytes"] = len(largest)
-        result["decoded_service_count"] = len(services)
-        result["decoded_services"] = [
-            {
-                "pat_index": svc.pat_index,
-                "service_id": svc.service_id,
-                "prog_idx": f"0x{svc.prog_idx:08X}",
-                "video_pid": f"0x{svc.video_pid:04X}",
-                "audio_pid": f"0x{svc.audio_pid:04X}",
-                "name": svc.name,
-            }
-            for svc in services[:100]
-        ]
+    if f9_0a_replies:
+        result["largest_f9_0a_device_reply_bytes"] = max(
+            map(len, f9_0a_replies)
+        )
     return result

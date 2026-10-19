@@ -1,4 +1,4 @@
-"""Analysiert klassische PCAP-Dateien auf APIX-Befehle und 0xF9/0x0A-Blobs."""
+"""Analysiert APIX-Befehle und den F9/0A-Speedtest-Verkehr in klassischen PCAPs."""
 from __future__ import annotations
 
 import argparse
@@ -8,7 +8,7 @@ import sys
 from collections.abc import Sequence
 from pathlib import Path
 
-from channels import parse_service_db
+from protocol import UDP_PORT
 from pcap_parser import analyze, packets
 
 
@@ -19,42 +19,29 @@ def run(path: str, extract_service_db: str | None = None) -> int:
         candidates = [
             pkt.payload
             for pkt in packets(capture_path)
-            if pkt.protocol == 17 and pkt.payload.startswith(b"\xf9\x0a")
+            if (
+                pkt.protocol == 17
+                and pkt.source_port == UDP_PORT
+                and pkt.payload.startswith(b"\xf9\x0a")
+            )
         ]
         if not candidates:
-            raise ValueError("In der PCAP-Datei wurde keine 0xF9/0x0A-Antwort gefunden.")
+            raise ValueError("In der PCAP-Datei wurde keine 0xF9/0x0A-Geräteantwort gefunden.")
         blob = max(candidates, key=len)
         Path(extract_service_db).write_bytes(blob)
         print(
-            f"Größte 0xF9/0x0A-Antwort ({len(blob)} Byte) "
+            f"Größte 0xF9/0x0A-Geräteantwort ({len(blob)} Byte) "
             f"nach {extract_service_db} geschrieben."
         )
     print(json.dumps(result, ensure_ascii=False, indent=2))
     return 0
 
 
-def run_service_db(path: str) -> int:
-    data = Path(path).read_bytes()
-    services = parse_service_db(data)
-    if not services:
-        raise ValueError(
-            "Keine Einträge dekodiert. Erwartet wird eine vollständige 0xF9/0x0A-Antwort "
-            "mit den vom Client angenommenen Headern."
-        )
-    result = [
-        {
-            "pat_index": svc.pat_index,
-            "service_id": svc.service_id,
-            "prog_idx": f"0x{svc.prog_idx:08X}",
-            "video_pid": f"0x{svc.video_pid:04X}",
-            "audio_pid": f"0x{svc.audio_pid:04X}",
-            "encrypted": svc.is_encrypted,
-            "name": svc.name,
-        }
-        for svc in services
-    ]
-    print(json.dumps(result, ensure_ascii=False, indent=2))
-    return 0
+def run_service_db(_path: str) -> int:
+    raise ValueError(
+        "0xF9/0x0A is used for a speedtest by the analyzed APK, not as a channel database. "
+        "Channel lists are available via TCP 0xF6/0x20 and 0xF6/0x21."
+    )
 
 
 def main(argv: Sequence[str] | None = None) -> int:
@@ -63,11 +50,11 @@ def main(argv: Sequence[str] | None = None) -> int:
     parser.add_argument(
         "--decode-service-db",
         metavar="DATEI",
-        help="Gespeicherte 0xF9/0x0A-Antwort dekodieren (UDP-Payload als Binärdatei)",
+        help="Legacy option; rejected because 0xF9/0x0A is a speedtest, not a channel database",
     )
     parser.add_argument(
         "--extract-service-db",
-        help="Größte gefundene UDP-0xF9/0x0A-Antwort unverändert speichern",
+        help="Legacy option name; save the largest 0xF9/0x0A device reply unchanged",
     )
     args = parser.parse_args(argv)
     if bool(args.pcap) == bool(args.decode_service_db):

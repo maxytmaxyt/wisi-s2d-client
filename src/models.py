@@ -44,7 +44,10 @@ class Channel:
 # ---------------------------------------------------------------------------
 @dataclass
 class ServiceEntry:
-    """Compat-Wrapper um Channel mit den alten Feldnamen."""
+    """Compat-Wrapper um Channel.
+
+    `pat_index` ist der historische Feldname für den Tune-Kanalindex.
+    """
     pat_index:   int
     prog_idx:    int
     service_id:  int

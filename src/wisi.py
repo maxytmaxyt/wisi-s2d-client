@@ -29,7 +29,7 @@ def main(argv: Sequence[str] | None = None) -> int:
     actions.add_argument(
         "--decode-service-db",
         metavar="DATEI",
-        help="Gespeicherten 0xF9/0x0A-Rohblob dekodieren",
+        help="Legacy option; rejected because 0xF9/0x0A is a speedtest, not a channel database",
     )
     parser.add_argument("--output", default="stream.ts", help="Stream-Datei oder - für stdout")
     parser.add_argument("--duration", type=float, default=0.0, help="Streamdauer in Sekunden")
@@ -37,7 +37,10 @@ def main(argv: Sequence[str] | None = None) -> int:
                         help="Interner Kanal-Index des Dongles (0–65535) für --stream")
     parser.add_argument("--epg-output", default="epg.json", help="EPG-Datei oder - für stdout")
     parser.add_argument("--epg-limit", type=int, help="EPG nur für die ersten N Sender laden")
-    parser.add_argument("--pcap-extract", help="0xF9/0x0A-Antwort zusätzlich in diese Datei schreiben")
+    parser.add_argument(
+        "--pcap-extract",
+        help="Größte 0xF9/0x0A-Speedtest-Geräteantwort aus PCAP extrahieren",
+    )
     parser.add_argument("--debug", action="store_true", help="Debug-Logs aktivieren")
     args = parser.parse_args(argv)
 

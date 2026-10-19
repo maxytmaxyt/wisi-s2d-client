@@ -4,8 +4,8 @@ channels.py – Kanalliste via TCP (0xF6/0x20 + 0xF6/0x21)
 fetch_channel_list   – XML-Kanalliste vom Dongle laden
 parse_chlist_xml     – <ch_List>-XML in Channel-Objekte parsen
 channels_to_services – Channel-Liste → ServiceEntry-Liste (LCN-sortiert)
-parse_service_db     – Legacy-Parser für 0xF9/0x0A-Blob (OR S2D: immer leer)
-fetch_service_db     – Legacy-Stub (immer leere Liste)
+parse_service_db     – Legacy-Parser für ein historisches, nicht verifiziertes Format
+fetch_service_db     – deaktivierter Legacy-Stub; F9/0A ist im APK ein Speedtest
 """
 from __future__ import annotations
 
@@ -149,11 +149,11 @@ def channels_to_services(channels: List[Channel]) -> List[ServiceEntry]:
 
 
 # ---------------------------------------------------------------------------
-# Legacy-Stubs (0xF9/0x0A – OR S2D liefert keinen Service-DB-Blob)
+# Legacy parser (0xF9/0x0A is a speedtest in the analyzed TV2Smart APK)
 # ---------------------------------------------------------------------------
 def parse_service_db(data: bytes) -> List[ServiceEntry]:
-    """Legacy-Parser für 0xF9/0x0A UDP-Blob (OR S2D: liefert immer 0 Einträge)."""
-    log.debug("parse_service_db: %dB (OR S2D gibt kein Service-DB-Format zurück)", len(data))
+    """Decode a historical, unverified service-DB blob; not for F9/0A speedtest data."""
+    log.debug("parse_service_db: legacy parser received %dB", len(data))
     UDP_HEADER_SIZE_LEGACY = 28
     SERVICE_DB_HEADER = 32
     SERVICE_ENTRY_SIZE = 128
@@ -202,9 +202,9 @@ def parse_service_db(data: bytes) -> List[ServiceEntry]:
 
 
 def fetch_service_db(*_args, **_kwargs) -> List[ServiceEntry]:
-    """Veraltet beim OR S2D. Bitte fetch_channel_list() via TCP verwenden."""
+    """Disabled legacy API; channel lists are fetched via TCP, not F9/0A."""
     log.warning(
-        "fetch_service_db() via 0xF9/0x0A UDP wird vom OR S2D nicht unterstützt. "
-        "Bitte fetch_channel_list() via TCP 0xF6/0x20+0x21 verwenden."
+        "fetch_service_db() is disabled: F9/0A is a speedtest in the analyzed APK. "
+        "Use fetch_channel_list() via TCP 0xF6/0x20+0x21."
     )
     return []

@@ -38,7 +38,7 @@ python src/wisi.py --ip 192.168.178.32 --channels
 python src/wisi.py --ip 192.168.178.32 --stream --pat-idx 4 --duration 60 --output stream.ts
 ```
 
-`--duration 0` = unbegrenzt. `--pat-idx 4` stammt aus dem Beispielmitschnitt (Programm 4914) – vorher die Kanalliste prüfen.
+`--duration 0` = unbegrenzt. `--pat-idx 4` stammt aus dem Beispielmitschnitt (interner Dongle-Kanalindex 4, Programm 4914) – vorher die Kanalliste prüfen. Der CLI-Optionsname bleibt aus Kompatibilitätsgründen bestehen; der Wert ist kein PAT-Array-Index.
 
 ```bash
 vlc stream.ts   # Aufzeichnung abspielen
@@ -69,15 +69,15 @@ python src/wisi.py --pcap "research/PCAPdroid_12_Okt._16_16_04.pcap"
 | `--ip IP` | IP-Adresse des Dongles (Standard: `192.168.178.32`) |
 | `--channels` | Kanalliste vom Gerät laden und ausgeben |
 | `--stream` | MPEG-TS-Stream starten |
-| `--pat-idx N` | PAT-Index für `--stream` (Standard: 4) |
+| `--pat-idx N` | Interner 16-Bit-Kanalindex des Dongles für `--stream` (Standard: 4; historischer Optionsname) |
 | `--output DATEI` | Ausgabedatei oder `-` für stdout |
 | `--duration SEK` | Streamdauer in Sekunden (0 = unbegrenzt) |
 | `--epg` | EPG aller Sender als JSON laden |
 | `--epg-output DATEI` | EPG-Ausgabedatei (Standard: `epg.json`) |
 | `--epg-limit N` | EPG nur für die ersten N Sender laden |
 | `--pcap DATEI` | PCAP-Datei auf APIX-Befehle analysieren |
-| `--pcap-extract DATEI` | `0xF9/0x0A`-Antwort aus PCAP extrahieren |
-| `--decode-service-db DATEI` | Legacy-UDP-Blob dekodieren |
+| `--pcap-extract DATEI` | Größte `0xF9/0x0A`-Speedtest-Geräteantwort aus PCAP extrahieren |
+| `--decode-service-db DATEI` | Veraltete Option; wird abgelehnt, da `F9/0A` ein Speedtest ist |
 | `--discover` | Experimentelle UDP-Gerätesuche |
 | `--probe-opcode 0xNN` | Einzelnen unbekannten Opcode testen |
 | `--debug` | Debug-Logs aktivieren |

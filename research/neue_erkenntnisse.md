@@ -1,3 +1,5 @@
+> **Überholt / nicht als Implementierungsgrundlage verwenden:** Die nachstehenden Spekulationen wurden durch den APK-/PCAP-Abgleich vom 19. Oktober teilweise widerlegt. Insbesondere ist `0xF9/0x0A` im analysierten TV2Smart-Aufrufpfad ein Speedtest, und `0xF6/0x01` trägt im Beispiel den internen 16-Bit-Dongle-Kanalindex `00 04`. Maßgeblich sind [apk_reverse_engineering.md](apk_reverse_engineering.md), [pcap_analysis.md](pcap_analysis.md) und [or_s2d_protocol_analysis.md](or_s2d_protocol_analysis.md).
+
 ## Was die neue Spezifikation konkret freischaltet
 
 Die alte "Deep Research" war KI-Spekulation über einen unbekannten Dongle. Die neue Spezifikation ist **gematchtes Wissen** – sie beschreibt exakt dein Gerät (OR S2D / TiViCon) und deckt sich an vielen Stellen mit dem was wir aus dem PCAP und APK schon wissen. Das eröffnet mehrere konkrete Angriffsvektoren:

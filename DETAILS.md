@@ -2,7 +2,7 @@
 
 > Kurzversion mit Ausführungsanleitung: [README.md](README.md)
 
-**Stand: 14. Oktober 2026.** Das Protokoll ist teilweise aus Mitschnitten abgeleitet. Beobachtete App-Abläufe sind nicht automatisch unabhängig funktionierende Client-Abläufe.
+**Stand: 19. Oktober 2026.** Das Protokoll ist teilweise aus Mitschnitten abgeleitet. Beobachtete App-Abläufe sind nicht automatisch unabhängig funktionierende Client-Abläufe.
 
 > **Modellunterschied beachten:** Dieses Repository beschreibt den WISI **OR S2D**. Ältere Notizen verwenden teils „O2D", „Tivizen" oder „TiViCon". Kommandobedeutungen anderer Modelle nicht ungeprüft übertragen.
 
@@ -14,6 +14,7 @@
 - **USBC-Framing:** 31-Byte-CBW. Eine 35-Byte-Auth-Erweiterung ist in den vorhandenen Artefakten nicht belegt.
 - **USBS-Trailer:** 13 Byte. Ein 46-Byte-Trailer ist nicht bestätigt.
 - **Stream:** `0xF6/0x03` → `0xF6/0x01` → `0xF8/0x07` → UDP-Pulls mit `0xF9/0x01` im Mitschnitt beobachtet.
+- **APK-Abgleich:** DVB-Pulls `F9/01` verwenden `data_len=0xBC00`; der gleiche Wert kommt auch beim separaten Speedtest `F9/0A` vor. Die Stream-PCAP zeigt Requests, aber keine vollständigen großen TS-Antworten.
 - **`0xF9/0x0A`:** Im TV2Smart-APK als **Speedtest** belegt, nicht als Senderliste.
 - **Status:** Analyse und Code vorhanden, aber nicht jede Funktion ist live end-to-end verifiziert.
 
@@ -58,13 +59,19 @@ Beobachtete Sequenz im Mitschnitt:
 2. `0xF6/0x03` – Kanalvorbereitung
 3. `0xF6/0x32` / `0xF6/0x33` – `ch_Info`-Länge und XML
 4. `0xF6/0x02` – Signalabfrage
-5. `0xF6/0x01` mit Payload `00 04` – Tune (PAT-Index 4 = Programm 4914 im Beispiel)
+5. `0xF6/0x01` mit Payload `00 04` – Tune (interner 16-Bit-Kanalindex 4 im Beispiel; nicht DVB-Service-ID oder PAT-Array-Index)
 6. `0xF8/0x07` – Stream-Freigabe
-7. `0xF9/0x01` (wiederholt) – UDP-Pull
+7. erster `0xF9/0x01`-UDP-Pull mit `data_len=0xBC00`, Byte 21 = `0x00`
+8. `0xF6/0x17` – Tune-Bestätigung
+9. weitere `0xF9/0x01`-UDP-Pulls mit `data_len=0xBC00`, Byte 21 = `0x01`
 
-UDP-Antwort: typisch 32.740 Byte, davon 32.712 Byte = **174 MPEG-TS-Pakete à 188 Byte**. Der Code sucht den `0x47`-Sync und richtet an 188-Byte-Grenzen aus.
+Im Stream-PCAP vom 12. Oktober sind 48 ausgehende `F9/01`-Requests belegt (11 mit Byte 21 = `00`, 37 mit `01`). Sichtbar ist nur eine 13-Byte-`USBS`-Antwort von Port 8800; vollständige große Antworten und damit der Ende-zu-Ende-Empfang von TS-Daten sind in dieser Aufnahme nicht belegt. 32.740-Byte-Antworten aus einer anderen Aufnahme dürfen daher nicht ohne Rohdatenabgleich als Streamantwort dieses `F9/01`-Pfads bezeichnet werden. Der Client sucht bei empfangenen Datagrammen nach MPEG-TS-Sync (`0x47`) und richtet an 188-Byte-Grenzen aus.
 
-PAT im Beispielstream: Programm 4914 → Index 4. PMT: Video-PID `0x1338` (H.264), Audio-PIDs `0x1339`/`0x133A` (MPEG-1), PID `0x133E` (privat, vermutl. Teletext).
+Der APK-Empfangspfad reserviert bei angeforderter Länge `0xBC00` zusätzlich 64 + 13 Byte, insgesamt 48.205 Byte Pufferkapazität. Das ist keine Aussage über die tatsächlich übertragene Paket- oder TS-Nutzdatenlänge. `F9/0A` verwendet ebenfalls `data_len=0xBC00`, ist laut APK-Aufrufpfad aber der separate Speedtest.
+
+Keep-Alive-Belege getrennt behandeln: TCP `Socket.setKeepAlive(true)` aktiviert die Betriebssystemoption; wiederholte `F6/16`-Requests im Python-Client sind eine eigene APIX-Mechanik. Dass TV2Smart während des Streamings periodisch `F6/16` sendet, ist bislang nicht mit Zeitfolge und Aufrufstelle belegt.
+
+PAT im Beispielstream: Programm 4914. Der Tune-Payload `00 04` ist separat als interner Dongle-Kanalindex 4 dokumentiert und darf nicht allein aus der PAT-Tabellenposition abgeleitet werden. PMT: Video-PID `0x1338` (H.264), Audio-PIDs `0x1339`/`0x133A` (MPEG-1), PID `0x133E` (privat, vermutl. Teletext).
 
 ### 5. EPG und weitere Opcodes
 
@@ -80,19 +87,19 @@ Neuere Mitschnitte zeigen außerdem `0xFA/0x00`, `0xFA/0x07`, `0xFA/0x08` (Gerä
 
 | Kanal | Prefix/Opcode | Funktion | Sicherheit |
 |---|---|---|---|
-| TCP 8802 | `0xF6/0x16` | Init / Keep-Alive; Status `0x00`→`0x01` | Beobachtet |
+| TCP 8802 | `0xF6/0x16` | Init-/Statusabfrage; Status `0x00`→`0x01` | Beobachtet; periodischer Stream-Heartbeat der App offen |
 | TCP 8802 | `0xF6/0x17` | Init Phase 2 / Tune-Bestätigung | Beobachtet; Semantik kontextabhängig |
 | TCP 8802 | `0xF6/0x20` + `0x21` | ch_List-Länge und XML | Beobachtet |
 | TCP 8802 | `0xF6/0x22` | ch_List-Quittung | Beobachtet; Notwendigkeit offen |
 | TCP 8802 | `0xF6/0x03` | Kanal vorbereiten | Beobachtet |
 | TCP 8802 | `0xF6/0x32` + `0x33` | ch_Info-Länge und XML | Beobachtet |
 | TCP 8802 | `0xF6/0x02` | Signalstatus | Beobachtet |
-| TCP 8802 | `0xF6/0x01` | Tune / Kanalaktivierung | Beobachtet; Payload nur am Beispiel bestätigt |
+| TCP 8802 | `0xF6/0x01` | Tune / Kanalaktivierung; 16-Bit-Kanalindex Big-Endian | Beobachtet; Beispielpayload `00 04`, weitere Werte live prüfen |
 | TCP 8802 | `0xF8/0x07` | Stream-Freigabe | Beobachtet |
 | TCP 8802 | `0xF6/0x30` + `0x31` | EPG-Länge und XML | Beobachtet |
 | UDP 8800 | `0xF9/0x02` | Stream-Initialisierung | Beobachtet |
-| UDP 8800 | `0xF9/0x01` | MPEG-TS-Block per Pull | Beobachtet |
-| UDP 8800 | `0xF9/0x0A` | Speedtest (kein Senderlisten-Format) | APK-Beleg; Antwortgrößen variieren |
+| UDP 8800 | `0xF9/0x01` | DVB-TS-Block per Pull; Request `data_len=0xBC00` | APK-Worker und 48 PCAP-Requests belegt; vollständige Antwort in der PCAP fehlt |
+| UDP 8800 | `0xF9/0x0A` | Speedtest (kein Senderlisten-Format), `data_len=0xBC00` | APK-Aufrufpfad belegt; 32.740-Byte-PCAP-Antworten nicht abschließend erklärt |
 | APIX | `0xFA/0x00`, `0x07`, `0x08` | Geräte-/Netzwerkinfos | Beobachtet; Details in research/ |
 
 ---

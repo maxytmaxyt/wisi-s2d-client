@@ -13,18 +13,11 @@ sys.path.insert(0, str(Path(__file__).resolve().parents[1] / "src"))
 import wisi_common
 import wisi_client
 from wisi_discovery import DISCOVERY_REQUEST, MAGIC, VERSION, build_request, parse_response
-from wisi_pcap import analyze
+from wisi_pcap import analyze, run_service_db
 
 
-def _service_db_blob() -> bytes:
-    record = bytearray(128)
-    struct.pack_into(">IHHHH", record, 0, 0x40B40089, 4914, 0x006E, 0x1338, 0x1338)
-    record[12] = 0x1B
-    struct.pack_into(">H", record, 13, 0x1339)
-    record[15] = 0x03
-    struct.pack_into(">H", record, 16, 1)
-    record[18:22] = b"ZDF\0"
-    return b"\xF9\x0A" + bytes(26 + 32) + record
+def _f9_0a_reply() -> bytes:
+    return b"\xF9\x0A" + bytes(26 + 32 + 128)
 
 
 def _ethernet_ipv4_udp(payload: bytes, source_port: int, destination_port: int) -> bytes:
@@ -104,12 +97,15 @@ class ProtocolFrameTests(unittest.TestCase):
 
 
 class PcapTests(unittest.TestCase):
-    def test_extracts_apiX_request_and_decodes_service_db_response(self) -> None:
+    def test_counts_only_f9_0a_replies_from_dongle(self) -> None:
         command = b"USBC" + bytes(4) + struct.pack(">I", 0) + bytes((0x80, 0, 16))
         command += bytes((0xF9,)) + b"APIX" + bytes((0x0A,)) + bytes(10)
+        request_payload = b"\xF9\x0A" + bytes(29)
+        reply = _f9_0a_reply()
         frames = [
             _ethernet_ipv4_udp(command, 40000, 8800),
-            _ethernet_ipv4_udp(_service_db_blob(), 8800, 40000),
+            _ethernet_ipv4_udp(request_payload, 40000, 8800),
+            _ethernet_ipv4_udp(reply, 8800, 40000),
         ]
         with tempfile.TemporaryDirectory() as folder:
             path = Path(folder) / "capture.pcap"
@@ -117,11 +113,12 @@ class PcapTests(unittest.TestCase):
             result = analyze(path)
 
         self.assertEqual(result["apiX_commands"].get("0xF9/0x0A"), 1)
-        self.assertEqual(result["service_db_responses"], 1)
-        self.assertEqual(result["decoded_service_count"], 1)
-        services = result["decoded_services"]
-        self.assertEqual(services[0]["service_id"], 4914)
-        self.assertEqual(services[0]["name"], "ZDF")
+        self.assertEqual(result["f9_0a_device_replies"], 1)
+        self.assertEqual(result["largest_f9_0a_device_reply_bytes"], len(reply))
+
+    def test_legacy_f9_0a_service_db_decode_is_rejected(self) -> None:
+        with self.assertRaisesRegex(ValueError, "speedtest"):
+            run_service_db("unused.bin")
 
 
 class ServiceDatabaseTests(unittest.TestCase):

@@ -27,7 +27,7 @@ _MENU = """
 ║  [1]  Kanalliste laden (TCP 0xF6/0x20+0x21)      ║
 ║  [2]  Kanal vorbereiten + Signal prüfen           ║
 ║  [3]  Stream starten                              ║
-║  [4]  PAT-Index testen (0–5)                      ║
+║  [4]  Kanalindex testen (0–5)                     ║
 ║  [5]  Verbindung neu aufbauen                     ║
 ║  [q]  Beenden                                     ║
 ╚════════════════════════════════════════════════════╝"""
@@ -39,7 +39,7 @@ def _pick_service(services: List[ServiceEntry]) -> Optional[ServiceEntry]:
     if not active:
         active = services
 
-    print(f"\n{'Nr':>4}  {'PAT':>4}  {'sid':>6}  Name")
+    print(f"\n{'Nr':>4}  {'Index':>5}  {'sid':>6}  Name")
     print("-" * 60)
     for i, s in enumerate(active[:60], 1):
         lock = "🔒" if s.is_encrypted else "   "
@@ -123,7 +123,7 @@ def main_menu(sock: socket.socket, ip: str) -> None:
             stream(sock, lock, selected, outfile, dur, keepalive_active=True)
 
         elif choice == "4":
-            log.info("PAT-Index-Test (schickt 0x01 mit Index 0–5) …")
+            log.info("Kanalindex-Test (schickt 0x01 mit Index 0–5) …")
             for idx in range(6):
                 with lock:
                     protocol.send_recv(sock, protocol.cmd_tune(idx), 2, f"0x01 idx={idx}")

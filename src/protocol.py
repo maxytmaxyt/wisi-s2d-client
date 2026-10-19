@@ -111,7 +111,7 @@ def cmd_udp_init() -> bytes:
     return build_usbc(0, 0x00, 0xF9, 0x02, b"\x01")
 
 def cmd_udp_service_db() -> bytes:
-    """0xF9/0x0A – Service-Datenbank / Kanalliste anfordern."""
+    """Legacy-Builder: Die analysierte APK verwendet F9/0A für einen Speedtest."""
     return build_usbc(UDP_REQUEST_LEN, 0x80, 0xF9, 0x0A)
 
 def cmd_udp_ts_block(first: bool = False) -> bytes:

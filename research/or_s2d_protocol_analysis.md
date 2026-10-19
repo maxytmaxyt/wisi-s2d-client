@@ -146,15 +146,16 @@ Der folgende Tune-Ablauf ist im OR-S2D-PCAP beobachtet. Die dort erkannten `USBC
 2. 0xF6/0x32  – ch_Info-Größe abfragen
 3. 0xF6/0x33  – ch_Info-Daten abrufen (<ch_Info> XML)
 4. 0xF6/0x02  – Signal pollen (Stärke + Qualität), Polling 3×
-5. 0xF6/0x01  – Kanal aktivieren: payload = [0x00, pat_index]
+5. 0xF6/0x01  – Kanal aktivieren: 16-Bit interner Dongle-Kanalindex, Big-Endian (Beispielpayload `00 04`)
 6. 0xF8/0x07  – Stream-Freigabe
-7. 0xF9/0x01  – UDP-Block anfordern (Pull, first=True: byte21=0x00)
+7. 0xF9/0x01  – erster UDP-DVB-Pull (`data_len=0xBC00`, byte21=0x00)
 8. 0xF6/0x17  – Tune bestätigen: payload = [0x01, 0x00, 0x00, 0x00]
-9. 0xF9/0x01  – weitere UDP-Blöcke (Pull-Loop, byte21=0x01)
+9. 0xF9/0x01  – weitere UDP-DVB-Pulls (`data_len=0xBC00`, byte21=0x01)
 ```
 
-Der PAT-Index in Schritt 5 entspricht der Position in der nach LCN sortierten Kanalliste  
-(nicht dem prog_idx!). Im PCAP wurde PAT-Index `0x04` für das erste gestreamte Programm gesehen.
+Das Payload-Bytepaar `00 04` ist im Mitschnitt beobachtet. Die APK-Analyse ordnet es einem internen 16-Bit-Kanalindex des Dongles zu, nicht der DVB-Service-ID und nicht dem PAT-Array-Index. Eine allgemeine Zuordnung weiterer Indexwerte muss live verifiziert werden.
+
+Im Stream-PCAP sind 48 ausgehende `F9/01`-Requests belegt (11 mit Byte 21 = `00`, 37 mit `01`); eine große passende TS-Antwort ist in dieser Aufzeichnung nicht sichtbar. Die separat beobachteten UDP-Antworten mit 32.740 Byte stammen aus anderen Aufnahmen und sind bytegenau noch keinem vollständigen `F9/01`-Request/Response-Paar zugeordnet.
 
 ---
 
@@ -163,7 +164,7 @@ Der PAT-Index in Schritt 5 entspricht der Position in der nach LCN sortierten Ka
 Unverändert gegenüber O2D:
 
 - UDP-Port 8800, pull-basiert (Client fordert jeden Block aktiv an)
-- Jeder UDP-Block: bis zu 32.740 Byte MPEG-TS
+- Für den DVB-Worker ist ein Request mit `data_len=0xBC00` (48.128) belegt; eine typische vollständige Antwortgröße für diesen Pfad ist anhand der vorliegenden Stream-PCAP nicht bestätigt.
 - MPEG-TS-Sync (`0x47`) suchen, ausrichten auf 188-Byte-Paketgrenzen
 - Header am Anfang jedes Blocks verwerfen (Größe variiert; TS-Sync-Suche robuster)
 
@@ -176,7 +177,7 @@ Unverändert gegenüber O2D:
 | 🔴 1      | Session-Token/Auth-Feld anderer Varianten         | Für die 31-Byte-Requests und 13-Byte-Suffixe in APK/PCAP nicht belegt; abweichende Firmwarepfade offen |
 | 🔴 2      | CRC-Algorithmus                                   | Unbekannt; Dongle prüft es scheinbar nicht → Nullbytes senden |
 | 🟡 3      | `0xF9/0x0A`-Antwortbytes vergleichen              | Speedtest-Rolle ist im APK-Code belegt; die abweichenden 32.740-Byte-PCAP-Antworten sind bytegenau noch nicht zugeordnet |
-| 🟡 4      | Kanalwechsel testen                               | `0xF6/0x01` mit anderem PAT-Index; braucht laufenden Stream |
+| 🟡 4      | Kanalwechsel testen                               | `0xF6/0x01` mit weiterem internen Dongle-Kanalindex; braucht laufenden Stream |
 | 🟡 5      | `0xF6/0x22` Abschluss nach ch_List               | Ob nötig oder optional, ist unklar |
 | 🟢 6      | `0xFA/0x00`-Antwortstruktur weiter verifizieren  | Geräteinfo beobachtet; Session-Token-Bedeutung nicht bestätigt |
 | 🟢 7      | Pay-TV / verschlüsselte Kanäle                    | `prog_idx` mit `0x48`-Prefix = encrypted; CA-Handling fehlt |

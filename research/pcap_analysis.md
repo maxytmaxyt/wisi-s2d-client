@@ -1,6 +1,6 @@
 # PCAP-Auswertung
 
-Stand: 14. Oktober 2026. Die Zahlen wurden mit `src/wisi_pcap.py` und einer zusätzlichen Auswertung der UDP-Payloads auf Port 8800 ermittelt. APIX-Zählungen erkennen `USBC`-Muster, rekonstruieren aber keine vollständigen TCP-Nachrichten.
+Stand: 19. Oktober 2026. Die Zahlen wurden mit `src/wisi_pcap.py` und einer zusätzlichen Auswertung der UDP-Payloads auf Port 8800 ermittelt. APIX-Zählungen erkennen `USBC`-Muster, rekonstruieren aber keine vollständigen TCP-Nachrichten.
 
 ## Mitschnitte
 
@@ -10,7 +10,7 @@ Stand: 14. Oktober 2026. Die Zahlen wurden mit `src/wisi_pcap.py` und einer zus�
 | `PCAPdroid_12_Okt._16_16_04.pcap` | 940 | 400 | zwei 13-Byte-`USBS`-Antworten |
 | `PCAPdroid_12_Okt._16_28_17.pcap` | 1.197 | 200 | eine 13-Byte-`USBS`-Antwort |
 
-Im Mitschnitt vom 11. Oktober beginnen die großen Antworten mit `f9 0a`; über die gesamten 32.740 Byte sind jeweils nur zwei Bytes ungleich null. Der Legacy-Service-DB-Parser dekodiert daraus null Einträge. Die Antworten der beiden Mitschnitte vom 12. Oktober sind kurze `USBS`-Antworten; dort ist kein großer `0xF9/0x0A`-Blob aufgezeichnet.
+Im Mitschnitt vom 11. Oktober beginnen die großen Antworten mit `f9 0a`; über die gesamten 32.740 Byte sind jeweils nur zwei Bytes ungleich null. Der frühere Legacy-Service-DB-Parser dekodierte daraus null Einträge. Die APK-Analyse ordnet den `F9/0A`-Opcode einem Speedtest zu; sie erklärt nicht bytegenau diese 32.740-Byte-Antworten. Die Antworten der beiden Mitschnitte vom 12. Oktober sind kurze `USBS`-Antworten; dort ist kein großer `0xF9/0x0A`-Blob aufgezeichnet.
 
 Laut separat übermittelter Konsolenausgabe erhielt der Nutzer am 13. Oktober fünfmal eine 48.143-Byte-Antwort mit `f9 0a`-Präfix und Nullbytes am Anfang. Diese Größe taucht in keinem gespeicherten Mitschnitt auf. Die APK-Analyse ordnet sie als Speedtest ein: `getSpeedTestMbps()` baut `0xF9/0x0A` mit 48.128 Byte Testdaten, fordert 48.130 Datenbytes an und berechnet den Durchsatz mit 48.128 Byte pro Antwort. Der SDK-Netzwerkempfänger liest weitere 13 Abschlussbytes: `48.130 + 13 = 48.143`. Das passt zur Konsolenausgabe und ist kein Senderdatenbank-Layout. Ohne Rohblob bleiben Füll- und Abschlussbytes ungeprüft.
 
@@ -18,6 +18,9 @@ Laut separat übermittelter Konsolenausgabe erhielt der Nutzer am 13. Oktober f�
 
 - Die Kanallisten-Aufzeichnung vom 12. Oktober enthält `0xF6/0x20`, `0xF6/0x21` und `0xF6/0x22` über TCP/8802. Das XML wurde in einer separaten Analyse mit 440 Einträgen ausgewertet.
 - Der Stream-Mitschnitt enthält `0xF6/0x03`, `0xF6/0x32`, `0xF6/0x33`, `0xF6/0x01`, `0xF8/0x07` und `0xF9/0x01` sowie UDP-Streamverkehr.
+- Eine Auswertung der UDP-Requests nach Headerfeldern ergibt im Mitschnitt vom 12. Oktober **48 `0xF9/0x01`-Requests mit `data_len=0xBC00`** (11 mit Byte 21 = `0x00`, 37 mit Byte 21 = `0x01`). Das passt zum APK-DVB-Worker: dessen `e1(boolean)`-Builder setzt genau diese Länge und kodiert den Boolean an Byte 21; der Worker markiert den ersten Block mit `dongle_first_bulk_head`.
+- Im selben Mitschnitt sind separat **200 `0xF9/0x0A`-Requests** mit `data_len=0xBC00` enthalten. Dieser Opcode wird im APK-Speedtest benutzt. Die identische Länge allein kennzeichnet also nicht den Modus; Opcode und Aufrufpfad unterscheiden DVB-Pulls (`F9/01`) vom Speedtest (`F9/0A`).
+- Der Mitschnitt zeigt die ausgehenden `F9/01`-Pulls, aber nur eine 13-Byte-`USBS`-Antwort von Port 8800. Die wiederholten Requests sind belegt; der vollständige eingehende TS-Block ist in dieser Aufzeichnung nicht enthalten.
 - Die UDP-`0xF9/0x0A`-Requests in den neueren Mitschnitten sind 31 Byte lang; die sichtbaren Antworten sind 13 Byte. Das allein widerlegt oder bestätigt keine anders gerahmten TCP-Kommandos.
 - Das APK-SDK erzeugt für `0xF9/0x0A` einen 31-Byte-USBC-Request und verwendet den Opcode im Speedtest. Das ordnet die 48.143-Byte-Antwort ein, ohne die abweichenden 32.740-Byte-PCAP-Antworten gleichzusetzen.
 

@@ -1,4 +1,4 @@
-"""Lädt und zeigt die vom Dongle angebotene Service-Datenbank an."""
+"""Load and display the dongle channel list fetched over TCP."""
 from __future__ import annotations
 
 import argparse
@@ -11,7 +11,7 @@ from wisi_common import DEFAULT_IP, load_services
 
 def run(ip: str) -> int:
     services = load_services(ip)
-    print(f"{'PAT':>4} {'SID':>6} {'prog_idx':>10} {'vPID':>6} {'aPID':>6} {'Status':>8}  Name")
+    print(f"{'Index':>5} {'SID':>6} {'prog_idx':>10} {'vPID':>6} {'aPID':>6} {'Status':>8}  Name")
     for service in services:
         state = "verschl." if service.is_encrypted else "FTA"
         print(
