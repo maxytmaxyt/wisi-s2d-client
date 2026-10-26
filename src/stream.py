@@ -4,10 +4,15 @@ stream.py – Kanal-Prepare und MPEG-TS-Stream
 prepare_channel    – 0x03 → 0x32/0x33 → 0x02 (Signal prüfen)
 stream             – Tune + UDP-MPEG-TS-Stream
 
-Fixes aus PCAP-Analyse:
-  - Korrekte Reihenfolge laut PCAP: 0x01 → 0xF8/0x07 → 0xF9/0x01 (first) → 0x17 confirm
-  - Kein separater 0xF9/0x02 UDP-Init (nicht im PCAP-Ablauf belegt)
-  - Keine zweite TCP-Verbindung / Re-Tune (nicht im PCAP belegt, verursachte Speedtest-Response)
+Ablauf laut stream.md Schritt 3.1 (Erste Pull-Initialisierung):
+  1. UDP Socket auf Port 8800 binden (VOR allen TCP-Befehlen)
+  2. 0xF9/0x02 UDP-Init senden
+  3. 0xF9/0x01 (first, byte21=0x00) – erster DVB-Pull
+  4. TCP 0xF6/0x17 confirm senden
+
+Korrekte Tune-Reihenfolge (stream.md Schritt 3):
+  0xF6/0x01 (Tune) → 0xF8/0x07 (Stream-Freigabe) → 0xF9/0x02 (UDP-Init)
+  → 0xF9/0x01 (first) → 0xF6/0x17 (confirm) → Loop: 0xF9/0x01 (Folgeblöcke)
 
 Keep-Alive-Logik ist in keepalive.py ausgelagert.
 """
@@ -28,7 +33,6 @@ from models import ServiceEntry
 log = logging.getLogger("wisi.stream")
 
 # Speedtest-Response: 48128 Nutzdaten + 77 Byte Overhead = 48205 Byte.
-# Diese Pakete haben weder USBS- noch \xf9\x0a-Prefix (Problem 2).
 SPEEDTEST_RESPONSE_SIZE: int = protocol.UDP_REQUEST_LEN + 77  # 48205
 
 SIGNAL_INTVL: float = protocol.SIGNAL_INTVL
@@ -89,11 +93,19 @@ def stream(
 
     keepalive_active: True wenn der Aufrufer bereits einen KA-Thread auf tcp_sock führt
                       (z. B. main_menu) – dann wird kein zweiter gestartet.
+
+    Ablauf laut stream.md:
+      1. UDP Socket auf Port 8800 binden
+      2. TCP: 0xF6/0x01 Tune
+      3. TCP: 0xF8/0x07 Stream-Freigabe
+      4. UDP: 0xF9/0x02 Init-Signal senden
+      5. UDP: 0xF9/0x01 (first, byte21=0x00) – erster Pull
+      6. TCP: 0xF6/0x17 confirm
+      7. Loop: UDP 0xF9/0x01 (byte21=0x01) + Empfang
     """
     stop = threading.Event()
     dongle_ip = tcp_sock.getpeername()[0]
 
-    # Problem 1: tcp_sock stirbt nach Tune – on_dead signalisiert das sauber.
     tcp_sock_dead = threading.Event()
 
     ka: Optional[threading.Thread] = None
@@ -105,10 +117,12 @@ def stream(
         )
         ka.start()
 
-    # UDP-Socket VOR dem ersten TCP-Befehl binden.
+    # UDP-Socket auf Port 8800 binden – VOR dem ersten TCP-Befehl.
+    # Der Dongle sendet Antworten an Port 8800; lokales Binden ist Pflicht
+    # damit Pakete ankommen (stream.md Schritt 1.1).
     udp = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
     udp.setsockopt(socket.SOL_SOCKET, socket.SO_RCVBUF, 8 * 1024 * 1024)
-    udp.bind(("", 0))
+    udp.bind(("", protocol.UDP_PORT))
     udp.settimeout(0.1)
 
     try:
@@ -121,15 +135,21 @@ def stream(
         with lock:
             protocol.send_recv(tcp_sock, protocol.cmd_stream_release(), 0, "0xF8/0x07 release")
 
-        # Erster UDP-Pull (first=True → byte21=0x00) – vor 0x17 confirm laut PCAP
+        # UDP Socket-Init (0xF9/0x02) – einmaliges Init-Signal vor dem ersten Pull
+        # (stream.md Schritt 3.1, Punkt 1)
+        udp.sendto(protocol.cmd_udp_init(), (dongle_ip, protocol.UDP_PORT))
+        log.debug("0xF9/0x02 UDP-Init gesendet")
+
+        # Erster DVB-Pull (0xF9/0x01, first=True → byte21=0x00)
+        # (stream.md Schritt 3.1, Punkt 2)
         udp.sendto(protocol.cmd_udp_ts_block(first=True), (dongle_ip, protocol.UDP_PORT))
         pull_count = 1
         log.debug("0xF9/0x01 Pull #1 (first) gesendet")
 
-        # Tune bestätigen (TCP 0xF6/0x17) – nach erstem Pull laut PCAP
+        # Tune bestätigen (TCP 0xF6/0x17) – nach erstem Pull laut stream.md
         with lock:
             r = protocol.send_recv(tcp_sock, protocol.cmd_17_confirm(), 4, "0x17 confirm")
-        log.info("0x17 confirm: 0x%02X", r[2] if len(r) > 2 else 0xFF)
+        log.info("0x17 confirm: 0x%02X", r[0] if len(r) > 0 else 0xFF)
 
         out = open(output_path, "wb") if output_path != "-" else sys.stdout.buffer
         log.info("Stream → %s  (STRG+C zum Beenden)", output_path)
