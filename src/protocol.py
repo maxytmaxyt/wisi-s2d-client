@@ -75,8 +75,12 @@ def cmd_evtdesc_data(prog_idx: int, length: int) -> bytes:
     return build_usbc(length, 0x80, 0xF6, 0x36, struct.pack(">I", prog_idx))
 
 def cmd_prepare(prog_idx: int) -> bytes:
-    return build_usbc(4, 0x80, 0xF6, 0x03,
-                      b"\x00\x00\x00\x02" + struct.pack(">I", prog_idx))
+    """0xF6/0x03 – Kanal vorbereiten.
+
+    Payload (Bytes 21–24): 32-Bit prog_idx des Senders (Big-Endian).
+    Laut Spezifikation: nur die 4 Byte prog_idx als Inline-Payload.
+    """
+    return build_usbc(4, 0x80, 0xF6, 0x03, struct.pack(">I", prog_idx))
 
 def cmd_chinfo_size(prog_idx: int) -> bytes:
     return build_usbc(6, 0x80, 0xF6, 0x32, struct.pack(">I", prog_idx))
@@ -107,7 +111,10 @@ def cmd_probe(opcode: int) -> bytes:
 # ── UDP-Befehle (prefix = 0xF9) ─────────────────────────────────────────────
 
 def cmd_udp_init() -> bytes:
-    """0xF9/0x02 – einmalige Stream-Initialisierung."""
+    """0xF9/0x02 – einmalige Stream-Initialisierung.
+
+    Muss vor dem ersten 0xF9/0x01 Pull gesendet werden (stream.md Schritt 3.1).
+    """
     return build_usbc(0, 0x00, 0xF9, 0x02, b"\x01")
 
 def cmd_udp_service_db() -> bytes:
@@ -115,7 +122,11 @@ def cmd_udp_service_db() -> bytes:
     return build_usbc(UDP_REQUEST_LEN, 0x80, 0xF9, 0x0A)
 
 def cmd_udp_ts_block(first: bool = False) -> bytes:
-    """0xF9/0x01 – MPEG-TS-Block anfordern (Pull-Mechanismus)."""
+    """0xF9/0x01 – MPEG-TS-Block anfordern (Pull-Mechanismus).
+
+    first=True  → byte21=0x00 (erster Block nach UDP-Init)
+    first=False → byte21=0x01 (Folgeblöcke in der Loop)
+    """
     byte21 = b"\x00" if first else b"\x01"
     return build_usbc(UDP_REQUEST_LEN, 0x80, 0xF9, 0x01, byte21)
 
@@ -163,6 +174,10 @@ def connect(ip: str) -> Optional[socket.socket]:
     """
     Baut TCP-Verbindung auf und führt APIX-Init (0x16 + 0x17) durch.
     Gibt Socket zurück oder None bei Fehler.
+
+    Handshake-Sequenz laut Spezifikation:
+      1. 0xF6/0x16 senden → Antwort[0] == 0x01 bedeutet Dongle bereit
+      2. 0xF6/0x17 senden → Bestätigt Session-Initialisierung
     """
     import time
     log.info("Verbinde %s:%d …", ip, TCP_PORT)
@@ -177,20 +192,21 @@ def connect(ip: str) -> Optional[socket.socket]:
     sock.settimeout(None)
 
     r = send_recv(sock, cmd_16(), 12, "0x16 init")
-    if len(r) < 3:
+    if len(r) < 1:
         log.error("0x16: keine Antwort"); sock.close(); return None
-    status = r[2]
-    log.info("0x16 status=0x%02X  gerät=%s", status, r[3:8].hex())
+    # Byte[0] der 12-Byte Nutzdaten enthält den Bereitschaftsstatus (0x01 = bereit)
+    status = r[0]
+    log.info("0x16 status=0x%02X  gerät=%s", status, r[1:6].hex())
 
     r = send_recv(sock, cmd_17_init(), 4, "0x17 init")
-    log.info("0x17 flag=0x%02X", r[2] if len(r) > 2 else 0xFF)
+    log.info("0x17 flag=0x%02X", r[0] if len(r) > 0 else 0xFF)
 
     if status != 0x01:
         log.info("Warte auf Bereitschaft …")
         for _ in range(10):
             time.sleep(0.5)
             r = send_recv(sock, cmd_16(), 12, "0x16 poll")
-            if len(r) >= 3 and r[2] == 0x01:
+            if len(r) >= 1 and r[0] == 0x01:
                 log.info("Dongle bereit.")
                 break
         else:
