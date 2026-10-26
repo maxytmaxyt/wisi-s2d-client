@@ -7,7 +7,8 @@ und Re-Exportiert DEFAULT_IP für Rückwärtskompatibilität.
 Implementierung ist aufgeteilt in:
   models.py    – Channel, ServiceEntry, FALLBACK_SERVICE
   channels.py  – Kanalliste laden + parsen
-  stream.py    – Keep-Alive, prepare_channel, stream()
+  stream.py    – prepare_channel, stream()
+  keepalive.py – Keep-Alive Thread
   menu.py      – interaktives Konsolenmenü
   protocol.py  – USBC-Builder, Konstanten, TCP-Helfer, connect/disconnect
 """
@@ -19,6 +20,7 @@ import sys
 
 import protocol
 from channels import fetch_channel_list, channels_to_services, fetch_service_db
+from keepalive import _keepalive_worker
 from menu import main_menu
 from models import FALLBACK_SERVICE, ServiceEntry, Channel
 from stream import prepare_channel, stream
@@ -63,7 +65,6 @@ def main() -> None:
     lock = threading.Lock()
 
     if args.stream:
-        from stream import _keepalive_worker
         keepalive_stop = threading.Event()
         keepalive = threading.Thread(
             target=_keepalive_worker,
