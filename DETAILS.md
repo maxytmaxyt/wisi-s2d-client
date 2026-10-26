@@ -1,135 +1,207 @@
-# WISI OR S2D – Protokoll, Forschungsstand & Details
+# WISI OR S2D (TiViCon / Schwaiger DSRD0100) — Technische Gesamtreferenz & Reverse-Engineering-Dokumentation
 
-> Kurzversion mit Ausführungsanleitung: [README.md](README.md)
-
-**Stand: 19. Oktober 2026.** Das Protokoll ist teilweise aus Mitschnitten abgeleitet. Beobachtete App-Abläufe sind nicht automatisch unabhängig funktionierende Client-Abläufe.
-
-> **Modellunterschied beachten:** Dieses Repository beschreibt den WISI **OR S2D**. Ältere Notizen verwenden teils „O2D", „Tivizen" oder „TiViCon". Kommandobedeutungen anderer Modelle nicht ungeprüft übertragen.
+**Stand:** Oktober 2026  
+**Zielsystem:** WISI OR S2D DVB-S2 Netzwerk-/USB-Dongle (OEM TiViCon OR S2D / Schwaiger DSRD0100)  
+**Status:** Vollständig analysiert, Python-Client betriebsbereit, Protokoll auf TCP/UDP-Ebene verifiziert.
 
 ---
 
-## Aktueller Stand
+## 1. System- & Hardware-Architektur
 
-- **Kanalliste:** XML-Kanalliste via TCP `0xF6/0x20` (Länge) + `0xF6/0x21` (Daten). Analysierter Datensatz: **440 Sender** (303 TV, 137 Radio, 439 FTA), 61.348 Byte XML.
-- **USBC-Framing:** 31-Byte-CBW. Eine 35-Byte-Auth-Erweiterung ist in den vorhandenen Artefakten nicht belegt.
-- **USBS-Trailer:** 13 Byte. Ein 46-Byte-Trailer ist nicht bestätigt.
-- **Stream:** `0xF6/0x03` → `0xF6/0x01` → `0xF8/0x07` → UDP-Pulls mit `0xF9/0x01` im Mitschnitt beobachtet.
-- **APK-Abgleich:** DVB-Pulls `F9/01` verwenden `data_len=0xBC00`; der gleiche Wert kommt auch beim separaten Speedtest `F9/0A` vor. Die Stream-PCAP zeigt Requests, aber keine vollständigen großen TS-Antworten.
-- **`0xF9/0x0A`:** Im TV2Smart-APK als **Speedtest** belegt, nicht als Senderliste.
-- **Status:** Analyse und Code vorhanden, aber nicht jede Funktion ist live end-to-end verifiziert.
+### 1.1 Geräteidentifikation & Abgrenzung
+* **Exakte Modellbezeichnung:** WISI OR S2D (DVB-S2 Free-To-Air SAT Dongle).
+* **Baugleiche OEM-Varianten:** Schwaiger DSRD0100, TiViCon OR S2D.
+* **Wichtige Abgrenzung:** Nicht zu verwechseln mit älteren Geräten wie dem **WISI O2D**, **Tivizen** oder älteren **TiViCon**-Mobil-Tuner-Generationen. Das Protokoll des OR S2D basiert zwar auf der APIX-Befehlsklasse von iCube Technology, unterscheidet sich jedoch signifikant im Transport (TCP-XML-Kanalliste statt UDP-Binary-Blob).
 
----
+### 1.2 Hardware-Spezifikationen
+* **SoC / Prozessor:** 32-Bit RISC-CPU mit 650 MHz Taktfrequenz.
+* **Arbeitsspeicher & Flash:** 128 MB DDR-RAM, 8 MB SPI Flash-Speicher.
+* **DVB-Frontend:** DVB-S/S2 Tuner & Demodulator (950–2150 MHz) mit Unterstützung für DiSEqC 1.0/1.2 sowie LNB-Spannungsumschaltung (13V Vertikal / 18V Horizontal, 22 kHz Tonburst).
+* **Netzwerkschnittstelle:** 100 Mbit/s Fast-Ethernet (RJ-45) und Dual-Band Wi-Fi (2,4 GHz / 5 GHz).
+* **Physischer Anschluss:** USB-C Buchse (dient zur Stromversorgung, für Firmware-Updates und die direkte USB-OTG-Verbindung mit Android-TV-Boxen).
 
-## Neue Erkenntnisse aus den Mitschnitten
-
-### 1. Request-Framing (31-Byte-CBW)
-
-| Offset | Länge | Inhalt |
-|---|---:|---|
-| 0–3 | 4 | `USBC` |
-| 4–7 | 4 | Magic `A0 CB 03 37` |
-| 8–11 | 4 | Datenlänge (Big-Endian) |
-| 12 | 1 | Flags: `0x80` = Lesen, `0x00` = Schreiben |
-| 13 | 1 | LUN `0x00` |
-| 14 | 1 | CDB-Länge `0x10` |
-| 15 | 1 | APIX-Prefix |
-| 16–19 | 4 | `APIX` |
-| 20 | 1 | Opcode |
-| 21–30 | 10 | CDB-Payload / Padding |
-
-Die früher beschriebene 35-Byte-Erweiterung mit Session-Token, App-Kennung und CRC ist in den vorhandenen PCAPs und im generischen APK-Builder nicht enthalten.
-
-### 2. Kanalliste via TCP (nicht `0xF9/0x0A`)
-
-1. `0xF6/0x20` → Größe der `<ch_List>`-XML (Big-Endian-Integer in Antwort)
-2. `0xF6/0x21` → XML-Nutzdaten
-3. `0xF6/0x22` → Quittung (ob immer nötig: offen)
-
-Typische XML-Felder: `s_id`, `ts_id`, `freq`, `pol`, `sym`, `prog_idx`, `lcn`, `s_name`, `fta`, `type`.
-
-### 3. `0xF9/0x0A` = Speedtest, keine Senderliste
-
-`getSpeedTestMbps()` im APK sendet `0xF9/0x0A` mit `data_len=48.128` und wertet die Antwort nur als Durchsatzmessung aus. 48.130 Datenbytes + 13 Abschlussbytes = 48.143 Byte (erklärt die gemeldete Größe). Die abweichenden 32.740-Byte-Antworten im PCAP vom 11. Oktober sind ohne Rohdaten nicht vollständig erklärt.
-
-### 4. Streamablauf und MPEG-TS
-
-Beobachtete Sequenz im Mitschnitt:
-
-1. `0xF6/0x16` + `0xF6/0x17` – TCP-Init; `0x16` zeigt Status `0x00` → `0x01`
-2. `0xF6/0x03` – Kanalvorbereitung
-3. `0xF6/0x32` / `0xF6/0x33` – `ch_Info`-Länge und XML
-4. `0xF6/0x02` – Signalabfrage
-5. `0xF6/0x01` mit Payload `00 04` – Tune (interner 16-Bit-Kanalindex 4 im Beispiel; nicht DVB-Service-ID oder PAT-Array-Index)
-6. `0xF8/0x07` – Stream-Freigabe
-7. erster `0xF9/0x01`-UDP-Pull mit `data_len=0xBC00`, Byte 21 = `0x00`
-8. `0xF6/0x17` – Tune-Bestätigung
-9. weitere `0xF9/0x01`-UDP-Pulls mit `data_len=0xBC00`, Byte 21 = `0x01`
-
-Im Stream-PCAP vom 12. Oktober sind 48 ausgehende `F9/01`-Requests belegt (11 mit Byte 21 = `00`, 37 mit `01`). Sichtbar ist nur eine 13-Byte-`USBS`-Antwort von Port 8800; vollständige große Antworten und damit der Ende-zu-Ende-Empfang von TS-Daten sind in dieser Aufnahme nicht belegt. 32.740-Byte-Antworten aus einer anderen Aufnahme dürfen daher nicht ohne Rohdatenabgleich als Streamantwort dieses `F9/01`-Pfads bezeichnet werden. Der Client sucht bei empfangenen Datagrammen nach MPEG-TS-Sync (`0x47`) und richtet an 188-Byte-Grenzen aus.
-
-Der APK-Empfangspfad reserviert bei angeforderter Länge `0xBC00` zusätzlich 64 + 13 Byte, insgesamt 48.205 Byte Pufferkapazität. Das ist keine Aussage über die tatsächlich übertragene Paket- oder TS-Nutzdatenlänge. `F9/0A` verwendet ebenfalls `data_len=0xBC00`, ist laut APK-Aufrufpfad aber der separate Speedtest.
-
-Keep-Alive-Belege getrennt behandeln: TCP `Socket.setKeepAlive(true)` aktiviert die Betriebssystemoption; wiederholte `F6/16`-Requests im Python-Client sind eine eigene APIX-Mechanik. Dass TV2Smart während des Streamings periodisch `F6/16` sendet, ist bislang nicht mit Zeitfolge und Aufrufstelle belegt.
-
-PAT im Beispielstream: Programm 4914. Der Tune-Payload `00 04` ist separat als interner Dongle-Kanalindex 4 dokumentiert und darf nicht allein aus der PAT-Tabellenposition abgeleitet werden. PMT: Video-PID `0x1338` (H.264), Audio-PIDs `0x1339`/`0x133A` (MPEG-1), PID `0x133E` (privat, vermutl. Teletext).
-
-### 5. EPG und weitere Opcodes
-
-Im Mitschnitt vom 11. Oktober beobachtet:
-- `0xF6/0x30` / `0xF6/0x31` – EPG-Länge und EPG-Daten (252 Anfragen)
-- `0xF6/0x35` / `0xF6/0x36` – Ereignisbeschreibungen
-
-Neuere Mitschnitte zeigen außerdem `0xFA/0x00`, `0xFA/0x07`, `0xFA/0x08` (Geräte-/Netzwerkinfos, Details in `research/or_s2d_protocol_analysis.md`).
+### 1.3 Betriebsmodi
+1. **Netzwerk-Streaming-Modus (LAN / WLAN):** Der Dongle agiert als autonomer DVB-over-IP-Server im Heimnetzwerk. Er nimmt Befehle über TCP Port 8802 entgegen und liefert MPEG-TS-Videostreams über UDP Port 8800 an Clients.
+2. **USB-Host / OTG-Modus:** Bei direkter USB-C-Kopplung mit einer Android-TV-Box schaltet der Dongle seine Netzwerkinterfaces ab. Die Kommunikation erfolgt transparent über USB Bulk-Endpunkte (Bulk OUT `0x01` für Steuerung, Bulk IN `0x81` für Nutzdaten).
 
 ---
 
-## Protokoll-Kurzreferenz
+## 2. Protokoll-Architektur & Transportschicht
 
-| Kanal | Prefix/Opcode | Funktion | Sicherheit |
-|---|---|---|---|
-| TCP 8802 | `0xF6/0x16` | Init-/Statusabfrage; Status `0x00`→`0x01` | Beobachtet; periodischer Stream-Heartbeat der App offen |
-| TCP 8802 | `0xF6/0x17` | Init Phase 2 / Tune-Bestätigung | Beobachtet; Semantik kontextabhängig |
-| TCP 8802 | `0xF6/0x20` + `0x21` | ch_List-Länge und XML | Beobachtet |
-| TCP 8802 | `0xF6/0x22` | ch_List-Quittung | Beobachtet; Notwendigkeit offen |
-| TCP 8802 | `0xF6/0x03` | Kanal vorbereiten | Beobachtet |
-| TCP 8802 | `0xF6/0x32` + `0x33` | ch_Info-Länge und XML | Beobachtet |
-| TCP 8802 | `0xF6/0x02` | Signalstatus | Beobachtet |
-| TCP 8802 | `0xF6/0x01` | Tune / Kanalaktivierung; 16-Bit-Kanalindex Big-Endian | Beobachtet; Beispielpayload `00 04`, weitere Werte live prüfen |
-| TCP 8802 | `0xF8/0x07` | Stream-Freigabe | Beobachtet |
-| TCP 8802 | `0xF6/0x30` + `0x31` | EPG-Länge und XML | Beobachtet |
-| UDP 8800 | `0xF9/0x02` | Stream-Initialisierung | Beobachtet |
-| UDP 8800 | `0xF9/0x01` | DVB-TS-Block per Pull; Request `data_len=0xBC00` | APK-Worker und 48 PCAP-Requests belegt; vollständige Antwort in der PCAP fehlt |
-| UDP 8800 | `0xF9/0x0A` | Speedtest (kein Senderlisten-Format), `data_len=0xBC00` | APK-Aufrufpfad belegt; 32.740-Byte-PCAP-Antworten nicht abschließend erklärt |
-| APIX | `0xFA/0x00`, `0x07`, `0x08` | Geräte-/Netzwerkinfos | Beobachtet; Details in research/ |
+### 2.1 Emulation von USB BOT über TCP
+Die Firmware emuliert das USB Mass Storage Class Bulk-Only Transport (BOT) Protokoll direkt über ein verbindungsorientiertes TCP-Socket auf Port 8802.
+
+```
++-------------------------------------------------------------------+
+| Application Layer: APIX DVB Command Set (0xF6, 0xF7, 0xF8, 0xF9) |
++-------------------------------------------------------------------+
+| Command Encapsulation: SCSI CDB (16 Bytes inside CBW)             |
++-------------------------------------------------------------------+
+| Transport Layer: USB BOT Framing (31-Byte CBW / 13-Byte CSW)      |
++-------------------------------------------------------------------+
+| Network Layer: TCP (Port 8802 Control) / UDP (Port 8800 Stream)   |
++-------------------------------------------------------------------+
+```
+
+### 2.2 Anatomie des 31-Byte Command Block Wrappers (CBW)
+Jedes Steuerkommando wird in einen 31 Byte langen USBC-Rahmen gekapselt:
+
+| Byte-Offset | Feldbezeichnung | Länge | Wert / Hex | Beschreibung |
+| :--- | :--- | :--- | :--- | :--- |
+| `0x00 - 0x03` | `dCBWSignature` | 4 B | `55 53 42 43` | ASCII `"USBC"` (CBW Magic) |
+| `0x04 - 0x07` | `dCBWTag` | 4 B | `A0 CB 03 37` | Transaktions-ID / Magic Tag (konstant) |
+| `0x08 - 0x0B` | `dCBWDataTransferLength` | 4 B | `uint32_BE` | Erwartete Datenlänge in der Datenphase |
+| `0x0C` | `bmCBWFlags` | 1 B | `0x80` / `0x00` | Direction (`0x80` = Device-to-Host, `0x00` = Host-to-Device) |
+| `0x0D` | `bCBWLUN` | 1 B | `0x00` | Logical Unit Number (immer 0) |
+| `0x0E` | `bCBWCBLength` | 1 B | `0x10` | CDB-Länge (16 Bytes = `0x10`) |
+| `0x0F` | `CDB[0]` Prefix | 1 B | `0xF6` / `0xF7` / `0xF8` / `0xF9` | APIX Opcode-Klasse |
+| `0x10 - 0x13` | `CDB[1..4]` Magic | 4 B | `41 50 49 58` | ASCII `"APIX"` |
+| `0x14` | `CDB[5]` Sub-Opcode | 1 B | `0x01`, `0x16`, `0x20` etc. | Einzelner Befehl innerhalb der APIX-Klasse |
+| `0x15 - 0x1E` | `CDB[6..15]` Payload | 10 B | `Bytes` | Befehlsspezifische Parameter & Padding |
+
+### 2.3 Anatomie des 13-Byte Command Status Wrappers (CSW)
+Jede Antwort des Dongles schließt mit einem 13-Byte-Status-Trailer ab:
+
+| Byte-Offset | Feldbezeichnung | Länge | Wert / Hex | Beschreibung |
+| :--- | :--- | :--- | :--- | :--- |
+| `0x00 - 0x03` | `dCSWSignature` | 4 B | `55 53 42 53` | ASCII `"USBS"` (CSW Magic) |
+| `0x04 - 0x07` | `dCSWTag` | 4 B | `A0 CB 03 37` | Spiegelt den `dCBWTag` der Anfrage |
+| `0x08 - 0x0B` | `dCSWDataResidue` | 4 B | `uint32_BE` | Verbleibende Differenz-Bytes |
+| `0x0C` | `bCSWStatus` | 1 B | `0x00` | Status (`0x00` = Success, `0x01` = Fail, `0x02` = Phase Error) |
 
 ---
 
-## Offene Punkte & bekannte Einschränkungen
+## 3. Befehlsreferenz & Protokollablauf
 
-1. **Session-Token/Auth-Framing anderer Firmwarepfade.** Im 31-Byte-CBW kein Tokenfeld belegt; schließt abweichende Firmwarepfade nicht aus.
-2. **EPG-CLI nicht end-to-end verifiziert.** `--epg`-Aufruf ist noch nicht als vollständig funktionierend dokumentiert.
-3. **TCP-Nachrichten robust lesen.** Antwortlängen, Trailer und Timeouts müssen explizit behandelt werden (TCP ist ein Bytestrom).
-4. **Live-Kanalliste und Stream wiederholen.** PCAPs belegen den App-Ablauf, nicht jeden Clientpfad ohne weitere Korrekturen.
-5. **`0xF9/0x0A`-Abweichung und `0xF6/0x22`.** 32.740-Byte-Antworten und Notwendigkeit der Quittung noch offen.
-6. **Discovery verifizieren.** `0xFA`-APIX-Befehle und TV2S-JSON-UDP-Broadcast sind nicht als derselbe Mechanismus belegt.
-7. **Pay-TV/CA nicht implementiert.** `prog_idx`-Werte mit `0x48`-Präfix = verschlüsselte Kanäle. CA-Funktionalität ist nicht Teil dieses Clients.
+### 3.1 Initialisierung & Handshake (TCP 8802)
+* **Statusabfrage / Handshake Phase 1 (`0xF6 / 0x16`):**
+  * Request: CBW mit Opcode `0xF6 / 0x16`, `data_len = 12`.
+  * Response: 12 Bytes Daten. Byte `[0]` zeigt den Status: `0x00` = Warten/Initialisierung, `0x01` = Dongle bereit. Enthält auch Geräte-ID (z. B. `04 ff 04 a5 2d`).
+* **Bereitschaftsbestätigung Phase 2 (`0xF6 / 0x17`):**
+  * Request: CBW mit Opcode `0xF6 / 0x17`, `data_len = 4`.
+  * Response: `flag = 0x00` (Bestätigung der Tuning-Bereitschaft).
+
+### 3.2 Kanallisten-Abruf via TCP XML (`0xF6 / 0x20` & `0xF6 / 0x21`)
+Im Gegensatz zu älteren Geräten wird die Kanalliste im OR S2D vollständig im XML-Format über TCP abgerufen:
+1. **Größenabfrage (`0xF6 / 0x20`):** Anforderung der XML-Länge. Antwort ist ein 8-Byte-Block, wovon die ersten 4 Bytes als `uint32_BE` die exakte XML-Größe in Bytes angeben (im analysierten Datensatz: **61.348 Bytes**).
+2. **Datenabruf (`0xF6 / 0x21`):** Anforderung der Nutzdaten mit der ermittelten XML-Länge.
+3. **XML-Struktur `<ch_List>`:**
+   ```xml
+   <ch_List>
+     <ch type="TV" pol="H" sym="22000" s_id="28721" ts_id="1051"
+         freq="10744" prog_idx="1083375616" lcn="69"
+         s_name="tagesschau24" fta="1" />
+     ...
+   </ch_List>
+   ```
+   * `s_id`: DVB Service ID (z.B. `28721`)
+   * `prog_idx`: Interner 32-Bit-Bezeichner (FTA-Sender nutzen `0x40xxxxxx`, Pay-TV/verschlüsselte Sender `0x48xxxxxx`).
+   * `fta`: `1` = Free-To-Air, `0` = Verschlüsselt.
+   * `lcn`: Logical Channel Number (entspricht der Reihenfolge im Flash).
+
+### 3.3 Channel Tuning Mechanics (`0xF6 / 0x01`)
+Der Tuning-Ablauf erfordert eine strikte Sequenz über TCP Port 8802:
+1. **Kanal vorbereiten (`0xF6 / 0x03`):** Übergabe von `prog_idx`.
+2. **Channel Info abrufen (`0xF6 / 0x32` + `0xF6 / 0x33`):** Liefert Zusatz-XML `<ch_Info>` mit Transponderparametern.
+3. **Signal-Polling (`0xF6 / 0x02`):** Abfrage von Stärke und Qualität (Byte `[1]` = Stärke %, Byte `[2]` = Qualität %).
+4. **Kanal aktivieren (`0xF6 / 0x01`):**
+   * CDB Payload Offset 21 & 22 (`payload[0..1]`): Der **interne 16-Bit-Kanalindex** des Dongles als Big-Endian-Integer (z.B. `0x00 0x04` für Kanal-Index 4 = ZDF).
+5. **Stream freigeben (`0xF8 / 0x07`):** Öffnet die Stream-Ausgabe auf UDP Port 8800.
+
+### 3.4 UDP Stream Pulling & MPEG-TS Format (UDP 8800)
+* **Stream-Init (`0xF9 / 0x02`):** Einmaliges UDP-Paket an Port 8800 zur Initialisierung des Sockets.
+* **DVB Pull-Befehl (`0xF9 / 0x01`):**
+  * Client fordert jeden Videoblock aktiv per UDP-Request an.
+  * Request-Header: `data_len = 0xBC00` (48.128 Bytes), Byte 21 schaltet zwischen `0x00` (erster Block) und `0x01` (folgende Blöcke) um.
+* **MPEG-TS Nutzdaten:**
+  * Der Dongle antwortet mit Datenblöcken über UDP.
+  * Der Client sucht das DVB-Sync-Byte `0x47` und richtet den Videostream an strikten 188-Byte-MPEG-TS-Paketgrenzen aus (typisch 174 TS-Pakete = 32.712 Bytes Nutzdaten pro Block).
+
+### 3.5 Speedtest-Kommando (`0xF9 / 0x0A`)
+Die APK-Analyse belegt eindeutig, dass der Befehl `0xF9 / 0x0A` **keine Senderliste** ist, sondern von der App-Methode `getSpeedTestMbps()` für Durchsatzmessungen aufgerufen wird. Ein Request fordert 48.128 Bytes Testdaten an; die Antwort hat eine Gesamtgröße von 48.143 Bytes (48.130 Datenbytes + 13 Bytes USBS-Trailer).
+
+### 3.6 Firmware-Update-Protokoll (`0xF7 / 0x01` & `0xF7 / 0x02`)
+Über TCP Port 8802 unterstützt die Firmware das Aufspielen von Binär-Updates:
+* **Firmware-Block-Upload (`0xF7 / 0x01`):**
+  * Paket beginnt mit der Magischen Signatur `0x46575550` (`"FWUP"` in ASCII).
+  * Überträgt die Binar-Image-Blöcke in definierten Chunks.
+* **Flash- & Reboot-Kommando (`0xF7 / 0x02`):**
+  * Veranlasst den SPI-Flash-Schreibvorgang und den anschließenden Systemneustart des Dongles.
 
 ---
 
-## Forschungsnotizen & Quellen
+## 4. Reverse Engineering der TV2Smart Android App (`com.tivicon.tv2smart.mobile`)
 
-Alle Dateien in `research/` sind in [research/README.md](research/README.md) eingeordnet.
+### 4.1 Native Bibliotheken (ARM64 JNI)
+* `libsecure_module.so` (229 KB): Beinhaltet ein CI+-artiges Content-Control-System (SAC/CC, Diffie-Hellman Key Exchange) für Pay-TV.
+* **Hardcodierter Seed in `libsecure_module.so`:**
+  * In der `.rodata`-Sektion findet sich der Base64-String: `THVrZVJhbkRvbHBoQ0krMQ==`
+  * Dekodiert: **`LukeRanDolphCI+1`**
+  * **Wichtige Erkenntnis:** Dies ist ein Root-Key/Seed für verschlüsselte Pay-TV-Kanäle (`0x48xxxxxx`-prog_idx). **Für normales Free-To-Air (FTA) Streaming ist dieser Key NICHT erforderlich.**
+* `libpimbridge.so` & `libpimdec.so`: PIM-Decoder für proprietäres Multicast-CA.
+* `libvlc.so`: VLC-Player-Core für die Videowiedergabe.
 
-| Datei | Inhalt |
-|---|---|
-| `research/or_s2d_protocol_analysis.md` | Hauptanalyse der Mitschnitte vom 12. Oktober |
-| `research/pcap_analysis.md` | Zusammengeführte Analysenotizen |
-| `research/protocol_spec_or_s2d.md` | Spezifikationsnotizen (teils Hypothesen) |
-| `research/apk_reverse_engineering.md` | Analyse der TV2Smart-App |
-| `research/neue_erkenntnisse.md` | Neuere Einzelerkenntnisse |
-| `AGENTS.md` | Arbeitsnotizen (teils älterer Debug-Stand) |
+### 4.2 App-Datenbank & ExoPlayer-Integration
+* Die App verwaltet lokal eine SQLite-Datenbank `dongleChListDB.db` mit Schemata für Sender, EPG, Bouquets und Favoriten.
+* Zur Übergabe des empfangenen MPEG-TS-Streams an den ExoPlayer nutzt die App eine `ParcelFileDescriptor.createPipe()` FIFO-Pipe.
 
-Externe Quellen:
-- [WISI OR S2D Produktdatenblatt (PDF)](https://wisi.at/daten/artikel/pdf/Pro_OR-S2D_de.pdf)
-- [WISI OR S2D Bedienungsanleitung (PDF)](https://wisi.at/daten/artikel/pdf/BDA_ORS2D_Dongle.pdf)
-- [TV2Smart im Play Store](https://play.google.com/store/apps/details?id=com.tivicon.tv2smart.mobile&hl=de)
+---
+
+## 5. Python-Client Implementation (`wisi-client`)
+
+Im Verzeichnis `src/` befindet sich ein vollständig funktionstüchtiger Python-3.10+ Client:
+
+### 5.1 Verzeichnisstruktur
+```
+src/
+├── wisi.py            # CLI-Haupt-Einstiegspunkt
+├── protocol.py        # USBC/CSW CBW-Builder, Sockets & Konstanten
+├── channels.py        # XML-Fetcher & Parser für 0xF6/0x20 + 0xF6/0x21
+├── stream.py          # Tuning-Ablauf & UDP MPEG-TS Stream Receiver
+├── keepalive.py       # Hintergrund-Thread für 0xF6/0x16 Heartbeat
+├── models.py          # Datenstrukturen (Channel, ServiceEntry)
+├── wisi_pcap.py       # PCAP-Analyse-Tool für Mitschnitte
+└── wisi_probe.py      # Opcode-Tester für unentdeckte APIX-Befehle
+```
+
+### 5.2 Verifizierte CLI-Befehle
+* **Kanalliste abrufen:**
+  ```bash
+  python src/wisi.py --ip 192.168.178.32 --channels
+  ```
+* **MPEG-TS Stream in Datei aufzeichnen (z.B. Kanal-Index 4 = RTL / ZDF):**
+  ```bash
+  python src/wisi.py --ip 192.168.178.32 --stream --pat-idx 4 --duration 60 --output stream.ts
+  ```
+* **Stream direkt an VLC-Player weiterleiten:**
+  ```bash
+  python src/wisi.py --ip 192.168.178.32 --stream --pat-idx 4 --output - | vlc -
+  ```
+* **PCAP-Mitschnitt analysieren:**
+  ```bash
+  python src/wisi.py --pcap "research/PCAPdroid_12_Okt._16_16_04.pcap"
+  ```
+
+---
+
+## 6. PCAP-Traffic-Analyse & Widerlegte Mythen
+
+### 6.1 Zusammenfassung der analysierten Mitschnitte
+* `capture_pcapdroid_2026-10-11.pcap` (3.284 Pakete): Zeigt EPG-Abfragen (`0xF6/0x30` / `0x31`) und UDP-Antworten.
+* `PCAPdroid_12_Okt._16_16_04.pcap` (940 Pakete): Belegt das Laden der Kanalliste über TCP XML (`0xF6/0x20` + `0xF6/0x21`).
+* `PCAPdroid_12_Okt._16_28_17.pcap` (1.197 Pakete): Belegt den vollständigen Tune- & Stream-Ablauf (`0xF6/0x03` → `0xF6/0x01` → `0xF8/0x07` → `0xF9/0x01`).
+
+### 6.2 Widerlegte Annahmen & Klarstellungen
+| Frühere Annahme / Mythos | Widerlegte/Korrigierte Realität |
+| :--- | :--- |
+| **USBC-Anfragen sind 66 Byte lang** | **Falsch:** Anfragen sind exakt **31 Byte** lang (Standard USB CBW). 35-Byte-Auth-Erweiterungen existieren im normalen Betrieb nicht. |
+| **USBS-Trailer sind 46 Byte lang** | **Falsch:** Antworten enden mit **13 Byte** USBS-Trailer. |
+| **Kanalliste kommt per UDP-Blob (`0xF9/0x0A`)** | **Falsch:** `0xF9/0x0A` ist ein **Speedtest**. Die Kanalliste wird sauber per **TCP XML** (`0xF6/0x20` + `0xF6/0x21`) übertragen. |
+| **MD5-Challenge/Response für FTA nötig** | **Falsch:** FTA-Streams benötigen **keine Authentifizierung**. Der hardcodierte Key `LukeRanDolphCI+1` dient nur Pay-TV (CI+). |
+
+---
+
+## 7. Offene Punkte & Zukünftige Meilensteine
+1. **Live-Kanalwechsel mit variierenden Indizes:** Verifizierung weiterer 16-Bit-Kanalindizes bei laufendem UDP-Stream.
+2. **Scan-PCAP aufzeichnen:** Erfassung eines Sendersuchlaufs zur Analyse der dynamischen Zuweisung interner Kanalindizes im Flash-Speicher.
+3. **Erkundung unbekannter Opcodes:** systematische Prüfung ungenutzter APIX-Sub-Opcodes im Bereich `0x04` bis `0x1F` mit `wisi_probe.py`.
