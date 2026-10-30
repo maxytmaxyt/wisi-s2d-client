@@ -6,22 +6,22 @@ Dieses Repo enthält einen reverse-engineerten Python-Client für den **WISI OR 
 
 | Was | Wo |
 |---|---|
-| CLI-Einstieg | `src/wisi.py --help` |
+| CLI-Einstieg | `src/wisi/wisi.py --help` |
 | Datenmodelle | `src/models.py` – Channel, ServiceEntry, FALLBACK_SERVICE |
 | Protokoll-Layer | `src/protocol.py` – USBC-Builder, Konstanten, TCP-Helfer, connect/disconnect |
 | Kanalliste | `src/channels.py` – fetch_channel_list, parse_chlist_xml |
 | Keep-Alive | `src/keepalive.py` – _keepalive_worker |
 | Stream | `src/stream.py` – prepare_channel, stream() |
-| Menü | `src/menu.py` – interaktives Konsolenmenü |
-| CLI-Main | `src/wisi_client.py` – main(), Re-Export DEFAULT_IP |
-| Protokoll-Spezifikation | `DETAILS.md` ← **zuerst lesen** |
-| Streaming-Ablauf | `stream.md` – Schritt-für-Schritt A–Z |
-| Forschungsstand | `research/README.md` |
+| Menü-Logik | `src/tools/menu.py` – interaktives Konsolenmenü |
+| PCAP-Parser | `src/tools/pcap_parser.py` – Ethernet/IP/UDP + APIX-Analyse |
+| CLI-Subkommandos | `src/wisi/` – client, channels, epg, discovery, probe, pcap, menu |
+| Protokoll-Spezifikation | `research/DETAILS.md` ← **zuerst lesen** |
+| Streaming-Ablauf | `research/stream.md` – Schritt-für-Schritt A–Z |
+| Forschungsübersicht | `research/README.md` |
 | PCAP-Auswertung | `research/pcap_analysis.md` |
 | APK-Befunde | `research/apk_reverse_engineering.md`, `research/apk-erkenntnisse-18.10.26.md` |
 | Mitschnitte + Binärdaten | `research/assets/` |
-| Veraltete Research-Docs | `research/outdated/` |
-| Legacy-Code | `archive/` (nicht anfassen) |
+| Veraltete Research-Docs | `research/archive/` |
 
 ---
 
@@ -68,9 +68,9 @@ Root-Key für Pay-TV CI+-Derivation – für FTA irrelevant. Details: `research/
 Implementierung ist vollständig, aber noch nicht gegen echten Dongle als Erfolg bestätigt.
 
 ```bash
-python src/wisi.py --ip 192.168.178.32 --stream --output - | vlc -
+python src/wisi/wisi.py --ip 192.168.178.32 --stream --output - | vlc -
 # Bei Problemen:
-python src/wisi.py --ip 192.168.178.32 --stream --output - --debug 2>debug.log | vlc -
+python src/wisi/wisi.py --ip 192.168.178.32 --stream --output - --debug 2>debug.log | vlc -
 ```
 
 - PCAP-Vergleich mit `research/assets/PCAPdroid_12_Okt._16_28_17.pcap`
@@ -81,14 +81,14 @@ Kein Mitschnitt eines Sendersuchlaufs vorhanden. Würde Kanal-Index → LCN-Mapp
 
 ```bash
 # PCAPdroid auf Android, TV2Smart → Sendersuchlauf → PCAP in research/assets/ ablegen
-python src/wisi.py --pcap research/assets/scan_DATUM.pcap
+python src/wisi/wisi.py --pcap research/assets/scan_DATUM.pcap
 ```
 
 ### 🟢 3 – Unbekannte Opcodes per Probe finden
 `CMD_GET_ABOUT_DONGLE_INFO`, `CMD_START_SCAN_DVBS` u. a. haben noch keinen bestätigten Opcode-Wert.
 
 ```bash
-python src/wisi.py --ip 192.168.178.32 --probe-opcode 0x12
+python src/wisi/wisi.py --ip 192.168.178.32 --probe-opcode 0x12
 ```
 Alle Opcodes `0x04`–`0x1F` testen (außer `0x16`/`0x17`). USBS-Status `0x00` = Erfolg.
 
@@ -97,7 +97,6 @@ Alle Opcodes `0x04`–`0x1F` testen (außer `0x16`/`0x17`). USBS-Status `0x00` =
 ## Wichtige Nicht-Ziele / Fallen
 
 - `0xF9/0x0A` ist **kein** Senderlisten-Befehl → nie als Service-DB dekodieren
-- `wisi_menu.py` ist **Legacy** → Änderungen gehören in `wisi_client.py` / `menu.py`
-- `fetch_service_db()` in `channels.py` ist **deaktivierter Legacy-Stub` → nicht reaktivieren
-- `research/outdated/` und `archive/` nicht als Implementierungsgrundlage nutzen
-- `DETAILS.md` und `stream.md` sind die **maßgeblichen Quellen** – bei Widerspruch gewinnen sie
+- `fetch_service_db()` in `src/wisi/client.py` ist ein **deaktivierter Legacy-Stub** → nicht reaktivieren
+- `research/archive/` nicht als Implementierungsgrundlage nutzen
+- `research/DETAILS.md` und `research/stream.md` sind die **maßgeblichen Quellen** – bei Widerspruch gewinnen sie

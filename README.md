@@ -2,7 +2,7 @@
 
 Python-Client für den **WISI OR S2D** (DVB-S2-Satelliten-Dongle). Basiert auf eigenen PCAP-Mitschnitten und der Analyse der TV2Smart-App.
 
-> Details zu Protokoll, Forschungsstand und offenen Punkten: [DETAILS.md](DETAILS.md)
+> Details zu Protokoll, Forschungsstand und offenen Punkten: [research/DETAILS.md](research/DETAILS.md)
 
 ---
 
@@ -18,7 +18,7 @@ source .venv/bin/activate        # Linux/macOS
 pip install -e .
 ```
 
-Nach der Installation ist der Befehl `wisi` verfügbar. Ohne Installation: `python src/wisi.py`.
+Nach der Installation ist der Befehl `wisi` verfügbar. Ohne Installation: `python src/wisi/wisi.py`.
 
 ---
 
@@ -29,16 +29,16 @@ Die Standard-IP in den Beispielen ist `192.168.178.32` – durch die IP deines D
 ### Kanalliste anzeigen
 
 ```bash
-python src/wisi.py --ip 192.168.178.32 --channels
+python src/wisi/wisi.py --ip 192.168.178.32 --channels
 ```
 
 ### Stream aufzeichnen
 
 ```bash
-python src/wisi.py --ip 192.168.178.32 --stream --pat-idx 4 --duration 60 --output stream.ts
+python src/wisi/wisi.py --ip 192.168.178.32 --stream --pat-idx 4 --duration 60 --output stream.ts
 ```
 
-`--duration 0` = unbegrenzt. `--pat-idx 4` stammt aus dem Beispielmitschnitt (interner Dongle-Kanalindex 4, Programm 4914) – vorher die Kanalliste prüfen. Der CLI-Optionsname bleibt aus Kompatibilitätsgründen bestehen; der Wert ist kein PAT-Array-Index.
+`--duration 0` = unbegrenzt. `--pat-idx 4` stammt aus dem Beispielmitschnitt (interner Dongle-Kanalindex 4, Programm 4914) – vorher die Kanalliste prüfen.
 
 ```bash
 vlc stream.ts   # Aufzeichnung abspielen
@@ -47,19 +47,19 @@ vlc stream.ts   # Aufzeichnung abspielen
 Direkt an VLC pipen (erst nach erfolgreichem lokalem Test):
 
 ```bash
-python src/wisi.py --ip 192.168.178.32 --stream --pat-idx 4 --output - | vlc -
+python src/wisi/wisi.py --ip 192.168.178.32 --stream --pat-idx 4 --output - | vlc -
 ```
 
 ### EPG laden
 
 ```bash
-python src/wisi.py --ip 192.168.178.32 --epg --epg-output epg.json
+python src/wisi/wisi.py --ip 192.168.178.32 --epg --epg-output epg.json
 ```
 
 ### PCAP analysieren
 
 ```bash
-python src/wisi.py --pcap "research/PCAPdroid_12_Okt._16_16_04.pcap"
+python src/wisi/wisi.py --pcap "research/assets/PCAPdroid_12_Okt._16_16_04.pcap"
 ```
 
 ### Alle Optionen
@@ -69,7 +69,7 @@ python src/wisi.py --pcap "research/PCAPdroid_12_Okt._16_16_04.pcap"
 | `--ip IP` | IP-Adresse des Dongles (Standard: `192.168.178.32`) |
 | `--channels` | Kanalliste vom Gerät laden und ausgeben |
 | `--stream` | MPEG-TS-Stream starten |
-| `--pat-idx N` | Interner 16-Bit-Kanalindex des Dongles für `--stream` (Standard: 4; historischer Optionsname) |
+| `--pat-idx N` | Interner 16-Bit-Kanalindex des Dongles für `--stream` (Standard: 4) |
 | `--output DATEI` | Ausgabedatei oder `-` für stdout |
 | `--duration SEK` | Streamdauer in Sekunden (0 = unbegrenzt) |
 | `--epg` | EPG aller Sender als JSON laden |
@@ -96,25 +96,26 @@ python -m unittest discover -s tests -v
 
 ```
 src/
-├── wisi.py            # CLI-Einstieg
 ├── protocol.py        # USBC-Builder, Konstanten, TCP-Helfer
 ├── models.py          # Channel, ServiceEntry, FALLBACK_SERVICE
 ├── channels.py        # Kanalliste laden (0xF6/0x20+0x21)
 ├── keepalive.py       # Keep-Alive-Thread (0x16-Ping)
 ├── stream.py          # prepare_channel + MPEG-TS-Stream
-├── menu.py            # Interaktives Konsolenmenü
-├── pcap_parser.py     # PCAP-Parsing und APIX-Analyse
-├── wisi_client.py     # CLI-Einstieg + Re-Exporte
-├── wisi_channels.py   # Kanalliste ausgeben
-├── wisi_common.py     # Gemeinsamer load_services()-Helfer
-├── wisi_epg.py        # EPG-Export
-├── wisi_pcap.py       # PCAP-CLI
-├── wisi_discovery.py  # Experimentelle Gerätesuche
-├── wisi_probe.py      # Opcode-Tester
-└── wisi_menu.py       # Legacy (veraltet)
-research/              # Mitschnitte, Analysen, APK
-archive/               # Ältere Client-Experimente
+├── wisi/              # CLI-Einstiegspunkte und Subkommandos
+│   ├── wisi.py        # Haupt-CLI (Einstieg)
+│   ├── client.py      # Stream-Client + Re-Exporte
+│   ├── channels.py    # Kanalliste ausgeben
+│   ├── common.py      # load_services()-Helfer
+│   ├── discovery.py   # Experimentelle Gerätesuche
+│   ├── epg.py         # EPG-Export
+│   ├── menu.py        # Interaktives Konsolenmenü
+│   ├── pcap.py        # PCAP-CLI
+│   └── probe.py       # Opcode-Tester
+└── tools/             # Hilfswerkzeuge
+    ├── menu.py        # Konsolenmenü-Logik
+    └── pcap_parser.py # PCAP-Parsing und APIX-Analyse
+research/              # Dokumentation, Mitschnitte, Analysen, APK
 tests/
 ```
 
-Weitere Infos zum Protokoll, Forschungsstand und offenen Punkten: **[DETAILS.md](DETAILS.md)**
+Weitere Infos zum Protokoll, Forschungsstand und offenen Punkten: **[research/DETAILS.md](research/DETAILS.md)**
