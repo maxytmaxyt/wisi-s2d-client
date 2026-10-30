@@ -10,21 +10,20 @@ requires = ["setuptools>=61"]
 build-backend = "setuptools.build_meta"
 
 [project.scripts]
-wisi = "wisi:main"
+wisi = "wisi.wisi:main"
 
 [tool.setuptools]
 package-dir = {"" = "src"}
+packages = [
+    "wisi",
+    "tools",
+]
 py-modules = [
     "protocol",
-    "wisi",
-    "wisi_channels",
-    "wisi_client",
-    "wisi_common",
-    "wisi_discovery",
-    "wisi_epg",
-    "wisi_pcap",
-    "wisi_probe",
-    "wisi_menu",
+    "models",
+    "channels",
+    "keepalive",
+    "stream",
 ]
 
 [tool.ruff]

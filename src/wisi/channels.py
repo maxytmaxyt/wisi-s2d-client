@@ -6,7 +6,7 @@ import logging
 import sys
 from collections.abc import Sequence
 
-from wisi_common import DEFAULT_IP, load_services
+from wisi.common import DEFAULT_IP, load_services
 
 
 def run(ip: str) -> int:

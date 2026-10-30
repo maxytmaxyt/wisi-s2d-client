@@ -517,7 +517,7 @@ def main_menu(sock: socket.socket, ip: str) -> None:
 # ---------------------------------------------------------------------------
 def main() -> None:
     """Leitet alte Aufrufe an den korrigierten Client weiter."""
-    from wisi_client import main as current_main
+    from wisi.client import main as current_main
 
     current_main()
 

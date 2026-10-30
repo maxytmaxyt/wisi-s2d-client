@@ -6,7 +6,7 @@ import logging
 import sys
 from collections.abc import Sequence
 
-from wisi_client import DEFAULT_IP
+from wisi.client import DEFAULT_IP
 
 
 def main(argv: Sequence[str] | None = None) -> int:
@@ -53,15 +53,15 @@ def main(argv: Sequence[str] | None = None) -> int:
 
     try:
         if args.channels:
-            from wisi_channels import run
+            from wisi.channels import run
 
             return run(args.ip)
         if args.epg:
-            from wisi_epg import run
+            from wisi.epg import run
 
             return run(args.ip, args.epg_output, args.epg_limit)
         if args.stream:
-            from wisi_client import main as client_main
+            from wisi.client import main as client_main
 
             forwarded = ["--ip", args.ip, "--stream", "--pat-idx", str(args.pat_idx),
                          "--output", args.output, "--duration", str(args.duration)]
@@ -75,19 +75,19 @@ def main(argv: Sequence[str] | None = None) -> int:
                 sys.argv = original_argv
             return 0
         if args.discover:
-            from wisi_discovery import run
+            from wisi.discovery import run
 
             return run(args.ip, 2.0)
         if args.probe_opcode is not None:
-            from wisi_probe import run
+            from wisi.probe import run
 
             return run(args.ip, args.probe_opcode)
         if args.pcap:
-            from wisi_pcap import run
+            from wisi.pcap import run
 
             return run(args.pcap, args.pcap_extract)
         if args.decode_service_db:
-            from wisi_pcap import run_service_db
+            from wisi.pcap import run_service_db
 
             if args.pcap_extract:
                 parser.error("--pcap-extract kann nicht mit --decode-service-db verwendet werden.")

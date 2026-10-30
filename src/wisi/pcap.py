@@ -9,7 +9,7 @@ from collections.abc import Sequence
 from pathlib import Path
 
 from protocol import UDP_PORT
-from pcap_parser import analyze, packets
+from tools.pcap_parser import analyze, packets
 
 
 def run(path: str, extract_service_db: str | None = None) -> int:

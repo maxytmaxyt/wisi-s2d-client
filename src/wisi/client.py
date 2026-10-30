@@ -21,7 +21,7 @@ import sys
 import protocol
 from channels import fetch_channel_list, channels_to_services, fetch_service_db
 from keepalive import _keepalive_worker
-from menu import main_menu
+from tools.menu import main_menu
 from models import FALLBACK_SERVICE, ServiceEntry, Channel
 from stream import prepare_channel, stream
 

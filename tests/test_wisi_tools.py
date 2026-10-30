@@ -10,10 +10,10 @@ from unittest.mock import MagicMock, patch
 
 sys.path.insert(0, str(Path(__file__).resolve().parents[1] / "src"))
 
-import wisi_common
-import wisi_client
-from wisi_discovery import DISCOVERY_REQUEST, MAGIC, VERSION, build_request, parse_response
-from wisi_pcap import analyze, run_service_db
+import wisi.common as wisi_common
+import wisi.client as wisi_client
+from wisi.discovery import DISCOVERY_REQUEST, MAGIC, VERSION, build_request, parse_response
+from wisi.pcap import analyze, run_service_db
 
 
 def _f9_0a_reply() -> bytes:

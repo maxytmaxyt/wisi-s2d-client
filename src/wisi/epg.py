@@ -15,7 +15,7 @@ from typing import Dict, List
 import protocol
 from keepalive import _keepalive_worker
 from models import ServiceEntry
-from wisi_common import DEFAULT_IP, load_services
+from wisi.common import DEFAULT_IP, load_services
 
 
 # ---------------------------------------------------------------------------

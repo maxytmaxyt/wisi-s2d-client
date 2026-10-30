@@ -7,7 +7,7 @@ import sys
 from collections.abc import Sequence
 
 import protocol
-from wisi_common import DEFAULT_IP
+from wisi.common import DEFAULT_IP
 
 
 def run(ip: str, opcode: int) -> int:
