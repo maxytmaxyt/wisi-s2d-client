@@ -17,6 +17,12 @@ from __future__ import annotations
 import argparse
 import logging
 import sys
+from pathlib import Path
+
+# Allow running this file directly (python src/wisi/<file>.py):
+_src = str(Path(__file__).resolve().parent.parent)
+if _src not in sys.path:
+    sys.path.insert(0, _src)
 
 import protocol
 from channels import channels_to_services, fetch_channel_list

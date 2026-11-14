@@ -11,6 +11,11 @@ import xml.etree.ElementTree as ET
 from collections.abc import Sequence
 from pathlib import Path
 
+# Allow `python src/wisi/epg.py` without installing the package:
+_src = str(Path(__file__).resolve().parent.parent)
+if _src not in sys.path:
+    sys.path.insert(0, _src)
+
 import protocol
 from keepalive import _keepalive_worker
 from models import ServiceEntry

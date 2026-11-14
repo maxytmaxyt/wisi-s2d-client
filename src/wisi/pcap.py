@@ -8,6 +8,11 @@ import sys
 from collections.abc import Sequence
 from pathlib import Path
 
+# Allow `python src/wisi/pcap.py` without installing the package:
+_src = str(Path(__file__).resolve().parent.parent)
+if _src not in sys.path:
+    sys.path.insert(0, _src)
+
 from protocol import UDP_PORT
 from tools.pcap_parser import analyze, packets
 

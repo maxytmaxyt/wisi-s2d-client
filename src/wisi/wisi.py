@@ -5,6 +5,14 @@ import argparse
 import logging
 import sys
 from collections.abc import Sequence
+from pathlib import Path
+
+# Allow `python src/wisi/wisi.py` without installing the package:
+# insert src/ at the front of sys.path so both `wisi.*` and bare
+# top-level modules (protocol, channels, …) resolve correctly.
+_src = str(Path(__file__).resolve().parent.parent)
+if _src not in sys.path:
+    sys.path.insert(0, _src)
 
 from wisi.client import DEFAULT_IP
 

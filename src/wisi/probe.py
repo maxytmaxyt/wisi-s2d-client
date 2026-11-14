@@ -5,6 +5,12 @@ import argparse
 import logging
 import sys
 from collections.abc import Sequence
+from pathlib import Path
+
+# Allow running this file directly (python src/wisi/<file>.py):
+_src = str(Path(__file__).resolve().parent.parent)
+if _src not in sys.path:
+    sys.path.insert(0, _src)
 
 import protocol
 from wisi.common import DEFAULT_IP
