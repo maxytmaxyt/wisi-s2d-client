@@ -24,8 +24,8 @@ KEEPALIVE_INTVL  = 2.0
 SIGNAL_INTVL     = 3.0
 
 # ── UDP / TS ─────────────────────────────────────────────────────────────────
-UDP_REQUEST_LEN   = 0xBC00       # 48 128 Byte – Anforderungsgröße im USBC-Feld
-UDP_RESPONSE_SIZE = 32_740       # Typische Antwortgröße in Byte
+UDP_REQUEST_LEN   = 0xBC00       # 48 128 Byte – data_len-Feld im F9/01 und F9/0A CBW
+UDP_RESPONSE_SIZE = 48_205       # 0xBC00 + 64 SDK-Header + 13 USBS-Trailer
 TS_PKT_SIZE       = 188
 TS_SYNC           = 0x47
 USBS_LEN          = 13           # USBS-Status-Trailer Länge
