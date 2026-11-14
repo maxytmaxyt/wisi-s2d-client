@@ -31,8 +31,11 @@ from models import ServiceEntry
 
 log = logging.getLogger("wisi.stream")
 
-# Speedtest-Response: 48128 Nutzdaten + 77 Byte Overhead = 48205 Byte.
-SPEEDTEST_RESPONSE_SIZE: int = protocol.UDP_REQUEST_LEN + 77  # 48205
+# UDP-Antwortgröße: 0xBC00 Nutzdaten + 64 Byte SDK-Header + 13 Byte USBS-Trailer = 48205 Byte.
+# F9/01 (TS-Stream) und F9/0A (Speedtest) liefern dieselbe Größe –
+# der Inhalt unterscheidet sich: TS-Daten beginnen mit 0x47-Sync-Bytes,
+# Speedtest-Blöcke enthalten Füll-Bytes ohne Sync.
+UDP_BLOCK_SIZE: int = protocol.UDP_REQUEST_LEN + 64 + protocol.USBS_LEN  # 48205
 
 SIGNAL_INTVL: float = protocol.SIGNAL_INTVL
 UDP_PULL_INTVL: float = 0.5
@@ -199,16 +202,9 @@ def stream(
                     if data[:4] == b"USBS" or data[:2] == b"\xf9\x0a":
                         continue
 
-                    if len(data) == SPEEDTEST_RESPONSE_SIZE:
-                        speedtest_count += 1
-                        if speedtest_count == 1:
-                            log.warning(
-                                "Speedtest-Response (%dB) empfangen – zu viele Pulls oder "
-                                "falscher Modus. Weitere Speedtest-Blöcke werden still verworfen.",
-                                len(data),
-                            )
-                        else:
-                            log.debug("Speedtest-Response #%d verworfen", speedtest_count)
+                    # Log unexpected sizes (too small to hold TS data) but still try sync search.
+                    if len(data) < protocol.TS_PKT_SIZE * 4:
+                        log.debug("Datagramm zu klein (%dB) – übersprungen", len(data))
                         pull_pending = False
                         continue
 
