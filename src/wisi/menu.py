@@ -20,6 +20,10 @@ from pathlib import Path
 
 # Allow running this file directly (python src/wisi/<file>.py):
 _src = str(Path(__file__).resolve().parent.parent)
+_pkg = str(Path(__file__).resolve().parent)
+# Remove the package directory from sys.path so 'wisi' resolves as a
+# package rooted at src/, not as the script's own directory.
+sys.path = [p for p in sys.path if Path(p).resolve() != Path(_pkg).resolve()]
 if _src not in sys.path:
     sys.path.insert(0, _src)
 

@@ -7,14 +7,21 @@ import sys
 from collections.abc import Sequence
 from pathlib import Path
 
-# Allow `python src/wisi/wisi.py` without installing the package:
-# insert src/ at the front of sys.path so both `wisi.*` and bare
-# top-level modules (protocol, channels, …) resolve correctly.
+# Allow `python src/wisi/wisi.py` (and all lazy `from wisi.*` imports
+# inside main()) to work without installing the package first.
+# This must happen before any wisi.* import is attempted.
 _src = str(Path(__file__).resolve().parent.parent)
+_pkg = str(Path(__file__).resolve().parent)
+# Remove the package directory from sys.path so 'wisi' resolves as a
+# package rooted at src/, not as the script's own directory.
+sys.path = [p for p in sys.path if Path(p).resolve() != Path(_pkg).resolve()]
 if _src not in sys.path:
     sys.path.insert(0, _src)
 
-from wisi.client import DEFAULT_IP
+# DEFAULT_IP is re-exported here from protocol so callers don't need to
+# import protocol directly; we read it lazily to avoid a circular-import
+# issue when running this file directly.
+DEFAULT_IP: str = "192.168.178.32"  # mirrors protocol.DEFAULT_IP
 
 log = logging.getLogger("wisi")
 
