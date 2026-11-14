@@ -5,10 +5,9 @@ Kein eigener Einstiegspunkt – wird von allen anderen Modulen importiert.
 """
 from __future__ import annotations
 
+import logging
 import socket
 import struct
-import logging
-from typing import Optional
 
 log = logging.getLogger("wisi.proto")
 
@@ -146,7 +145,7 @@ def recv_exactly(sock: socket.socket, n: int,
             if not chunk:
                 break
             buf.extend(chunk)
-    except socket.timeout:
+    except TimeoutError:
         pass
     finally:
         sock.settimeout(None)
@@ -170,7 +169,7 @@ def send_recv(sock: socket.socket, cmd: bytes,
 # Verbindung herstellen / trennen
 # ─────────────────────────────────────────────────────────────────────────────
 
-def connect(ip: str) -> Optional[socket.socket]:
+def connect(ip: str) -> socket.socket | None:
     """
     Baut TCP-Verbindung auf und führt APIX-Init (0x16 + 0x17) durch.
     Gibt Socket zurück oder None bei Fehler.
@@ -185,7 +184,7 @@ def connect(ip: str) -> Optional[socket.socket]:
     sock.settimeout(CONNECT_TIMEOUT)
     try:
         sock.connect((ip, TCP_PORT))
-    except (OSError, socket.timeout) as e:
+    except (TimeoutError, OSError) as e:
         log.error("TCP fehlgeschlagen: %s", e)
         sock.close()
         return None

@@ -8,7 +8,6 @@ Legacy-Implementierung des DVB-over-IP-Clients für das hier als WISI OR S2D ide
 Beim direkten Start wird an src/wisi_client.py weitergeleitet.
 """
 
-import argparse
 import logging
 import socket
 import struct
@@ -17,7 +16,6 @@ import threading
 import time
 import xml.etree.ElementTree as ET
 from dataclasses import dataclass, field
-from typing import Optional
 
 # ---------------------------------------------------------------------------
 # Logging
@@ -155,7 +153,7 @@ def _recv_n(sock: socket.socket, n: int, timeout: float = RECV_TIMEOUT) -> bytes
             if not chunk:
                 break
             buf.extend(chunk)
-    except socket.timeout:
+    except TimeoutError:
         pass
     finally:
         sock.settimeout(None)
@@ -173,13 +171,13 @@ def _send_cmd(sock: socket.socket, cmd: bytes,
 # ---------------------------------------------------------------------------
 # Phase 1: Verbindung + Init
 # ---------------------------------------------------------------------------
-def connect(ip: str) -> Optional[socket.socket]:
+def connect(ip: str) -> socket.socket | None:
     log.info("Verbinde mit %s:%d ...", ip, TCP_PORT)
     sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
     sock.settimeout(CONNECT_TIMEOUT)
     try:
         sock.connect((ip, TCP_PORT))
-    except (OSError, socket.timeout) as e:
+    except (TimeoutError, OSError) as e:
         log.error("TCP fehlgeschlagen: %s", e)
         sock.close()
         return None
@@ -359,52 +357,56 @@ def stream(tcp_sock: socket.socket, ch: Channel,
         log.info("0x17 Bestätigung: 0x%02X", r[1] if len(r) > 1 else 0)
 
         # Stream-Loop
-        out = open(output_path, "wb") if output_path != "-" else sys.stdout.buffer
         log.info("Stream aktiv → %s   (STRG+C zum Beenden)",
                  output_path if output_path != "-" else "stdout")
 
-        t_start = time.monotonic()
-        block_num = 0
-        ts_count  = 0
+        import contextlib
+        _file_ctx = (
+            open(output_path, "wb")  # noqa: SIM115
+            if output_path != "-"
+            else contextlib.nullcontext(sys.stdout.buffer)
+        )
+        with _file_ctx as out:
+            t_start = time.monotonic()
+            block_num = 0
+            ts_count  = 0
 
-        try:
-            while not stop.is_set():
-                # Nächsten Block anfordern (Byte21=0x01 nach erstem)
-                udp.sendto(_udp_request_block(first=False),
-                           (tcp_sock.getpeername()[0], UDP_PORT))
-                try:
-                    data, _ = udp.recvfrom(65535)
-                except socket.timeout:
-                    log.warning("UDP-Timeout – kein Datenblock erhalten.")
-                    break
+            try:
+                while not stop.is_set():
+                    # Nächsten Block anfordern (Byte21=0x01 nach erstem)
+                    udp.sendto(_udp_request_block(first=False),
+                               (tcp_sock.getpeername()[0], UDP_PORT))
+                    try:
+                        data, _ = udp.recvfrom(65535)
+                    except TimeoutError:
+                        log.warning("UDP-Timeout – kein Datenblock erhalten.")
+                        break
 
-                # TS-Sync-Check
-                if data[0] != TS_SYNC:
-                    log.debug("Kein TS-Sync (0x%02X) – übersprungen.", data[0])
-                    continue
+                    # TS-Sync-Check
+                    if data[0] != TS_SYNC:
+                        log.debug("Kein TS-Sync (0x%02X) – übersprungen.", data[0])
+                        continue
 
-                out.write(data)
-                out.flush()
-                block_num += 1
-                ts_count  += len(data) // TS_PKT_SIZE
+                    out.write(data)
+                    out.flush()
+                    block_num += 1
+                    ts_count  += len(data) // TS_PKT_SIZE
 
-                if block_num % 50 == 0:
-                    elapsed = time.monotonic() - t_start
-                    rate_kbps = (block_num * len(data) / 1024) / elapsed
-                    log.info("Block %d  |  TS-Pakete: %d  |  %.0f KB/s",
-                             block_num, ts_count, rate_kbps)
+                    if block_num % 50 == 0:
+                        elapsed = time.monotonic() - t_start
+                        rate_kbps = (block_num * len(data) / 1024) / elapsed
+                        log.info("Block %d  |  TS-Pakete: %d  |  %.0f KB/s",
+                                 block_num, ts_count, rate_kbps)
 
-                if duration_s > 0 and (time.monotonic() - t_start) >= duration_s:
-                    log.info("Zieldauer erreicht.")
-                    break
+                    if duration_s > 0 and (time.monotonic() - t_start) >= duration_s:
+                        log.info("Zieldauer erreicht.")
+                        break
 
-        except KeyboardInterrupt:
-            print()
-            log.info("Abgebrochen.")
-        finally:
-            if output_path != "-":
-                out.close()
-            log.info("Stream beendet. Blöcke: %d  TS-Pakete: %d", block_num, ts_count)
+            except KeyboardInterrupt:
+                print()
+                log.info("Abgebrochen.")
+            finally:
+                log.info("Stream beendet. Blöcke: %d  TS-Pakete: %d", block_num, ts_count)
 
     finally:
         stop.set()
@@ -432,7 +434,7 @@ MENU = """
 ║  [q]  Beenden                               ║
 ╚══════════════════════════════════════════════╝"""
 
-def _pick_channel(channels: dict[int, Channel]) -> Optional[Channel]:
+def _pick_channel(channels: dict[int, Channel]) -> Channel | None:
     """Einfache Kanalwahl per Eingabe."""
     chlist = sorted(channels.values(), key=lambda c: c.s_id)
     print(f"\n{'Nr':>4}  {'s_id':>6}  {'prog_idx':>12}  {'🔒':>2}  Aktuelles Programm")
@@ -452,7 +454,7 @@ def _pick_channel(channels: dict[int, Channel]) -> Optional[Channel]:
 
 def main_menu(sock: socket.socket, ip: str) -> None:
     channels: dict[int, Channel] = {}
-    selected: Optional[Channel]  = None
+    selected: Channel | None  = None
     stop_epg = threading.Event()
 
     print(MENU)

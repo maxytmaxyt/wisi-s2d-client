@@ -9,6 +9,8 @@ from collections.abc import Sequence
 import protocol
 from wisi.common import DEFAULT_IP
 
+log = logging.getLogger("wisi.probe")
+
 
 def run(ip: str, opcode: int) -> int:
     if not 0x04 <= opcode <= 0x1F or opcode in (0x16, 0x17):
@@ -42,7 +44,7 @@ def main(argv: Sequence[str] | None = None) -> int:
     try:
         return run(args.ip, args.probe_opcode)
     except (ConnectionError, OSError, ValueError) as exc:
-        logging.error("%s", exc)
+        log.error("%s", exc)
         return 1
 
 

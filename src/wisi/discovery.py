@@ -10,8 +10,10 @@ import sys
 import time
 from collections.abc import Sequence
 
-from wisi.common import DEFAULT_IP
 from protocol import TCP_PORT
+from wisi.common import DEFAULT_IP
+
+log = logging.getLogger("wisi.discovery")
 
 MAGIC = 0x54563253
 VERSION = 0x0100
@@ -56,7 +58,7 @@ def run(ip: str, timeout: float) -> int:
         while time.monotonic() < deadline:
             try:
                 data, address = udp.recvfrom(65535)
-            except socket.timeout:
+            except TimeoutError:
                 break
             result = parse_response(data)
             if result is None:
@@ -67,7 +69,7 @@ def run(ip: str, timeout: float) -> int:
             seen.add(key)
             print(json.dumps({"ip": address[0], **result}, ensure_ascii=False, indent=2))
     if not seen:
-        logging.warning(
+        log.warning(
             "Keine TV2S-Discovery-Antwort empfangen. Dieses Format ist in den "
             "Projektmitschnitten nicht bestätigt; nutze bei Bedarf --ip direkt."
         )
@@ -85,7 +87,7 @@ def main(argv: Sequence[str] | None = None) -> int:
     try:
         return run(args.ip, args.timeout)
     except OSError as exc:
-        logging.error("Discovery fehlgeschlagen: %s", exc)
+        log.error("Discovery fehlgeschlagen: %s", exc)
         return 1
 
 

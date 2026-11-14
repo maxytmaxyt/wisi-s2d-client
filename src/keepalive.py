@@ -10,7 +10,6 @@ from __future__ import annotations
 import logging
 import socket
 import threading
-from typing import Optional
 
 import protocol
 
@@ -21,7 +20,7 @@ def _keepalive_worker(
     sock: socket.socket,
     lock: threading.Lock,
     stop: threading.Event,
-    on_dead: Optional[threading.Event] = None,
+    on_dead: threading.Event | None = None,
 ) -> None:
     """
     Sendet alle KEEPALIVE_INTVL Sekunden einen 0x16-Ping.

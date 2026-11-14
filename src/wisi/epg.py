@@ -10,12 +10,13 @@ import threading
 import xml.etree.ElementTree as ET
 from collections.abc import Sequence
 from pathlib import Path
-from typing import Dict, List
 
 import protocol
 from keepalive import _keepalive_worker
 from models import ServiceEntry
 from wisi.common import DEFAULT_IP, load_services
+
+log = logging.getLogger("wisi.epg")
 
 
 # ---------------------------------------------------------------------------
@@ -25,7 +26,7 @@ def _fetch_epg_for_service(
     sock,
     lock: threading.Lock,
     svc: ServiceEntry,
-) -> List[dict]:
+) -> list[dict]:
     """Lädt EPG-XML für einen Dienst. Gibt Liste von Event-Dicts zurück."""
     with lock:
         r = protocol.send_recv(sock, protocol.cmd_epg_size(svc.prog_idx), 6, "0x30 epg-size")
@@ -61,11 +62,11 @@ def _fetch_epg_for_service(
 def enrich_with_epg(
     sock,
     lock: threading.Lock,
-    services: List[ServiceEntry],
+    services: list[ServiceEntry],
     stop_event: threading.Event,
-) -> Dict[int, List[dict]]:
+) -> dict[int, list[dict]]:
     """Lädt EPG für alle Dienste. Gibt {service_id: [events]} zurück."""
-    result: Dict[int, List[dict]] = {}
+    result: dict[int, list[dict]] = {}
     for i, svc in enumerate(services):
         if stop_event.is_set():
             break
@@ -73,7 +74,7 @@ def enrich_with_epg(
         if events:
             result[svc.service_id] = events
         if (i + 1) % 10 == 0:
-            logging.getLogger("wisi.epg").info(
+            log.info(
                 "EPG: %d/%d Dienste abgefragt (%d mit Daten)",
                 i + 1, len(services), len(result),
             )
@@ -140,7 +141,7 @@ def main(argv: Sequence[str] | None = None) -> int:
     try:
         return run(args.ip, args.output, args.limit)
     except (ConnectionError, OSError, ValueError) as exc:
-        logging.error("%s", exc)
+        log.error("%s", exc)
         return 1
 
 

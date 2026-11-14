@@ -6,6 +6,8 @@ import logging
 import sys
 from collections.abc import Sequence
 
+log = logging.getLogger("wisi.channels")
+
 from wisi.common import DEFAULT_IP, load_services
 
 
@@ -30,7 +32,7 @@ def main(argv: Sequence[str] | None = None) -> int:
     try:
         return run(args.ip)
     except (ConnectionError, OSError) as exc:
-        logging.error("%s", exc)
+        log.error("%s", exc)
         return 1
 
 

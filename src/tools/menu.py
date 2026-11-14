@@ -10,12 +10,11 @@ import logging
 import socket
 import threading
 import time
-from typing import List, Optional
 
 import protocol
-from channels import fetch_channel_list, channels_to_services
+from channels import channels_to_services, fetch_channel_list
 from keepalive import _keepalive_worker
-from models import ServiceEntry, FALLBACK_SERVICE
+from models import FALLBACK_SERVICE, ServiceEntry
 from stream import prepare_channel, stream
 
 log = logging.getLogger("wisi.menu")
@@ -33,7 +32,7 @@ _MENU = """
 ╚════════════════════════════════════════════════════╝"""
 
 
-def _pick_service(services: List[ServiceEntry]) -> Optional[ServiceEntry]:
+def _pick_service(services: list[ServiceEntry]) -> ServiceEntry | None:
     active = [s for s in services if s.is_active and not s.is_encrypted]
     active += [s for s in services if s.is_active and s.is_encrypted]
     if not active:
@@ -56,8 +55,8 @@ def _pick_service(services: List[ServiceEntry]) -> Optional[ServiceEntry]:
 
 def main_menu(sock: socket.socket, ip: str) -> None:
     lock = threading.Lock()
-    services: List[ServiceEntry] = []
-    selected: Optional[ServiceEntry] = None
+    services: list[ServiceEntry] = []
+    selected: ServiceEntry | None = None
 
     keepalive_stop = threading.Event()
     keepalive = threading.Thread(

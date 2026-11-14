@@ -2,12 +2,11 @@
 from __future__ import annotations
 
 import threading
-from typing import List
 
 import protocol
-from channels import fetch_channel_list, channels_to_services
+from channels import channels_to_services, fetch_channel_list
 from keepalive import _keepalive_worker
-from models import ServiceEntry, FALLBACK_SERVICE
+from models import ServiceEntry
 
 DEFAULT_IP = protocol.DEFAULT_IP
 
@@ -16,7 +15,7 @@ connect    = protocol.connect
 disconnect = protocol.disconnect
 
 
-def load_services(ip: str, timeout: float = 15.0) -> List[ServiceEntry]:
+def load_services(ip: str, timeout: float = 15.0) -> list[ServiceEntry]:
     """
     Verbindet mit dem Dongle, lädt Kanalliste via TCP 0xF6/0x20+0x21
     und gibt eine Liste von ServiceEntry zurück.
@@ -60,6 +59,10 @@ def load_services(ip: str, timeout: float = 15.0) -> List[ServiceEntry]:
 
 
 __all__ = [
-    "DEFAULT_IP", "load_services",
-    "connect", "disconnect", "fetch_channel_list", "threading",
+    "DEFAULT_IP",
+    "connect",
+    "disconnect",
+    "fetch_channel_list",
+    "load_services",
+    "threading",
 ]

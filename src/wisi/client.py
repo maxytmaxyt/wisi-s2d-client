@@ -19,11 +19,11 @@ import logging
 import sys
 
 import protocol
-from channels import fetch_channel_list, channels_to_services, fetch_service_db
+from channels import channels_to_services, fetch_channel_list
 from keepalive import _keepalive_worker
-from tools.menu import main_menu
-from models import FALLBACK_SERVICE, ServiceEntry, Channel
+from models import FALLBACK_SERVICE, ServiceEntry
 from stream import prepare_channel, stream
+from tools.menu import main_menu
 
 # Re-Export für wisi.py (importiert DEFAULT_IP von hier)
 DEFAULT_IP = protocol.DEFAULT_IP

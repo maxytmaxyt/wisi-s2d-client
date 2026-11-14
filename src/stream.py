@@ -24,7 +24,6 @@ import struct
 import sys
 import threading
 import time
-from typing import Optional
 
 import protocol
 from keepalive import _keepalive_worker
@@ -108,7 +107,7 @@ def stream(
 
     tcp_sock_dead = threading.Event()
 
-    ka: Optional[threading.Thread] = None
+    ka: threading.Thread | None = None
     if not keepalive_active:
         ka = threading.Thread(
             target=_keepalive_worker,
@@ -151,125 +150,131 @@ def stream(
             r = protocol.send_recv(tcp_sock, protocol.cmd_17_confirm(), 4, "0x17 confirm")
         log.info("0x17 confirm: 0x%02X", r[0] if len(r) > 0 else 0xFF)
 
-        out = open(output_path, "wb") if output_path != "-" else sys.stdout.buffer
         log.info("Stream → %s  (STRG+C zum Beenden)", output_path)
 
-        t_start = time.monotonic()
-        block_num = 0
-        ts_bytes = 0
-        pull_pending = True
-        next_pull_deadline = t_start + UDP_PULL_INTVL
-        last_packet_at = t_start
-        next_timeout_warning = t_start + 5.0
-        speedtest_count = 0
+        import contextlib
+        _file_ctx = (
+            open(output_path, "wb")  # noqa: SIM115
+            if output_path != "-"
+            else contextlib.nullcontext(sys.stdout.buffer)
+        )
+        with _file_ctx as out:
+            t_start = time.monotonic()
+            block_num = 0
+            ts_bytes = 0
+            pull_pending = True
+            next_pull_deadline = t_start + UDP_PULL_INTVL
+            last_packet_at = t_start
+            next_timeout_warning = t_start + 5.0
+            speedtest_count = 0
 
-        try:
-            while not stop.is_set():
-                now = time.monotonic()
-                if duration_s > 0 and now - t_start >= duration_s:
-                    log.info("Dauer %.0f s erreicht.", duration_s)
-                    break
+            try:
+                while not stop.is_set():
+                    now = time.monotonic()
+                    if duration_s > 0 and now - t_start >= duration_s:
+                        log.info("Dauer %.0f s erreicht.", duration_s)
+                        break
 
-                if not pull_pending or now >= next_pull_deadline:
+                    if not pull_pending or now >= next_pull_deadline:
+                        udp.sendto(
+                            protocol.cmd_udp_ts_block(first=False),
+                            (dongle_ip, protocol.UDP_PORT),
+                        )
+                        pull_count += 1
+                        pull_pending = True
+                        next_pull_deadline = now + UDP_PULL_INTVL
+                        log.debug("0xF9/0x01 Pull #%d (Fallback-Timer)", pull_count)
+
+                    try:
+                        data, _ = udp.recvfrom(65535)
+                    except TimeoutError:
+                        now = time.monotonic()
+                        if now >= next_timeout_warning and now - last_packet_at >= 5.0:
+                            log.warning(
+                                "Seit 5 Sekunden keine UDP-Streamdaten; Pulls laufen weiter."
+                            )
+                            next_timeout_warning = now + 5.0
+                        continue
+
+                    if data[:4] == b"USBS" or data[:2] == b"\xf9\x0a":
+                        continue
+
+                    if len(data) == SPEEDTEST_RESPONSE_SIZE:
+                        speedtest_count += 1
+                        if speedtest_count == 1:
+                            log.warning(
+                                "Speedtest-Response (%dB) empfangen – zu viele Pulls oder "
+                                "falscher Modus. Weitere Speedtest-Blöcke werden still verworfen.",
+                                len(data),
+                            )
+                        else:
+                            log.debug("Speedtest-Response #%d verworfen", speedtest_count)
+                        pull_pending = False
+                        continue
+
+                    sync_offset = data.find(bytes([protocol.TS_SYNC]))
+                    while sync_offset >= 0:
+                        if (
+                            sync_offset + 3 * protocol.TS_PKT_SIZE < len(data)
+                            and all(
+                                data[sync_offset + i * protocol.TS_PKT_SIZE] == protocol.TS_SYNC
+                                for i in range(4)
+                            )
+                        ):
+                            break
+                        sync_offset = data.find(bytes([protocol.TS_SYNC]), sync_offset + 1)
+
+                    if sync_offset < 0:
+                        log.debug(
+                            "Kein MPEG-TS-Sync in UDP-Datagramm (%dB) – verworfen", len(data)
+                        )
+                        pull_pending = False
+                        continue
+
+                    ts_data = data[sync_offset:]
+                    last_packet_at = time.monotonic()
+                    next_timeout_warning = last_packet_at + 5.0
+
+                    if block_num == 0:
+                        log.debug(
+                            "Erstes Stream-Datagramm: %dB, TS-Offset %d", len(data), sync_offset
+                        )
+
+                    complete_len = len(ts_data) - len(ts_data) % protocol.TS_PKT_SIZE
+                    if complete_len == 0:
+                        pull_pending = False
+                        continue
+
+                    out.write(ts_data[:complete_len])
+                    out.flush()
+                    block_num += 1
+                    ts_bytes += complete_len
+
                     udp.sendto(
                         protocol.cmd_udp_ts_block(first=False),
                         (dongle_ip, protocol.UDP_PORT),
                     )
                     pull_count += 1
                     pull_pending = True
-                    next_pull_deadline = now + UDP_PULL_INTVL
-                    log.debug("0xF9/0x01 Pull #%d (Fallback-Timer)", pull_count)
+                    next_pull_deadline = time.monotonic() + UDP_PULL_INTVL
+                    log.debug("0xF9/0x01 Pull #%d (nach Block %d)", pull_count, block_num)
 
-                try:
-                    data, _ = udp.recvfrom(65535)
-                except socket.timeout:
-                    now = time.monotonic()
-                    if now >= next_timeout_warning and now - last_packet_at >= 5.0:
-                        log.warning(
-                            "Seit 5 Sekunden keine UDP-Streamdaten; Pulls laufen weiter."
+                    if block_num % 50 == 0:
+                        elapsed = time.monotonic() - t_start
+                        kbps = (ts_bytes / 1024) / max(elapsed, 0.001)
+                        log.info(
+                            "Block %4d | %.1f MiB | %.0f KB/s",
+                            block_num, ts_bytes / 1_048_576, kbps,
                         )
-                        next_timeout_warning = now + 5.0
-                    continue
 
-                if data[:4] == b"USBS" or data[:2] == b"\xf9\x0a":
-                    continue
-
-                if len(data) == SPEEDTEST_RESPONSE_SIZE:
-                    speedtest_count += 1
-                    if speedtest_count == 1:
-                        log.warning(
-                            "Speedtest-Response (%dB) empfangen – zu viele Pulls oder "
-                            "falscher Modus. Weitere Speedtest-Blöcke werden still verworfen.",
-                            len(data),
-                        )
-                    else:
-                        log.debug("Speedtest-Response #%d verworfen", speedtest_count)
-                    pull_pending = False
-                    continue
-
-                sync_offset = data.find(bytes([protocol.TS_SYNC]))
-                while sync_offset >= 0:
-                    if (
-                        sync_offset + 3 * protocol.TS_PKT_SIZE < len(data)
-                        and all(
-                            data[sync_offset + i * protocol.TS_PKT_SIZE] == protocol.TS_SYNC
-                            for i in range(4)
-                        )
-                    ):
-                        break
-                    sync_offset = data.find(bytes([protocol.TS_SYNC]), sync_offset + 1)
-
-                if sync_offset < 0:
-                    log.debug("Kein MPEG-TS-Sync in UDP-Datagramm (%dB) – verworfen", len(data))
-                    pull_pending = False
-                    continue
-
-                ts_data = data[sync_offset:]
-                last_packet_at = time.monotonic()
-                next_timeout_warning = last_packet_at + 5.0
-
-                if block_num == 0:
-                    log.debug(
-                        "Erstes Stream-Datagramm: %dB, TS-Offset %d", len(data), sync_offset
-                    )
-
-                complete_len = len(ts_data) - len(ts_data) % protocol.TS_PKT_SIZE
-                if complete_len == 0:
-                    pull_pending = False
-                    continue
-
-                out.write(ts_data[:complete_len])
-                out.flush()
-                block_num += 1
-                ts_bytes += complete_len
-
-                udp.sendto(
-                    protocol.cmd_udp_ts_block(first=False),
-                    (dongle_ip, protocol.UDP_PORT),
+            except KeyboardInterrupt:
+                print()
+                log.info("Abgebrochen.")
+            finally:
+                log.info(
+                    "Stream beendet. %d Blöcke, %d Pulls, %.2f MiB",
+                    block_num, pull_count, ts_bytes / 1_048_576,
                 )
-                pull_count += 1
-                pull_pending = True
-                next_pull_deadline = time.monotonic() + UDP_PULL_INTVL
-                log.debug("0xF9/0x01 Pull #%d (nach Block %d)", pull_count, block_num)
-
-                if block_num % 50 == 0:
-                    elapsed = time.monotonic() - t_start
-                    kbps = (ts_bytes / 1024) / max(elapsed, 0.001)
-                    log.info(
-                        "Block %4d | %.1f MiB | %.0f KB/s",
-                        block_num, ts_bytes / 1_048_576, kbps,
-                    )
-
-        except KeyboardInterrupt:
-            print()
-            log.info("Abgebrochen.")
-        finally:
-            if output_path != "-":
-                out.close()
-            log.info(
-                "Stream beendet. %d Blöcke, %d Pulls, %.2f MiB",
-                block_num, pull_count, ts_bytes / 1_048_576,
-            )
 
     finally:
         stop.set()

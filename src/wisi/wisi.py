@@ -8,6 +8,8 @@ from collections.abc import Sequence
 
 from wisi.client import DEFAULT_IP
 
+log = logging.getLogger("wisi")
+
 
 def main(argv: Sequence[str] | None = None) -> int:
     parser = argparse.ArgumentParser(
@@ -97,7 +99,7 @@ def main(argv: Sequence[str] | None = None) -> int:
         parser.print_help()
         return 0
     except (ConnectionError, OSError, ValueError) as exc:
-        logging.error("%s", exc)
+        log.error("%s", exc)
         return 1
 
 

@@ -13,7 +13,6 @@ import logging
 import re
 import struct
 import threading
-from typing import List, Optional
 
 import protocol
 from models import Channel, ServiceEntry, channel_to_service
@@ -42,13 +41,13 @@ def _cmd_chlist_ack(size: int) -> bytes:
 # ---------------------------------------------------------------------------
 # XML-Parser
 # ---------------------------------------------------------------------------
-def parse_chlist_xml(xml_bytes: bytes) -> List[Channel]:
+def parse_chlist_xml(xml_bytes: bytes) -> list[Channel]:
     """
     Parst <ch_List> XML in eine Liste von Channel-Objekten.
     Jeder Kanal: type, pol, sym, s_id, ts_id, freq, prog_idx, lcn, s_name, fta
     """
     text = xml_bytes.decode("utf-8", errors="replace")
-    channels: List[Channel] = []
+    channels: list[Channel] = []
     for m in re.finditer(r"<ch\s+([^/]+)/>", text):
         attrs: dict[str, str] = dict(re.findall(r'(\w+)="([^"]*)"', m.group(1)))
         try:
@@ -77,7 +76,7 @@ def fetch_channel_list(
     lock: threading.Lock,
     session_token: bytes = b"",
     timeout: float = 15.0,
-) -> List[Channel]:
+) -> list[Channel]:
     """
     Holt die Kanalliste via TCP:
       0xF6/0x20  →  Länge der XML (8 Byte Antwort, [2:6] = uint32 BE)
@@ -136,13 +135,13 @@ def fetch_channel_list(
     try:
         with lock:
             protocol.send_recv(sock, _cmd_chlist_ack(xml_size), 8, "0xF6/0x22 ch_List_Ack")
-    except Exception as e:
+    except (OSError, ValueError) as e:
         log.debug("0xF6/0x22 Ack fehlgeschlagen (ignoriert): %s", e)
 
     return channels
 
 
-def channels_to_services(channels: List[Channel]) -> List[ServiceEntry]:
+def channels_to_services(channels: list[Channel]) -> list[ServiceEntry]:
     """Wandelt Channel-Liste in ServiceEntry-Liste (nach LCN sortiert)."""
     sorted_chs = sorted(channels, key=lambda c: c.lcn)
     return [channel_to_service(ch, idx) for idx, ch in enumerate(sorted_chs)]
@@ -151,7 +150,7 @@ def channels_to_services(channels: List[Channel]) -> List[ServiceEntry]:
 # ---------------------------------------------------------------------------
 # Legacy parser (0xF9/0x0A is a speedtest in the analyzed TV2Smart APK)
 # ---------------------------------------------------------------------------
-def parse_service_db(data: bytes) -> List[ServiceEntry]:
+def parse_service_db(data: bytes) -> list[ServiceEntry]:
     """Decode a historical, unverified service-DB blob; not for F9/0A speedtest data."""
     log.debug("parse_service_db: legacy parser received %dB", len(data))
     UDP_HEADER_SIZE_LEGACY = 28
@@ -163,7 +162,7 @@ def parse_service_db(data: bytes) -> List[ServiceEntry]:
 
     body = data[UDP_HEADER_SIZE_LEGACY:]
     entries_raw = body[SERVICE_DB_HEADER:]
-    services: List[ServiceEntry] = []
+    services: list[ServiceEntry] = []
     idx = 0
     offset = 0
     while offset + SERVICE_ENTRY_SIZE <= len(entries_raw):
@@ -201,7 +200,7 @@ def parse_service_db(data: bytes) -> List[ServiceEntry]:
     return services
 
 
-def fetch_service_db(*_args, **_kwargs) -> List[ServiceEntry]:
+def fetch_service_db(*_args, **_kwargs) -> list[ServiceEntry]:
     """Disabled legacy API; channel lists are fetched via TCP, not F9/0A."""
     log.warning(
         "fetch_service_db() is disabled: F9/0A is a speedtest in the analyzed APK. "

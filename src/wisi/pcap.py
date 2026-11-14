@@ -11,6 +11,8 @@ from pathlib import Path
 from protocol import UDP_PORT
 from tools.pcap_parser import analyze, packets
 
+log = logging.getLogger("wisi.pcap")
+
 
 def run(path: str, extract_service_db: str | None = None) -> int:
     capture_path = Path(path)
@@ -66,7 +68,7 @@ def main(argv: Sequence[str] | None = None) -> int:
             return run_service_db(args.decode_service_db)
         return run(args.pcap, args.extract_service_db)
     except (OSError, ValueError) as exc:
-        logging.error("%s", exc)
+        log.error("%s", exc)
         return 1
 
 
