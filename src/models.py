@@ -15,7 +15,7 @@ from dataclasses import dataclass
 @dataclass
 class Channel:
     """Ein Kanal aus der <ch_List> XML-Antwort (0xF6/0x21)."""
-    prog_idx:   int          # z. B. 0x40B20009 (FTA) oder 0x48xxxxxx (Pay-TV)
+    prog_idx:   int          # z. B. 0x40xxxxxx (TV) oder 0x48xxxxxx (Radio, type="RD")
     service_id: int          # DVB Service-ID (s_id)
     ts_id:      int
     freq:       int          # Frequenz in MHz
@@ -23,12 +23,16 @@ class Channel:
     sym:        int          # Symbolrate in kSymbols/s
     lcn:        int          # Logical Channel Number
     name:       str          # Sendername
-    fta:        bool         # Free-to-Air
-    ch_type:    str          # TV oder RADIO
+    fta:        bool         # Free-to-Air (fta="1" vs. fta="0")
+    ch_type:    str          # TV oder RD (Radio)
 
     @property
     def is_encrypted(self) -> bool:
-        return not self.fta or (self.prog_idx >> 24) == 0x48
+        return not self.fta
+
+    @property
+    def is_radio(self) -> bool:
+        return self.ch_type.upper() in ("RD", "RADIO") or (self.prog_idx >> 24) == 0x48
 
     def __str__(self) -> str:
         lock = "🔒" if self.is_encrypted else "FTA"
@@ -61,7 +65,11 @@ class ServiceEntry:
 
     @property
     def is_encrypted(self) -> bool:
-        return bool(self.flags & 0x0008) or (self.prog_idx >> 24) == 0x48
+        return bool(self.flags & 0x0008)
+
+    @property
+    def is_radio(self) -> bool:
+        return bool(self.flags & 0x0004) or (self.prog_idx >> 24) == 0x48
 
     @property
     def is_active(self) -> bool:
@@ -81,11 +89,16 @@ class ServiceEntry:
 # ---------------------------------------------------------------------------
 def channel_to_service(ch: Channel, idx: int) -> ServiceEntry:
     """Konvertiert Channel (aus XML) in ServiceEntry (Compat-Schicht)."""
+    flags = 0x0001
+    if ch.is_encrypted:
+        flags |= 0x0008
+    if ch.is_radio:
+        flags |= 0x0004
     return ServiceEntry(
         pat_index=idx,
         prog_idx=ch.prog_idx,
         service_id=ch.service_id,
-        flags=0x0001 if not ch.is_encrypted else 0x0009,
+        flags=flags,
         name=ch.name,
     )
 

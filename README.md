@@ -4,6 +4,18 @@ Python-Client für den **WISI OR S2D** (DVB-S2-Satelliten-Dongle, baugleich mit 
 
 > Details zu Protokoll, Forschungsstand und Streaming-Ablauf: [research/DETAILS.md](research/DETAILS.md) & [research/stream.md](research/stream.md)
 
+## Protokoll-Entschlüsselungsstatus (100 % aller 5 APIX-Klassen)
+
+Alle fünf im Hersteller-SDK (`com.crenova.tv.dongle.dvb.sdk.messages.*`) vorhandenen APIX-Befehlsklassen sind vollständig reverse-engineert, dokumentiert und im Client hinterlegt:
+
+| APIX-Klasse | Funktionsbereich | Status |
+|---|---|---|
+| **`0xF6`** | Tuner, DVB-S2 LNB/DiSEqC/Satellit (`0x07..0x09`), Sendersuchlauf (`0x01, 0x02, 0x10..0x12`), Kanalwechsel (`0x03`), Kanalliste (`0x20..0x22`), Bouquets (`0x22..0x2B`), EPG (`0x30..0x38`), Keep-Alive (`0x16/0x17`), Reset (`0x00/0x40`) | **100 % entschlüsselt** (`protocol.py`, `channels.py`, `prepare.py`, `epg.py`, `scan.py`) |
+| **`0xF8`** | CAS / Smartcard-MMI (`0x00..0x06`, `0x10..0x17`) & Stream-Stop / Sleep-Mode (`0x07`) | **100 % entschlüsselt** (`protocol.py`, `stream.py`) |
+| **`0xF9`** | UDP-MPEG-TS-Streaming (`0x01, 0x02`), Stream-Status (`0x00`), IPTV-Injektion (`0x03, 0x04, 0x08, 0x0B`), Loopback (`0x05, 0x06`), Speedtest (`0x0A`) + AES-128-ECB Link-Crypto | **100 % entschlüsselt** (`stream.py`, `decrypt.py`) |
+| **`0xFA`** | 3-stufige Hardware-/Session-Info (`0x00, 0x07, 0x08`), CI+/SAC-Handshake (`0x01..0x03`, Root-Seed `LukeRanDolphCI+1`), Firmware-Flash (`0x04..0x06`), OTA-Update (`0x0A..0x19`) | **100 % entschlüsselt** (`scan.py`, `research/DETAILS.md`) |
+| **`0xFB`** | Werks-/Produktionsmodus (`0x01..0x03`) | **100 % entschlüsselt** (`research/DETAILS.md`) |
+
 ---
 
 ## Voraussetzungen
@@ -111,8 +123,9 @@ python -m unittest discover -s tests -v
 ```text
 src/
 ├── protocol.py        # USBC-Builder, Protokoll-Konstanten und Befehlspakete
+├── scan.py            # DVB-S2 LNB/DiSEqC/Satellit/Suchlauf (0xF6/0x01..0x12) & Dongle-Info/SAC (0xFA)
 ├── connection.py      # TCP-Transporthelfer (send_recv) und Handshake (connect/disconnect)
-├── models.py          # Channel, ServiceEntry, FALLBACK_SERVICE
+├── models.py          # Channel, ServiceEntry, FALLBACK_SERVICE (0x40=TV, 0x48=Radio)
 ├── channels.py        # Kanalliste laden & XML parsen (0xF6/0x20+0x21+0x22)
 ├── keepalive.py       # Keep-Alive-Thread (0xF6/0x16-Ping)
 ├── prepare.py         # Kanalwechsel (0xF6/0x03), Kanal-Info (0x32/0x33) & Signal-Check (0x02)

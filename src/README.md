@@ -5,6 +5,7 @@
 ```text
 src/
 ├── protocol.py        # USBC-Builder, Konstanten und APIX-Befehlspakete
+├── scan.py            # DVB-S2 LNB/DiSEqC/Satellit/Suchlauf (0xF6) & Dongle-Info/SAC-Framing (0xFA)
 ├── connection.py      # TCP-Transport (recv_exactly, send_recv) & Session (connect/disconnect)
 ├── models.py          # Datenmodelle: Channel, ServiceEntry, FALLBACK_SERVICE
 ├── channels.py        # Kanalliste laden (0xF6/0x20+0x21+0x22), XML-Parser
@@ -22,9 +23,10 @@ Diese Module bilden die Protokoll- und Streaming-Schicht und werden von `wisi/` 
 
 | Modul | Verantwortlichkeit |
 |---|---|
-| `protocol.py` | 31-Byte USBC-Frame-Builder, Protokollkonstanten, TCP/UDP-Befehlspakete |
+| `protocol.py` | 31-Byte USBC-Frame-Builder, Protokollkonstanten, TCP/UDP-Befehlspakete (inkl. Re-Export von `scan.py`) |
+| `scan.py` | DVB-S2 LNB (`0xF6/0x07`), DiSEqC (`0x08`), Satellit (`0x09`), Transponder (`0x01`), Suchlauf (`0x10..0x12`), 17-Byte Status-Parser (`0x02`) sowie Dongle-Info & CI+/SAC-Framing (`0xFA/0x00..0x08`) |
 | `connection.py` | `recv_exactly()`, `send_recv()`, `connect()`, `disconnect()` (TCP Port 8802) |
-| `models.py` | `Channel`, `ServiceEntry`, `FALLBACK_SERVICE`, `channel_to_service()` |
+| `models.py` | `Channel`, `ServiceEntry`, `FALLBACK_SERVICE`, `channel_to_service()` (`0x40xxxxxx`=TV, `0x48xxxxxx`=Radio, `fta`=Verschlüsselung) |
 | `channels.py` | `fetch_channel_list()`, `channels_to_services()`, `<ch_List>`-XML-Parsing |
 | `keepalive.py` | `_keepalive_worker()` – hält die TCP-Verbindung mit `0xF6/0x16`-Pings offen |
 | `prepare.py` | `prepare_channel()` – schaltet per `0xF6/0x03` (`prog_idx`) um und prüft das Signal (`0xF6/0x02`) |

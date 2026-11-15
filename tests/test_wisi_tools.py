@@ -189,6 +189,110 @@ class ProtocolFrameTests(unittest.TestCase):
             self.assertEqual(out_path, ts_path)
             self.assertEqual(ts_path.read_bytes(), (b"\x47\x40\xC9\x10" + clear_payload) * 2)
 
+    def test_0x48_radio_channels_are_not_misclassified_as_encrypted(self) -> None:
+        from models import Channel, channel_to_service
+
+        fta_radio = Channel(
+            prog_idx=0x48C000A5,
+            service_id=28400,
+            ts_id=1093,
+            freq=12266,
+            pol="H",
+            sym=27500,
+            lcn=491,
+            name="hr1",
+            fta=True,
+            ch_type="RD",
+        )
+        self.assertTrue(fta_radio.is_radio)
+        self.assertFalse(fta_radio.is_encrypted)
+        svc_radio = channel_to_service(fta_radio, 490)
+        self.assertTrue(svc_radio.is_radio)
+        self.assertFalse(svc_radio.is_encrypted)
+
+        pay_tv = Channel(
+            prog_idx=0x40DE0110,
+            service_id=28800,
+            ts_id=1089,
+            freq=12188,
+            pol="H",
+            sym=27500,
+            lcn=4,
+            name="RTL HD",
+            fta=False,
+            ch_type="TV",
+        )
+        self.assertFalse(pay_tv.is_radio)
+        self.assertTrue(pay_tv.is_encrypted)
+        svc_pay = channel_to_service(pay_tv, 3)
+        self.assertTrue(svc_pay.is_encrypted)
+
+    def test_dvbs2_scan_and_sac_builders_match_apk_specifications(self) -> None:
+        lnb = wisi_protocol.cmd_dvbs2_lnb_set(9750, 10600, 11700, 0, 0)
+        self.assertEqual(lnb[15:21], b"\xF6APIX\x07")
+        self.assertEqual(struct.unpack_from(">HHHBHB", lnb, 21), (9750, 10600, 11700, 0, 0, 0))
+
+        diseqc = wisi_protocol.cmd_dvbs2_diseqc_set(1, 2, 192, 130, 0, 0)
+        self.assertEqual(diseqc[15:21], b"\xF6APIX\x08")
+        self.assertEqual(struct.unpack_from(">BBHHHH", diseqc, 21), (1, 2, 192, 130, 0, 0))
+
+        sat = wisi_protocol.cmd_dvbs2_satellite_set(192, west=False, pol="AUTO", khz_22="AUTO")
+        self.assertEqual(sat[15:21], b"\xF6APIX\x09")
+        self.assertEqual(sat[21:24], b"\x00\xC0\x04")
+
+        tune = wisi_protocol.cmd_dvbs2_tuner_set(
+            freq_khz=11362, sr_khz=22000, pol="H", sat_lon_tenths=192, west=False, khz_22="AUTO"
+        )
+        self.assertEqual(struct.unpack_from(">I", tune, 8)[0], 32)
+        self.assertEqual(tune[15:21], b"\xF6APIX\x01")
+        self.assertEqual(tune[21], 0x14)  # 0x04 (DVBS2) | 0x10 (H/18V)
+        self.assertEqual(struct.unpack_from(">HH", tune, 22), (192, 22000))
+        self.assertEqual(tune[26:29], struct.pack(">I", 11362)[1:])
+
+        scan = wisi_protocol.cmd_scan_start_stop(
+            scan_type=wisi_protocol.SCAN_MANUAL,
+            network_scan=True,
+            order_by=1,
+            search_range=1,
+            sort_mode=0,
+        )
+        self.assertEqual(scan[15:21], b"\xF6APIX\x10")
+        self.assertEqual(scan[21], 0x00)
+        self.assertEqual(scan[22], 1 | (1 << 1) | (1 << 3))
+
+        raw_status = bytes([
+            0xF6, 0x02,
+            0x01,  # lock=1, tune_fail=0
+            84,    # agc
+            92,    # snr
+            0x01,  # scan_in_progress
+            65,    # progress 65%
+            0x00, 0x2C, 0x62,  # freq = 11362
+            0x55, 0xF0,        # sr = 22000
+            0x04,              # mode = DVBS2
+            0x01, 0xEC,        # tv_count = 492
+            0x00, 0x9D,        # radio_count = 157
+        ])
+        st = wisi_protocol.parse_tuner_scan_status(raw_status)
+        self.assertTrue(st.lock)
+        self.assertFalse(st.tune_fail)
+        self.assertEqual((st.agc, st.snr, st.progress), (84, 92, 65))
+        self.assertTrue(st.scan_in_progress)
+        self.assertEqual((st.freq, st.symbol_rate, st.tv_count, st.radio_count), (11362, 22000, 492, 157))
+
+        info1 = wisi_protocol.cmd_dongle_info_phase1()
+        info2 = wisi_protocol.cmd_dongle_info_phase2()
+        info3 = wisi_protocol.cmd_dongle_info_phase3()
+        self.assertEqual((info1[15:21], struct.unpack_from(">I", info1, 8)[0]), (b"\xFAAPIX\x00", 64))
+        self.assertEqual((info2[15:21], struct.unpack_from(">I", info2, 8)[0]), (b"\xFAAPIX\x07", 51))
+        self.assertEqual((info3[15:21], struct.unpack_from(">I", info3, 8)[0]), (b"\xFAAPIX\x08", 480))
+
+        sac_w = wisi_protocol.cmd_sac_write(b"\xAA\xBB\xCC\xDD", sac_embedded=True)
+        self.assertEqual(len(sac_w), 35)
+        self.assertEqual(sac_w[15:22], b"\xFAAPIX\x03\x01")
+        self.assertEqual(sac_w[31:], b"\xAA\xBB\xCC\xDD")
+        self.assertEqual(wisi_protocol.SAC_ROOT_SEED, b"LukeRanDolphCI+1")
+
 
 class PcapTests(unittest.TestCase):
     def test_counts_only_f9_0a_replies_from_dongle(self) -> None:

@@ -120,9 +120,15 @@ Sender werden beim Umschalten über ihren 32-Bit **`prog_idx`** aus der XML-Kana
   * Automatisch am Ende von `--stream` durch Angabe von `--decrypt`, oder
   * Nachträglich für jede gespeicherte `.ts`-Datei per `python src/wisi/decrypt.py stream.ts` bzw. `python src/wisi/wisi.py --decrypt-ts stream.ts`.
 
-### 5.2 Pay-TV / Verschlüsselte Sender (`0x48xxxxxx`, CAS)
-* In der Kanalliste mit `fta="0"` und `prog_idx`-Präfix `0x48xxxxxx` gekennzeichnet.
-* Nutzt in der Android-App zusätzlich `libsecure_module.so` (Root-Seed `THVrZVJhbkRvbHBoQ0krMQ==` → **`LukeRanDolphCI+1`**) für einen Diffie-Hellman-/SAC-Schlüsselaustausch zur Ableitung dynamischer `CCK`/`CIV`-Schlüssel.
+### 5.2 `0x48xxxxxx` (Radio vs. Pay-TV) & CI+/SAC-Handshake (`0xFA/0x01..0x03`, `scan.py`)
+* **Bedeutung von `0x48xxxxxx`:** In `<ch_List>` haben TV-Sender (`type="TV"`) das Präfix `0x40xxxxxx` und Radiosender (`type="RD"`) das Präfix `0x48xxxxxx` (Bit 27 = `0x08000000`). Verschlüsselung (Pay-TV) wird ausschließlich über **`fta="0"`** angezeigt!
+* **CI+ / SAC-Handshake (`com.crenova.tv.dongle.dvb.sdk.security.*` & `libsecure_module.so`):**
+  * Beim Abruf von `0xFA/0x00` (`cmd_dongle_info_phase1`) übergibt das SDK die 16-Byte-`systemId` an `SecureNativeModule.setSystemId(bArr)`.
+  * Auf FTA-Firmware (`clearFTAStream == 1` in `0xFA/0x08` Byte 21) gibt `DongleSessionInfo.CreNovaDongleInitListener()` `false` zurück; der SAC-Handshake wird übersprungen und der statische Schlüssel `DEFAULT_TS_KEY` genutzt.
+  * Bei aktivem CAS/CI+ durchläuft das SDK über `0xFA/0x03` (Write) → `0xFA/0x01` (Poll 6-Byte Len) → `0xFA/0x02` (Read Packet) drei Stufen (`SecEngInit` mit Root-Seed `LukeRanDolphCI+1`):
+    1. **Mutual Auth & Diffie-Hellman (`onDongleGetIntegerData.java`):** Nonce-Austausch (`msgCreateAuthReqNoncePacket`), DH-Zertifikat (`msgCreateAuthReqDHSigCertPacket`) und AKH-Bestätigung (`msgCreateAuthReqCnfAkhPacket`).
+    2. **Content-Control Key Calculation & Sync (`C2004e1.java`):** `msgCreateCCDataReqPacket` → `hostStoreCicamKp` → `hostDeriveCIVnCCK`, gefolgt von `msgCreateCCSyncReqPacket` (`sac_embedded = 1`).
+    3. **SAC Keying für den TS-Stream (`CreNovaDongleInitListener.java`):** `msgCreateCCSACKeyingReqPacket` → `hostDeriveCIVnCCK` → `msgCreateCCSACSyncCnfPacket` (`sac_embedded = 1`) → `hostGetCCK(16)` liefert den dynamischen 16-Byte-AES-Schlüssel.
 
 ---
 

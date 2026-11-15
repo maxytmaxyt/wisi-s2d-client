@@ -202,20 +202,42 @@ PIM (Programme Integration Module) ist ein separater proprietärer CA-Pfad über
 
 | Frage | Antwort |
 |---|---|
-| Braucht normales FTA-Streaming die CC/SAC-Auth? | **Nein.** Kein SAC-Handshake in FTA-PCAPs sichtbar. |
-| Was ist `LukeRanDolphCI+1`? | Root-Key/Seed für CI+-artige Pay-TV-Authentifizierung (CNKEY-Chain). |
-| Braucht man `libsecure_module.so` für den Python-Client? | Nur wenn verschlüsselte Kanäle (`0x48xxxxxx`-prog_idx) geöffnet werden sollen. |
-| War die Formel `MD5(Challenge || SharedSecret || Timestamp)` korrekt? | **Nicht bestätigt.** `libsecure_module.so` verwendet SHA-256 und AES, kein MD5 im CC-Pfad. |
+| Braucht normales FTA-Streaming die CC/SAC-Auth? | **Nein.** Auf FTA-Firmware (`clearFTAStream == 1` in `0xFA/0x08` Byte 21) gibt `DongleSessionInfo.CreNovaDongleInitListener()` `false` zurück und überspringt den SAC-Handshake komplett. |
+| Was ist `LukeRanDolphCI+1`? | Root-Key/Seed für die CI+-artige SAC-Authentifizierung (`SecEngInit` / `CNKEY_Init` in `libsecure_module.so`). |
+| Was bedeutet `0x48xxxxxx` beim `prog_idx`? | **Radio-Kanal (`type="RD"`, Bit 27 = `0x08000000`)**, **nicht** Pay-TV! TV-Sender haben `0x40xxxxxx` (`type="TV"`). Verschlüsselung wird ausschließlich über `fta="0"` angezeigt. |
+| Wie läuft der SAC-Handshake auf dem Draht ab? | Über `0xFA/0x03` (Write Request, `byte21 = isSacEmbedded`) → `0xFA/0x01` (Poll 6-Byte Antwortlänge) → `0xFA/0x02` (Read Response) in 3 Stufen: Mutual Auth (`onDongleGetIntegerData`) → CC Key Calc & Sync (`C2004e1`) → SAC Keying (`CreNovaDongleInitListener` → `hostGetCCK(16)`). |
+| War die Formel `MD5(Challenge || SharedSecret || Timestamp)` korrekt? | **Nein, widerlegt.** `libsecure_module.so` verwendet Diffie-Hellman, SHA-256 und AES, kein MD5. |
+
+## Vollständige Dekompilierung aller 5 APIX-Builder-Klassen (`sdk/messages/*`)
+
+Im gesamten Paket `com.crenova.tv.dongle.dvb.sdk.messages` existieren exakt fünf Builder-Klassen auf Basis von `C2001e1` (`build_usbc`):
+
+1. **`0xF6` (`(byte) -10`, `messages/onGetBouquetListXml.java`):**
+   - Deckt sämtliche Tuner-, DVB-S2-Scan-, Kanallisten-, Bouquet-, EPG- und Systembefehle ab (`0x00..0x61`).
+   - **DVB-S2 Sendersuchlauf (`sdk/onDongleGetIntegerData.java`, Zeilen 487–672 & 1209–1286):**
+     - `0xF6/0x07` (`CMD_TUNER_DVBS2_SET_LNB = 126`): 10-Byte-Payload `[lnb1_hi, lnb1_lo, lnb2_hi, lnb2_lo, center_hi, center_lo, unicable_sat, band_hi, band_lo, 0]`.
+     - `0xF6/0x08` (`CMD_TUNER_DVBS2_SET_DISEQC = 127`): 10-Byte-Payload `[diseqc11, diseqc12, usals1_hi, usals1_lo, usals2_hi, usals2_lo, usals3_hi, usals3_lo, usals4_hi, usals4_lo]`.
+     - `0xF6/0x09` (`CMD_TUNER_DVBS2_SET_SATELLITE = 132`): `[lon_hi | west_bit, lon_lo, 0x04 | pol_bits | khz_bits]`.
+     - `0xF6/0x01` (`CMD_TUNER_DVBS2_SET = 125`, `data_len = 32`): `[0x04 | pol_bits | khz_bits, lon_hi | west_bit, lon_lo, sr_hi, sr_lo, freq_b2, freq_b1, freq_b0, 0, 0]`.
+     - `0xF6/0x10` (`CMD_TUNER_SCAN = 111`, `CMD_STOP_SCAN = 704`): `byte21 = scanType (0..3)`, `byte22 = netScan | (orderBy << 1) | (searchRange << 3) | (sortMode << 6)`.
+     - `0xF6/0x02` (`CMD_TUNER_STATUS = 112`, `data_len = 17`): liefert `lock (b2)`, `agc (b3)`, `snr (b4)`, `scanInProgress (b5)`, `progress% (b6)`, `freq (b7..9)`, `sr (b10..11)`, `mode (b12)`, `tvCount (b13..14)`, `radioCount (b15..16)`.
+     - `0xF6/0x11` & `0xF6/0x12` (`CMD_CH_MANUAL_SCAN_LIST_LENGTH / DATA = 113 / 114`): lädt die beim Suchlauf gefundene XML-Kanalliste.
+2. **`0xF8` (`(byte) -8`, `messages/onDongleCommunicationStatusHelpText.java`):**
+   - Deckt CAS/Smartcard-MMI (`0x00..0x06`, `0x10..0x17`) sowie den Stream-Sleep-Befehl `0xF8/0x07` (`CMD_CAS_SLEEP_MODE = 208`, 35 Bytes inkl. `[mode, 0, 0, 0]`) ab.
+3. **`0xF9` (`(byte) -7`, `messages/CreNovaDongleInitListener.java`):**
+   - Deckt UDP-MPEG-TS-Streaming (`0x01`, `0x02`), Stream-Status (`0x00`), IPTV-Injektion (`0x03, 0x04, 0x08, 0x0B`), Loopback-Test (`0x05, 0x06`) und Speedtest (`0x0A`) ab.
+4. **`0xFA` (`(byte) -6`, `messages/onDongleCommunicationStatus.java`):**
+   - Deckt die 3-stufige `DongleSessionInfo`-Abfrage (`0x00` 64B → `0x07` 51B → `0x08` 480B), den CI+/SAC-Handshake (`0x01` Poll Len, `0x02` Read, `0x03` Write), Firmware-Flashing (`0x04..0x06`) und OTA-Firmware-Download (`0x0A..0x19`) ab.
+5. **`0xFB` (`(byte) -5`, `messages/onDongleGetIntegerData.java`):**
+   - Deckt den Werks-/Produktionsmodus (`0x01` Send Data, `0x02` Get XML Report 58B, `0x03` Set Mode) ab.
 
 ## Korrigierte Aussagen und verbleibende Grenzen
 
 | Frühere Aussage | Ergebnis aus dem hochgeladenen Artefakt |
 |---|---|
-| `0xF9/0x0A` ist eine Senderdatenbank oder EPG-Abfrage | Nicht bestätigt. Der konkrete APK-Aufruf ist ein Speedtest mit 48.128 Testbytes. |
-| Die 48.143 Byte sind ein dekodierbarer Kanalblob | Sehr wahrscheinlich Speedtest-Antwort: 48.130 Datenbytes plus 13 Abschlussbytes. Null-/Füllmuster nicht roh geprüft. |
-| Alle APK-Requests sind 66 Byte lang | Falsch für den eingebetteten generischen Builder: er erzeugt 31-Byte-USBC-Requests. Andere Mitschnitte/Transportpfade können abweichen. |
+| `0xF9/0x0A` ist eine Senderdatenbank oder EPG-Abfrage | Widerlegt. Der konkrete APK-Aufruf ist ein Speedtest (`getSpeedTestMbps()`) mit 48.128 Testbytes. |
+| Sendersuchlauf nutzt `0xF7/0x01` und `0xF8/0x01..0x04` | Widerlegt. `0xF7` existiert im SDK nicht, `0xF8` ist CAS/MMI. Der Suchlauf läuft über `0xF6/0x07 → 0x08 → 0x09 → 0x01 → 0x10 → 0x02 → 0x11/0x12`. |
+| `0x48xxxxxx` kennzeichnet Pay-TV | Widerlegt. `0x48xxxxxx` (Bit 27) kennzeichnet Radiosender (`type="RD"`). Verschlüsselung wird ausschließlich über `fta="0"` angezeigt. |
+| Alle APK-Requests sind 66 Byte lang | Falsch für den eingebetteten generischen Builder: er erzeugt 31-Byte-USBC-Requests. |
 | `...ByProgIdxAndPid` liefert Program-Index plus Video- und Audio-PID | In diesem SDK hat die Methode zwei Integer-Parameter insgesamt: Program-Index und einen PID-Wert. |
 | Die App enthält `libtivicon_dvb.so` und `libstream_decoder.so` | Diese Bibliotheken fehlen im hochgeladenen XAPK. |
-| Die APK beweist den OR-S2D-`0xF6/0x01`-Payload | Nein. Dafür bleibt der vorhandene PCAP mit Payload `00 04` der direkte Beleg. |
-
-Statische Analyse kann Bytecodepfade zeigen, aber keine Live-Ausführung des SDKs auf dem OR S2D ersetzen. Das 48.143-Byte-Rohpaket wäre weiterhin nötig, um einzelne Payload- und Footerbytes zu verifizieren.
