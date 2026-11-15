@@ -5,9 +5,6 @@ import argparse
 import logging
 import sys
 from collections.abc import Sequence
-
-log = logging.getLogger("wisi.channels")
-
 from pathlib import Path
 
 # Allow running this file directly (python src/wisi/<file>.py):
@@ -20,6 +17,8 @@ if _src not in sys.path:
     sys.path.insert(0, _src)
 
 from wisi.common import DEFAULT_IP, load_services
+
+log = logging.getLogger("wisi.channels")
 
 
 def run(ip: str) -> int:

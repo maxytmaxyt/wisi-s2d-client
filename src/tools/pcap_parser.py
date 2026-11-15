@@ -40,9 +40,12 @@ def _ipv4_payload(frame: bytes, linktype: int) -> bytes | None:
                 return None
             ethertype = struct.unpack_from(">H", frame, offset + 2)[0]
             offset += 4
-        if ethertype != 0x0800:
+        if ethertype == 0x0800:
+            packet = frame[offset:]
+        elif frame[0] >> 4 == 4:
+            packet = frame
+        else:
             return None
-        packet = frame[offset:]
     else:
         raise ValueError(
             f"Nicht unterstützter PCAP-Linktyp {linktype} "

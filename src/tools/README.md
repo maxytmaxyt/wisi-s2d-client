@@ -6,8 +6,8 @@ Interne Hilfswerkzeuge, die von `src/wisi/` importiert werden.
 
 | Datei | Beschreibung |
 |---|---|
-| `menu.py` | Interaktives Konsolenmenü – Senderauswahl, Navigation, Anzeige |
-| `pcap_parser.py` | PCAP-Parsing: Ethernet/IP/UDP-Schichten, APIX-Befehlserkennung, Statistiken |
+| `menu.py` | Interaktives Konsolenmenü – Kanalliste, Kanalvorbereitung, Stream-Aufnahme und `.ts`-Entschlüsselung |
+| `pcap_parser.py` | PCAP-Parsing (Ethernet & Raw IPv4, inkl. PCAPdroid-Captures), APIX-Befehlserkennung und Statistiken |
 
 ## Imports
 

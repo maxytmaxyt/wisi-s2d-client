@@ -52,4 +52,4 @@ int i5 = i4 + 13;                   // zusätzliche 13 Bytes
 byte[] bArr3 = new byte[i5];
 this.isType0MMIActive.receive(datagramPacket2);
 ```
-Für den `0xBC00`-Pfad ergibt das eine reservierte Empfangsgröße von 48.205 Byte. Diese Allokation erklärt nicht allein den tatsächlichen Antwortinhalt oder die auf dem Kabel beobachtete Paketgröße; die PCAP-Auswertung muss weiterhin Request- und Antwortpakete getrennt behandeln.
+Für den `0xBC00`-Pfad ergibt das eine reservierte Empfangsgröße von 48.205 Byte (`48.128 B` TS-Daten + `64 B` `EXTRACSW` mit Block-Sequenznummer in Byte 12 + `13 B` `USBS`). Bei IPv4-Defragmentierung von `PCAPdroid_12_Okt._16_28_17.pcap` sowie im Live-Betrieb gegen den Dongle sind exakt diese 48.205-Byte-UDP-Antworten bestätigt. Zudem invertiert der Worker in `onDongleGetIntegerData.tuneChannelByProgIdx()` das Flag `getCustomerVariation = !ok`: Nach jedem erfolgreichen Block wird `byte21 = 0x00` gesendet, nach einem Timeout `byte21 = 0x01`.

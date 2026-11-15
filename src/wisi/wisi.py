@@ -35,6 +35,11 @@ def main(argv: Sequence[str] | None = None) -> int:
     actions.add_argument("--channels", action="store_true", help="Senderliste anzeigen")
     actions.add_argument("--epg", action="store_true", help="EPG aller Sender als JSON laden")
     actions.add_argument("--stream", action="store_true", help="MPEG-TS-Stream starten")
+    actions.add_argument(
+        "--decrypt-ts",
+        metavar="DATEI",
+        help="Gespeicherte .ts-Datei entschlüsseln (z. B. stream.ts)",
+    )
     actions.add_argument("--discover", action="store_true", help="Experimentelle UDP-Gerätesuche")
     actions.add_argument(
         "--probe-opcode",
@@ -50,10 +55,18 @@ def main(argv: Sequence[str] | None = None) -> int:
     )
     parser.add_argument("--output", default="stream.ts", help="Stream-Datei oder - für stdout")
     parser.add_argument("--duration", type=float, default=0.0, help="Streamdauer in Sekunden")
+    parser.add_argument(
+        "--decrypt",
+        action="store_true",
+        help="Bei --stream: gespeicherte .ts-Datei am Ende automatisch entschlüsseln",
+    )
     parser.add_argument("--pat-idx", type=int, default=4,
                         help="Interner Kanal-Index des Dongles (0–65535) für --stream")
     parser.add_argument("--epg-output", default="epg.json", help="EPG-Datei oder - für stdout")
-    parser.add_argument("--epg-limit", type=int, help="EPG nur für die ersten N Sender laden")
+    parser.add_argument(
+        "--epg-limit", "--limit", dest="epg_limit", type=int,
+        help="EPG nur für die ersten N Sender laden",
+    )
     parser.add_argument(
         "--pcap-extract",
         help="Größte 0xF9/0x0A-Speedtest-Geräteantwort aus PCAP extrahieren",
@@ -76,12 +89,24 @@ def main(argv: Sequence[str] | None = None) -> int:
         if args.epg:
             from wisi.epg import run
 
-            return run(args.ip, args.epg_output, args.epg_limit)
+            epg_out = (
+                args.output
+                if args.epg_output == "epg.json" and args.output != "stream.ts"
+                else args.epg_output
+            )
+            return run(args.ip, epg_out, args.epg_limit)
+        if args.decrypt_ts:
+            from wisi.decrypt import run as decrypt_run
+
+            out_target = args.output if args.output != "stream.ts" else None
+            return decrypt_run(args.decrypt_ts, out_target)
         if args.stream:
             from wisi.client import main as client_main
 
             forwarded = ["--ip", args.ip, "--stream", "--pat-idx", str(args.pat_idx),
                          "--output", args.output, "--duration", str(args.duration)]
+            if args.decrypt:
+                forwarded.append("--decrypt")
             if args.debug:
                 forwarded.append("--debug")
             original_argv = sys.argv

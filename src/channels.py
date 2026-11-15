@@ -33,9 +33,9 @@ def _cmd_chlist_data(size: int) -> bytes:
     return protocol.build_usbc(size, 0x80, 0xF6, 0x21)
 
 
-def _cmd_chlist_ack(size: int) -> bytes:
-    """0xF6/0x22 – Empfang der ch_List quittieren."""
-    return protocol.build_usbc(size, 0x80, 0xF6, 0x22)
+def _cmd_chlist_ack(_size: int = 8) -> bytes:
+    """0xF6/0x22 – Empfang der ch_List quittieren (immer 8 Byte Antwort)."""
+    return protocol.build_usbc(8, 0x80, 0xF6, 0x22)
 
 
 # ---------------------------------------------------------------------------

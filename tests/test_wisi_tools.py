@@ -4,14 +4,19 @@ import json
 import struct
 import sys
 import tempfile
+import threading
 import unittest
 from pathlib import Path
 from unittest.mock import MagicMock, patch
 
 sys.path.insert(0, str(Path(__file__).resolve().parents[1] / "src"))
 
-import wisi.common as wisi_common
+import channels as wisi_channels_mod
+import protocol as wisi_protocol
+import stream as wisi_stream
 import wisi.client as wisi_client
+import wisi.common as wisi_common
+import wisi.epg as wisi_epg
 from wisi.discovery import DISCOVERY_REQUEST, MAGIC, VERSION, build_request, parse_response
 from wisi.pcap import analyze, run_service_db
 
@@ -94,6 +99,95 @@ class ProtocolFrameTests(unittest.TestCase):
         self.assertEqual(result, payload)
         self.assertEqual(response_socket.remaining, b"")
         self.assertEqual(response_socket.sent, b"request")
+
+    def test_prog_idx_commands_match_apk_and_pcap_offsets(self) -> None:
+        prog_idx = 0x40DE0110
+        prep = wisi_protocol.cmd_prepare(prog_idx)
+        self.assertEqual(len(prep), 31)
+        self.assertEqual(prep[15:21], b"\xF6APIX\x03")
+        self.assertEqual(prep[21:25], b"\x00\x00\x00\x02")
+        self.assertEqual(struct.unpack_from(">I", prep, 25)[0], prog_idx)
+
+        epg_sz = wisi_protocol.cmd_epg_size(prog_idx)
+        self.assertEqual(epg_sz[15:21], b"\xF6APIX\x30")
+        self.assertEqual(epg_sz[21:25], b"\x00\x00\x00\x00")
+        self.assertEqual(struct.unpack_from(">I", epg_sz, 25)[0], prog_idx)
+
+        epg_dat = wisi_protocol.cmd_epg_data(prog_idx, 0, 1234)
+        self.assertEqual(struct.unpack_from(">I", epg_dat, 8)[0], 1234)
+        self.assertEqual(epg_dat[15:21], b"\xF6APIX\x31")
+        self.assertEqual(struct.unpack_from(">I", epg_dat, 25)[0], prog_idx)
+
+        evt_sz = wisi_protocol.cmd_evtdesc_size(prog_idx, 0x05CA)
+        self.assertEqual(evt_sz[15:21], b"\xF6APIX\x35")
+        self.assertEqual(evt_sz[21:23], b"\x00\x00")
+        self.assertEqual(struct.unpack_from(">HI", evt_sz, 23), (0x05CA, prog_idx))
+
+        rel = wisi_protocol.cmd_stream_release()
+        self.assertEqual(len(rel), 35)
+        self.assertEqual(struct.unpack_from(">I", rel, 8)[0], 4)
+        self.assertEqual(rel[15:21], b"\xF8APIX\x07")
+        self.assertEqual(rel[31:35], b"\x01\x00\x00\x00")
+
+        ack = wisi_channels_mod._cmd_chlist_ack(250550)
+        self.assertEqual(struct.unpack_from(">I", ack, 8)[0], 8)
+        self.assertEqual(ack[15:21], b"\xF6APIX\x22")
+
+        ts_ok = wisi_protocol.cmd_udp_ts_block(first=True)
+        ts_retry = wisi_protocol.cmd_udp_ts_block(first=False)
+        self.assertEqual(ts_ok[21], 0x00)
+        self.assertEqual(ts_retry[21], 0x01)
+
+    def test_epg_strips_2_byte_apix_response_prefix(self) -> None:
+        svc = wisi_client.Channel(
+            prog_idx=0x40DE0110,
+            service_id=28800,
+            ts_id=1,
+            freq=12188,
+            pol="H",
+            sym=27500,
+            lcn=1,
+            name="RTL Austria",
+            fta=True,
+            ch_type="TV",
+        )
+        xml_body = (
+            b"\xF6\x31<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n"
+            b"<epg_Data><ch prog_idx=\"40de0110\" name=\"RTL Austria\">"
+            b"<evt id=\"1482\" date=\"12/10/2026\" time=\"20:15\" dur=\"01:00\" des=\"Testsendung\"/>"
+            b"</ch></epg_Data>\n\x00\x00"
+        )
+        responses = [
+            b"\xF6\x30" + struct.pack(">I", len(xml_body)),
+            xml_body,
+        ]
+        with patch.object(wisi_protocol, "send_recv", side_effect=responses):
+            events = wisi_epg._fetch_epg_for_service(object(), threading.Lock(), svc)
+        self.assertEqual(len(events), 1)
+        self.assertEqual(events[0]["title"], "Testsendung")
+        self.assertEqual(events[0]["event_id"], 1482)
+
+    def test_descramble_ts_block_decrypts_aes_ecb_payload_and_clears_tsc_bit(self) -> None:
+        from cryptography.hazmat.primitives.ciphers import Cipher, algorithms, modes
+
+        clear_payload = b"\x00\x00\x01\xE0" + bytes(range(180))
+        encryptor = Cipher(algorithms.AES(wisi_stream.DEFAULT_TS_KEY), modes.ECB()).encryptor()
+        enc_len = (184 // 16) * 16
+        encrypted_payload = (
+            encryptor.update(clear_payload[:enc_len])
+            + clear_payload[enc_len:]
+        )
+        scrambled_pkt = b"\x47\x40\xC9\x90" + encrypted_payload
+        descrambled = wisi_stream.descramble_ts_block(scrambled_pkt)
+        self.assertEqual(descrambled[:4], b"\x47\x40\xC9\x10")
+        self.assertEqual(descrambled[4:], clear_payload)
+
+        with tempfile.TemporaryDirectory() as folder:
+            ts_path = Path(folder) / "sample.ts"
+            ts_path.write_bytes(scrambled_pkt * 2)
+            out_path = wisi_stream.decrypt_ts_file(ts_path)
+            self.assertEqual(out_path, ts_path)
+            self.assertEqual(ts_path.read_bytes(), (b"\x47\x40\xC9\x10" + clear_payload) * 2)
 
 
 class PcapTests(unittest.TestCase):

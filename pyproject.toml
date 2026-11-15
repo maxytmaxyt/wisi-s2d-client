@@ -3,7 +3,9 @@ name = "wisi-s2d-client"
 version = "0.2.0"
 description = "Reverse-engineered Python client for the WISI OR S2D DVB-over-IP dongle"
 requires-python = ">=3.10"
-dependencies = []
+dependencies = [
+    "cryptography>=41.0.0",
+]
 
 [build-system]
 requires = ["setuptools>=61"]
@@ -20,9 +22,12 @@ packages = [
 ]
 py-modules = [
     "protocol",
+    "connection",
     "models",
     "channels",
     "keepalive",
+    "prepare",
+    "decrypt",
     "stream",
 ]
 

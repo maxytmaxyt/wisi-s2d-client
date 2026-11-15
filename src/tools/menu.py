@@ -15,7 +15,7 @@ import protocol
 from channels import channels_to_services, fetch_channel_list
 from keepalive import _keepalive_worker
 from models import FALLBACK_SERVICE, ServiceEntry
-from stream import prepare_channel, stream
+from stream import decrypt_ts_file, prepare_channel, stream
 
 log = logging.getLogger("wisi.menu")
 
@@ -28,6 +28,7 @@ _MENU = """
 ║  [3]  Stream starten                              ║
 ║  [4]  Kanalindex testen (0–5)                     ║
 ║  [5]  Verbindung neu aufbauen                     ║
+║  [6]  Gespeicherte .ts-Datei entschlüsseln        ║
 ║  [q]  Beenden                                     ║
 ╚════════════════════════════════════════════════════╝"""
 
@@ -119,7 +120,17 @@ def main_menu(sock: socket.socket, ip: str) -> None:
                 dur = float(dur_str) if dur_str else 0.0
             except ValueError:
                 dur = 0.0
-            stream(sock, lock, selected, outfile, dur, keepalive_active=True)
+            dec_ans = input("Am Ende entschlüsseln? [J/n]: ").strip().lower()
+            decrypt_after = dec_ans not in ("n", "no", "nein", "0")
+            stream(
+                sock,
+                lock,
+                selected,
+                outfile,
+                dur,
+                keepalive_active=True,
+                decrypt_after=decrypt_after,
+            )
 
         elif choice == "4":
             log.info("Kanalindex-Test (schickt 0x01 mit Index 0–5) …")
@@ -148,8 +159,15 @@ def main_menu(sock: socket.socket, ip: str) -> None:
             keepalive.start()
             print(_MENU)
 
+        elif choice == "6":
+            ts_file = input("Pfad zur .ts-Datei [stream.ts]: ").strip() or "stream.ts"
+            try:
+                decrypt_ts_file(ts_file)
+            except (FileNotFoundError, OSError) as exc:
+                log.error("%s", exc)
+
         else:
-            print("1–5 oder q.")
+            print("1–6 oder q.")
 
     keepalive_stop.set()
     keepalive.join(timeout=4.0)

@@ -1,13 +1,14 @@
 """
 protocol.py – WISI OR S2D / TiViCon APIX-Protokoll: Shared Layer
-Alle USBC-Builder, Konstanten und Basis-TCP/UDP-Helfer.
+Alle USBC-Builder und Konstanten (TCP-Transporthelfer sind in connection.py).
 Kein eigener Einstiegspunkt – wird von allen anderen Modulen importiert.
 """
 from __future__ import annotations
 
 import logging
-import socket
 import struct
+
+from connection import connect, disconnect, recv_exactly, send_recv
 
 log = logging.getLogger("wisi.proto")
 
@@ -52,55 +53,68 @@ def build_usbc(data_len: int, flags: int,
             + cdb)
 
 
-# ── TCP-Befehle (prefix = 0xF6) ─────────────────────────────────────────────
+# ── TCP-Befehle (prefix = 0xF6 / 0xF8) ──────────────────────────────────────
 
 def cmd_16()         -> bytes: return build_usbc(12, 0x80, 0xF6, 0x16)
 def cmd_17_init()    -> bytes: return build_usbc(4,  0x80, 0xF6, 0x17)
 def cmd_17_confirm() -> bytes: return build_usbc(4,  0x80, 0xF6, 0x17, b"\x01\x00\x00\x00")
 def cmd_signal()     -> bytes: return build_usbc(17, 0x80, 0xF6, 0x02)
-def cmd_stream_release() -> bytes: return build_usbc(4, 0x00, 0xF8, 0x07)
+
+
+def cmd_stream_release() -> bytes:
+    """0xF8/0x07 – Stream/Aufnahme stoppen (31B USBC + 4B Host-to-Device Payload)."""
+    return build_usbc(4, 0x00, 0xF8, 0x07) + b"\x01\x00\x00\x00"
+
 
 def cmd_epg_size(prog_idx: int) -> bytes:
-    return build_usbc(6, 0x80, 0xF6, 0x30, struct.pack(">I", prog_idx))
+    return build_usbc(6, 0x80, 0xF6, 0x30, b"\x00\x00\x00\x00" + struct.pack(">I", prog_idx))
+
 
 def cmd_epg_data(prog_idx: int, offset: int, length: int) -> bytes:
-    return build_usbc(length, 0x80, 0xF6, 0x31,
-                      struct.pack(">I", prog_idx) + struct.pack(">H", offset))
+    return build_usbc(
+        length, 0x80, 0xF6, 0x31,
+        b"\x00\x00\x00\x00" + struct.pack(">I", prog_idx) + struct.pack(">H", offset),
+    )
 
-def cmd_evtdesc_size(prog_idx: int) -> bytes:
-    return build_usbc(6, 0x80, 0xF6, 0x35, struct.pack(">I", prog_idx))
 
-def cmd_evtdesc_data(prog_idx: int, length: int) -> bytes:
-    return build_usbc(length, 0x80, 0xF6, 0x36, struct.pack(">I", prog_idx))
+def cmd_evtdesc_size(prog_idx: int, event_id: int = 0) -> bytes:
+    return build_usbc(
+        6, 0x80, 0xF6, 0x35,
+        b"\x00\x00" + struct.pack(">HI", event_id & 0xFFFF, prog_idx),
+    )
+
+
+def cmd_evtdesc_data(prog_idx: int, length: int, event_id: int = 0) -> bytes:
+    return build_usbc(
+        length, 0x80, 0xF6, 0x36,
+        b"\x00\x00" + struct.pack(">HI", event_id & 0xFFFF, prog_idx),
+    )
+
 
 def cmd_prepare(prog_idx: int) -> bytes:
-    """0xF6/0x03 – Kanal vorbereiten.
+    """0xF6/0x03 – Kanalwechsel per prog_idx (ACTION_CHANGE_CHANNEL_BY_PROGIDX).
 
-    Payload (Bytes 21–24): 32-Bit prog_idx des Senders (Big-Endian).
-    Laut Spezifikation: nur die 4 Byte prog_idx als Inline-Payload.
+    Payload (Bytes 21–28): Modus 0x00000002 + 32-Bit prog_idx des Senders (Big-Endian).
+    Antwort (4 Byte): f6 03 <signalLock> <isFta>.
     """
-    return build_usbc(4, 0x80, 0xF6, 0x03, struct.pack(">I", prog_idx))
+    return build_usbc(
+        4, 0x80, 0xF6, 0x03,
+        b"\x00\x00\x00\x02" + struct.pack(">I", prog_idx),
+    )
+
 
 def cmd_chinfo_size(prog_idx: int) -> bytes:
-    return build_usbc(6, 0x80, 0xF6, 0x32, struct.pack(">I", prog_idx))
+    return build_usbc(6, 0x80, 0xF6, 0x32, b"\x00\x00\x00\x00" + struct.pack(">I", prog_idx))
+
 
 def cmd_chinfo_data(prog_idx: int, length: int) -> bytes:
-    return build_usbc(length, 0x80, 0xF6, 0x33, struct.pack(">I", prog_idx))
+    return build_usbc(length, 0x80, 0xF6, 0x33, b"\x00\x00\x00\x00" + struct.pack(">I", prog_idx))
+
 
 def cmd_tune(channel_index: int) -> bytes:
-    """0x01 – Kanal aktivieren.
+    """0xF6/0x01 – Legacy-Tune-Befehl."""
+    return build_usbc(2, 0x80, 0xF6, 0x01, struct.pack(">H", channel_index & 0xFFFF))
 
-    channel_index ist der interne 16-Bit Program-Index (prog_idx) des Dongles –
-    also die Position in der vom Dongle verwalteten Senderliste, NICHT die DVB
-    Service-ID. Der Index wird Big-Endian in Byte 21 (High) und Byte 22 (Low)
-    des USBC-Blocks kodiert.
-
-    Beispiel: ZDF hat prog_idx=4 → payload 0x00 0x04.
-    Kanal 50 → payload 0x00 0x32.
-    Kanal 300 → payload 0x01 0x2C.
-    """
-    return build_usbc(2, 0x80, 0xF6, 0x01,
-                      struct.pack(">H", channel_index & 0xFFFF))
 
 def cmd_probe(opcode: int) -> bytes:
     """Sendet einen unbekannten Opcode (0xF6) mit minimalen Daten – für Opcode-Scan."""
@@ -110,112 +124,59 @@ def cmd_probe(opcode: int) -> bytes:
 # ── UDP-Befehle (prefix = 0xF9) ─────────────────────────────────────────────
 
 def cmd_udp_init() -> bytes:
-    """0xF9/0x02 – einmalige Stream-Initialisierung.
-
-    Muss vor dem ersten 0xF9/0x01 Pull gesendet werden (stream.md Schritt 3.1).
-    """
+    """0xF9/0x02 – einmalige Stream-Initialisierung."""
     return build_usbc(0, 0x00, 0xF9, 0x02, b"\x01")
+
 
 def cmd_udp_service_db() -> bytes:
     """Legacy-Builder: Die analysierte APK verwendet F9/0A für einen Speedtest."""
     return build_usbc(UDP_REQUEST_LEN, 0x80, 0xF9, 0x0A)
 
+
 def cmd_udp_ts_block(first: bool = False) -> bytes:
     """0xF9/0x01 – MPEG-TS-Block anfordern (Pull-Mechanismus).
 
-    first=True  → byte21=0x00 (erster Block nach UDP-Init)
-    first=False → byte21=0x01 (Folgeblöcke in der Loop)
+    first=True  → byte21=0x00 (erster Block / nach erfolgreichem Block)
+    first=False → byte21=0x01 (Wiederholung nach Timeout/Fehler)
     """
     byte21 = b"\x00" if first else b"\x01"
     return build_usbc(UDP_REQUEST_LEN, 0x80, 0xF9, 0x01, byte21)
 
 
-# ─────────────────────────────────────────────────────────────────────────────
-# TCP-Helfer
-# ─────────────────────────────────────────────────────────────────────────────
-
-def recv_exactly(sock: socket.socket, n: int,
-                 timeout: float = RECV_TIMEOUT) -> bytes:
-    """Liest exakt n Bytes mit Timeout. Gibt auch Teilergebnisse zurück."""
-    sock.settimeout(timeout)
-    buf = bytearray()
-    try:
-        while len(buf) < n:
-            chunk = sock.recv(n - len(buf))
-            if not chunk:
-                break
-            buf.extend(chunk)
-    except TimeoutError:
-        pass
-    finally:
-        sock.settimeout(None)
-    return bytes(buf)
-
-
-def send_recv(sock: socket.socket, cmd: bytes,
-              data_len: int, label: str = "") -> bytes:
-    """Sendet Befehl, liest Nutzdaten (data_len Byte) + USBS-Trailer."""
-    sock.sendall(cmd)
-    raw = recv_exactly(sock, data_len + USBS_LEN)
-    payload = raw[:data_len]
-    if label:
-        log.debug("%-25s tx=%dB rx=%dB head=%s",
-                  label, len(cmd), len(raw),
-                  payload[:min(6, len(payload))].hex())
-    return payload
-
-
-# ─────────────────────────────────────────────────────────────────────────────
-# Verbindung herstellen / trennen
-# ─────────────────────────────────────────────────────────────────────────────
-
-def connect(ip: str) -> socket.socket | None:
-    """
-    Baut TCP-Verbindung auf und führt APIX-Init (0x16 + 0x17) durch.
-    Gibt Socket zurück oder None bei Fehler.
-
-    Handshake-Sequenz laut Spezifikation:
-      1. 0xF6/0x16 senden → Antwort[0] == 0x01 bedeutet Dongle bereit
-      2. 0xF6/0x17 senden → Bestätigt Session-Initialisierung
-    """
-    import time
-    log.info("Verbinde %s:%d …", ip, TCP_PORT)
-    sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-    sock.settimeout(CONNECT_TIMEOUT)
-    try:
-        sock.connect((ip, TCP_PORT))
-    except (TimeoutError, OSError) as e:
-        log.error("TCP fehlgeschlagen: %s", e)
-        sock.close()
-        return None
-    sock.settimeout(None)
-
-    r = send_recv(sock, cmd_16(), 12, "0x16 init")
-    if len(r) < 1:
-        log.error("0x16: keine Antwort"); sock.close(); return None
-    # Byte[0] der 12-Byte Nutzdaten enthält den Bereitschaftsstatus (0x01 = bereit)
-    status = r[0]
-    log.info("0x16 status=0x%02X  gerät=%s", status, r[1:6].hex())
-
-    r = send_recv(sock, cmd_17_init(), 4, "0x17 init")
-    log.info("0x17 flag=0x%02X", r[0] if len(r) > 0 else 0xFF)
-
-    if status != 0x01:
-        log.info("Warte auf Bereitschaft …")
-        for _ in range(10):
-            time.sleep(0.5)
-            r = send_recv(sock, cmd_16(), 12, "0x16 poll")
-            if len(r) >= 1 and r[0] == 0x01:
-                log.info("Dongle bereit.")
-                break
-        else:
-            log.warning("Dongle meldet nicht 0x01 – weiter trotzdem.")
-    return sock
-
-
-def disconnect(sock: socket.socket) -> None:
-    try:
-        sock.close()
-    except OSError:
-        pass
-    log.info("Verbindung getrennt.")
+__all__ = [
+    "CONNECT_TIMEOUT",
+    "DEFAULT_IP",
+    "KEEPALIVE_INTVL",
+    "MAGIC_TAG",
+    "RECV_TIMEOUT",
+    "SIGNAL_INTVL",
+    "TCP_PORT",
+    "TS_PKT_SIZE",
+    "TS_SYNC",
+    "UDP_PORT",
+    "UDP_REQUEST_LEN",
+    "UDP_RESPONSE_SIZE",
+    "USBS_LEN",
+    "build_usbc",
+    "cmd_16",
+    "cmd_17_confirm",
+    "cmd_17_init",
+    "cmd_chinfo_data",
+    "cmd_chinfo_size",
+    "cmd_epg_data",
+    "cmd_epg_size",
+    "cmd_evtdesc_data",
+    "cmd_evtdesc_size",
+    "cmd_prepare",
+    "cmd_probe",
+    "cmd_signal",
+    "cmd_stream_release",
+    "cmd_tune",
+    "cmd_udp_init",
+    "cmd_udp_service_db",
+    "cmd_udp_ts_block",
+    "connect",
+    "disconnect",
+    "recv_exactly",
+    "send_recv",
+]

@@ -50,8 +50,12 @@ def _fetch_epg_for_service(
             sock, protocol.cmd_epg_data(svc.prog_idx, 0, size), size, "0x31 epg-data"
         )
     xml_bytes = r[:size]
+    start = xml_bytes.find(b"<")
+    if start < 0:
+        return []
     try:
-        root = ET.fromstring(xml_bytes.decode("utf-8", errors="replace"))
+        text = xml_bytes[start:].rstrip(b"\x00").decode("utf-8", errors="replace")
+        root = ET.fromstring(text)
     except ET.ParseError:
         return []
 

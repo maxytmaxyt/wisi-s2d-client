@@ -1,87 +1,37 @@
 """
-stream.py – Kanal-Prepare und MPEG-TS-Stream
-=============================================
-prepare_channel    – 0x03 → 0x32/0x33 → 0x02 (Signal prüfen)
-stream             – Tune + UDP-MPEG-TS-Stream
-
-Ablauf laut stream.md Schritt 3.1 (Erste Pull-Initialisierung):
-  1. UDP Socket auf Port 8800 binden (VOR allen TCP-Befehlen)
-  2. 0xF9/0x02 UDP-Init senden
-  3. 0xF9/0x01 (first, byte21=0x00) – erster DVB-Pull
-  4. TCP 0xF6/0x17 confirm senden
-
-Korrekte Tune-Reihenfolge (stream.md Schritt 3):
-  0xF6/0x01 (Tune) → 0xF8/0x07 (Stream-Freigabe) → 0xF9/0x02 (UDP-Init)
-  → 0xF9/0x01 (first) → 0xF6/0x17 (confirm) → Loop: 0xF9/0x01 (Folgeblöcke)
-
-Keep-Alive-Logik ist in keepalive.py ausgelagert.
+stream.py – UDP-MPEG-TS-Stream (mit optionaler Entschlüsselung am Ende)
+=======================================================================
+stream             – Tune + UDP-MPEG-TS-Stream (Speicherung der Rohdaten;
+                     bei decrypt_after=True wird die Datei am Ende entschlüsselt)
+prepare_channel    – Re-Export aus prepare.py
+descramble_ts_block, decrypt_ts_file, DEFAULT_TS_KEY – Re-Export aus decrypt.py
 """
 from __future__ import annotations
 
+import contextlib
 import logging
 import socket
-import struct
 import sys
 import threading
 import time
 
 import protocol
+from decrypt import DEFAULT_TS_KEY, decrypt_ts_file, descramble_ts_block
 from keepalive import _keepalive_worker
 from models import ServiceEntry
+from prepare import (
+    get_last_prepared_prog_idx,
+    prepare_channel,
+    reset_prepared_prog_idx,
+)
 
 log = logging.getLogger("wisi.stream")
 
-# UDP-Antwortgröße: 0xBC00 Nutzdaten + 64 Byte SDK-Header + 13 Byte USBS-Trailer = 48205 Byte.
-# F9/01 (TS-Stream) und F9/0A (Speedtest) liefern dieselbe Größe –
-# der Inhalt unterscheidet sich: TS-Daten beginnen mit 0x47-Sync-Bytes,
-# Speedtest-Blöcke enthalten Füll-Bytes ohne Sync.
 UDP_BLOCK_SIZE: int = protocol.UDP_REQUEST_LEN + 64 + protocol.USBS_LEN  # 48205
-
 SIGNAL_INTVL: float = protocol.SIGNAL_INTVL
 UDP_PULL_INTVL: float = 0.5
 
 
-# ---------------------------------------------------------------------------
-# Phase 3: Kanal vorbereiten + Signal prüfen
-# ---------------------------------------------------------------------------
-def prepare_channel(
-    sock: socket.socket,
-    lock: threading.Lock,
-    svc: ServiceEntry,
-) -> None:
-    """0x03 prepare → 0x32/0x33 ch_Info → 0x02 Signal-Poll."""
-    with lock:
-        protocol.send_recv(sock, protocol.cmd_prepare(svc.prog_idx), 4, "0x03 prepare")
-
-    with lock:
-        r = protocol.send_recv(sock, protocol.cmd_chinfo_size(svc.prog_idx), 6, "0x32 chinfo-size")
-    if len(r) >= 6:
-        ci_size = struct.unpack(">I", r[2:6])[0]
-        if ci_size > 0:
-            with lock:
-                r2 = protocol.send_recv(
-                    sock, protocol.cmd_chinfo_data(svc.prog_idx, ci_size),
-                    ci_size, "0x33 chinfo",
-                )
-            log.debug("ch_Info: %s", r2[:min(80, ci_size)].decode("utf-8", "replace"))
-
-    for attempt in range(3):
-        time.sleep(SIGNAL_INTVL)
-        with lock:
-            r = protocol.send_recv(
-                sock, protocol.cmd_signal(), 17,
-                f"0x02 signal [{attempt + 1}/3]",
-            )
-        if len(r) >= 5:
-            log.info("Signal: Stärke=%d%%  Qualität=%d", r[3], r[4])
-            if r[3] >= 50:
-                return
-    log.warning("Signal schwach – weiter trotzdem.")
-
-
-# ---------------------------------------------------------------------------
-# Phase 4+5: Tune + MPEG-TS-Stream
-# ---------------------------------------------------------------------------
 def stream(
     tcp_sock: socket.socket,
     lock: threading.Lock,
@@ -89,25 +39,17 @@ def stream(
     output_path: str,
     duration_s: float = 0.0,
     keepalive_active: bool = False,
+    decrypt_after: bool = False,
 ) -> None:
     """
-    Tunet auf `svc` und schreibt MPEG-TS-Daten nach `output_path` ('-' = stdout).
+    Tunet (falls noch nicht via prepare_channel geschehen) auf `svc` und schreibt
+    MPEG-TS-Daten nach `output_path` ('-' = stdout).
 
-    keepalive_active: True wenn der Aufrufer bereits einen KA-Thread auf tcp_sock führt
-                      (z. B. main_menu) – dann wird kein zweiter gestartet.
-
-    Ablauf laut stream.md:
-      1. UDP Socket auf Port 8800 binden
-      2. TCP: 0xF6/0x01 Tune
-      3. TCP: 0xF8/0x07 Stream-Freigabe
-      4. UDP: 0xF9/0x02 Init-Signal senden
-      5. UDP: 0xF9/0x01 (first, byte21=0x00) – erster Pull
-      6. TCP: 0xF6/0x17 confirm
-      7. Loop: UDP 0xF9/0x01 (byte21=0x01) + Empfang
+    Wenn `decrypt_after=True` gesetzt ist (CLI `--decrypt`), wird die gespeicherte
+    `.ts`-Datei direkt nach Abschluss der Aufnahme entschlüsselt.
     """
     stop = threading.Event()
     dongle_ip = tcp_sock.getpeername()[0]
-
     tcp_sock_dead = threading.Event()
 
     ka: threading.Thread | None = None
@@ -119,43 +61,30 @@ def stream(
         )
         ka.start()
 
-    # UDP-Socket auf Port 8800 binden – VOR dem ersten TCP-Befehl.
-    # Der Dongle sendet Antworten an Port 8800; lokales Binden ist Pflicht
-    # damit Pakete ankommen (stream.md Schritt 1.1).
     udp = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
+    udp.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
     udp.setsockopt(socket.SOL_SOCKET, socket.SO_RCVBUF, 8 * 1024 * 1024)
     udp.bind(("", protocol.UDP_PORT))
-    udp.settimeout(0.1)
+    udp.settimeout(UDP_PULL_INTVL)
 
+    ts_bytes = 0
     try:
-        # Tune (TCP 0xF6/0x01)
-        with lock:
-            protocol.send_recv(tcp_sock, protocol.cmd_tune(svc.pat_index), 2, "0x01 tune")
-        log.info("Tune: channel_index=%d  sid=%d  (%s)", svc.pat_index, svc.service_id, svc.name)
+        if get_last_prepared_prog_idx() != svc.prog_idx:
+            prepare_channel(tcp_sock, lock, svc)
 
-        # Stream-Freigabe (TCP 0xF8/0x07)
-        with lock:
-            protocol.send_recv(tcp_sock, protocol.cmd_stream_release(), 0, "0xF8/0x07 release")
-
-        # UDP Socket-Init (0xF9/0x02) – einmaliges Init-Signal vor dem ersten Pull
-        # (stream.md Schritt 3.1, Punkt 1)
+        # UDP Socket-Init (0xF9/0x02) senden und 13-Byte USBS-Antwort abholen
         udp.sendto(protocol.cmd_udp_init(), (dongle_ip, protocol.UDP_PORT))
         log.debug("0xF9/0x02 UDP-Init gesendet")
-
-        # Erster DVB-Pull (0xF9/0x01, first=True → byte21=0x00)
-        # (stream.md Schritt 3.1, Punkt 2)
-        udp.sendto(protocol.cmd_udp_ts_block(first=True), (dongle_ip, protocol.UDP_PORT))
-        pull_count = 1
-        log.debug("0xF9/0x01 Pull #1 (first) gesendet")
-
-        # Tune bestätigen (TCP 0xF6/0x17) – nach erstem Pull laut stream.md
-        with lock:
-            r = protocol.send_recv(tcp_sock, protocol.cmd_17_confirm(), 4, "0x17 confirm")
-        log.info("0x17 confirm: 0x%02X", r[0] if len(r) > 0 else 0xFF)
+        udp.settimeout(0.2)
+        try:
+            init_ack, _ = udp.recvfrom(65535)
+            log.debug("0xF9/0x02 Ack empfangen (%dB)", len(init_ack))
+        except TimeoutError:
+            pass
+        udp.settimeout(UDP_PULL_INTVL)
 
         log.info("Stream → %s  (STRG+C zum Beenden)", output_path)
 
-        import contextlib
         _file_ctx = (
             open(output_path, "wb")  # noqa: SIM115
             if output_path != "-"
@@ -164,12 +93,12 @@ def stream(
         with _file_ctx as out:
             t_start = time.monotonic()
             block_num = 0
-            ts_bytes = 0
-            pull_pending = True
-            next_pull_deadline = t_start + UDP_PULL_INTVL
+            pull_count = 0
+            retry_last = False
+            last_seq = -1
             last_packet_at = t_start
             next_timeout_warning = t_start + 5.0
-            speedtest_count = 0
+            next_signal_at = t_start + SIGNAL_INTVL
 
             try:
                 while not stop.is_set():
@@ -178,19 +107,33 @@ def stream(
                         log.info("Dauer %.0f s erreicht.", duration_s)
                         break
 
-                    if not pull_pending or now >= next_pull_deadline:
-                        udp.sendto(
-                            protocol.cmd_udp_ts_block(first=False),
-                            (dongle_ip, protocol.UDP_PORT),
-                        )
-                        pull_count += 1
-                        pull_pending = True
-                        next_pull_deadline = now + UDP_PULL_INTVL
-                        log.debug("0xF9/0x01 Pull #%d (Fallback-Timer)", pull_count)
+                    if now >= next_signal_at and not tcp_sock_dead.is_set():
+                        try:
+                            with lock:
+                                sig = protocol.send_recv(
+                                    tcp_sock, protocol.cmd_signal(), 17, "0x02 signal"
+                                )
+                            if len(sig) >= 5:
+                                log.debug("Signal: Stärke=%d%%  Qualität=%d%%", sig[3], sig[4])
+                        except OSError:
+                            tcp_sock_dead.set()
+                        next_signal_at = time.monotonic() + SIGNAL_INTVL
+
+                    udp.sendto(
+                        protocol.cmd_udp_ts_block(first=not retry_last),
+                        (dongle_ip, protocol.UDP_PORT),
+                    )
+                    pull_count += 1
 
                     try:
-                        data, _ = udp.recvfrom(65535)
+                        while True:
+                            data, _ = udp.recvfrom(65535)
+                            if data[:4] == b"USBS" or data[:2] == b"\xf9\x0a":
+                                continue
+                            break
                     except TimeoutError:
+                        retry_last = True
+                        time.sleep(0.01)
                         now = time.monotonic()
                         if now >= next_timeout_warning and now - last_packet_at >= 5.0:
                             log.warning(
@@ -199,61 +142,68 @@ def stream(
                             next_timeout_warning = now + 5.0
                         continue
 
-                    if data[:4] == b"USBS" or data[:2] == b"\xf9\x0a":
-                        continue
-
-                    # Log unexpected sizes (too small to hold TS data) but still try sync search.
                     if len(data) < protocol.TS_PKT_SIZE * 4:
-                        log.debug("Datagramm zu klein (%dB) – übersprungen", len(data))
-                        pull_pending = False
+                        retry_last = True
+                        time.sleep(0.01)
                         continue
 
-                    sync_offset = data.find(bytes([protocol.TS_SYNC]))
+                    if len(data) >= protocol.UDP_REQUEST_LEN + 64:
+                        seq = data[protocol.UDP_REQUEST_LEN + 12]
+                        if last_seq < seq:
+                            last_seq = seq
+                        elif last_seq == 255:
+                            last_seq = 0
+                        elif seq == 0:
+                            last_seq = -1
+                        else:
+                            retry_last = True
+                            time.sleep(0.01)
+                            continue
+                        payload = data[:protocol.UDP_REQUEST_LEN]
+                    elif len(data) > protocol.UDP_REQUEST_LEN:
+                        payload = data[:protocol.UDP_REQUEST_LEN]
+                    else:
+                        payload = data
+
+                    sync_offset = payload.find(bytes([protocol.TS_SYNC]))
                     while sync_offset >= 0:
                         if (
-                            sync_offset + 3 * protocol.TS_PKT_SIZE < len(data)
+                            sync_offset + 3 * protocol.TS_PKT_SIZE < len(payload)
                             and all(
-                                data[sync_offset + i * protocol.TS_PKT_SIZE] == protocol.TS_SYNC
+                                payload[sync_offset + i * protocol.TS_PKT_SIZE] == protocol.TS_SYNC
                                 for i in range(4)
                             )
                         ):
                             break
-                        sync_offset = data.find(bytes([protocol.TS_SYNC]), sync_offset + 1)
+                        sync_offset = payload.find(bytes([protocol.TS_SYNC]), sync_offset + 1)
 
                     if sync_offset < 0:
-                        log.debug(
-                            "Kein MPEG-TS-Sync in UDP-Datagramm (%dB) – verworfen", len(data)
-                        )
-                        pull_pending = False
+                        retry_last = True
+                        time.sleep(0.01)
                         continue
 
-                    ts_data = data[sync_offset:]
+                    ts_data = payload[sync_offset:]
+                    complete_len = len(ts_data) - len(ts_data) % protocol.TS_PKT_SIZE
+                    if complete_len == 0:
+                        retry_last = True
+                        time.sleep(0.01)
+                        continue
+
                     last_packet_at = time.monotonic()
                     next_timeout_warning = last_packet_at + 5.0
 
-                    if block_num == 0:
-                        log.debug(
-                            "Erstes Stream-Datagramm: %dB, TS-Offset %d", len(data), sync_offset
-                        )
-
-                    complete_len = len(ts_data) - len(ts_data) % protocol.TS_PKT_SIZE
-                    if complete_len == 0:
-                        pull_pending = False
-                        continue
-
-                    out.write(ts_data[:complete_len])
+                    # Bei stdout ('-') kann nicht nachträglich entschlüsselt werden;
+                    # bei Dateiausgabe schreiben wir zunächst die schnellen Rohblöcke.
+                    chunk_to_write = (
+                        descramble_ts_block(ts_data[:complete_len])
+                        if (decrypt_after and output_path == "-")
+                        else ts_data[:complete_len]
+                    )
+                    out.write(chunk_to_write)
                     out.flush()
                     block_num += 1
                     ts_bytes += complete_len
-
-                    udp.sendto(
-                        protocol.cmd_udp_ts_block(first=False),
-                        (dongle_ip, protocol.UDP_PORT),
-                    )
-                    pull_count += 1
-                    pull_pending = True
-                    next_pull_deadline = time.monotonic() + UDP_PULL_INTVL
-                    log.debug("0xF9/0x01 Pull #%d (nach Block %d)", pull_count, block_num)
+                    retry_last = False
 
                     if block_num % 50 == 0:
                         elapsed = time.monotonic() - t_start
@@ -273,7 +223,31 @@ def stream(
                 )
 
     finally:
+        reset_prepared_prog_idx()
+        if not tcp_sock_dead.is_set():
+            try:
+                with lock:
+                    protocol.send_recv(
+                        tcp_sock, protocol.cmd_stream_release(), 0, "0xF8/0x07 release"
+                    )
+            except OSError:
+                pass
         stop.set()
         if ka is not None:
             ka.join(timeout=4.0)
         udp.close()
+
+    if decrypt_after and output_path != "-" and ts_bytes > 0:
+        decrypt_ts_file(output_path)
+
+
+__all__ = [
+    "DEFAULT_TS_KEY",
+    "SIGNAL_INTVL",
+    "UDP_BLOCK_SIZE",
+    "UDP_PULL_INTVL",
+    "decrypt_ts_file",
+    "descramble_ts_block",
+    "prepare_channel",
+    "stream",
+]

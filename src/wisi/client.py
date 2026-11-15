@@ -29,9 +29,9 @@ if _src not in sys.path:
     sys.path.insert(0, _src)
 
 import protocol
-from channels import channels_to_services, fetch_channel_list
+from channels import channels_to_services, fetch_channel_list, fetch_service_db
 from keepalive import _keepalive_worker
-from models import FALLBACK_SERVICE, ServiceEntry
+from models import FALLBACK_SERVICE, Channel, ServiceEntry
 from stream import prepare_channel, stream
 from tools.menu import main_menu
 
@@ -41,6 +41,11 @@ DEFAULT_IP = protocol.DEFAULT_IP
 # Private Aliase für Tests und Rückwärtskompatibilität
 _cmd_16 = protocol.cmd_16
 _send_recv = protocol.send_recv
+
+__all__ = [
+    "Channel",
+    "fetch_service_db",
+]
 
 logging.basicConfig(
     level=logging.INFO,
@@ -62,6 +67,11 @@ def main() -> None:
                    help="Interner Kanal-Index des Dongles (0–65535) für --stream")
     p.add_argument("--output", default="stream.ts")
     p.add_argument("--duration", type=float, default=0.0)
+    p.add_argument(
+        "--decrypt",
+        action="store_true",
+        help="Gespeicherte Stream-Datei am Ende entschlüsseln",
+    )
     args = p.parse_args()
 
     if args.debug:
@@ -90,7 +100,15 @@ def main() -> None:
                 log.warning("Kanal-Index %d nicht in Senderliste – nutze Fallback.", args.pat_idx)
                 svc = ServiceEntry(**{**FALLBACK_SERVICE.__dict__, "pat_index": args.pat_idx})
             prepare_channel(sock, lock, svc)
-            stream(sock, lock, svc, args.output, args.duration, keepalive_active=True)
+            stream(
+                sock,
+                lock,
+                svc,
+                args.output,
+                args.duration,
+                keepalive_active=True,
+                decrypt_after=args.decrypt,
+            )
         finally:
             keepalive_stop.set()
             keepalive.join(timeout=4.0)

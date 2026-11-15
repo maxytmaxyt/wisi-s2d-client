@@ -1,0 +1,7287 @@
+{
+  "device_ip": "192.168.178.32",
+  "service_count": 10,
+  "services_with_epg": 7,
+  "channels": [
+    {
+      "pat_index": 0,
+      "service_id": 11110,
+      "prog_idx": 1085735055,
+      "name": "ZDF HD",
+      "events": [
+        {
+          "event_id": 40580,
+          "title": "SOKO Wismar",
+          "date": "61358",
+          "time": "10:10",
+          "duration": "00:45"
+        },
+        {
+          "event_id": 40581,
+          "title": "heute Xpress",
+          "date": "61358",
+          "time": "10:55",
+          "duration": "00:05"
+        },
+        {
+          "event_id": 40582,
+          "title": "einfach Mensch",
+          "date": "61358",
+          "time": "11:00",
+          "duration": "00:15"
+        },
+        {
+          "event_id": 41749,
+          "title": "Alle Nadeln an der Tanne",
+          "date": "61358",
+          "time": "11:15",
+          "duration": "01:25"
+        },
+        {
+          "event_id": 40584,
+          "title": "Rosamunde Pilcher: Argentinischer Tango",
+          "date": "61358",
+          "time": "12:40",
+          "duration": "01:30"
+        },
+        {
+          "event_id": 40585,
+          "title": "heute Xpress",
+          "date": "61358",
+          "time": "14:10",
+          "duration": "00:05"
+        },
+        {
+          "event_id": 40586,
+          "title": "Bares für Rares",
+          "date": "61358",
+          "time": "14:15",
+          "duration": "00:55"
+        },
+        {
+          "event_id": 40587,
+          "title": "Die Rosenheim-Cops",
+          "date": "61358",
+          "time": "15:10",
+          "duration": "00:50"
+        },
+        {
+          "event_id": 40588,
+          "title": "heute Xpress",
+          "date": "61358",
+          "time": "16:00",
+          "duration": "00:05"
+        },
+        {
+          "event_id": 40589,
+          "title": "Länderspiegel",
+          "date": "61358",
+          "time": "16:05",
+          "duration": "00:30"
+        },
+        {
+          "event_id": 40590,
+          "title": "ZDF.reportage",
+          "date": "61358",
+          "time": "16:35",
+          "duration": "00:30"
+        },
+        {
+          "event_id": 40591,
+          "title": "SOKO Linz",
+          "date": "61358",
+          "time": "17:05",
+          "duration": "00:55"
+        },
+        {
+          "event_id": 40592,
+          "title": "heute",
+          "date": "61358",
+          "time": "18:00",
+          "duration": "00:20"
+        },
+        {
+          "event_id": 40593,
+          "title": "Wetter",
+          "date": "61358",
+          "time": "18:20",
+          "duration": "00:05"
+        },
+        {
+          "event_id": 40594,
+          "title": "Lena Lorenz - Baby auf Probe (1)",
+          "date": "61358",
+          "time": "18:25",
+          "duration": "00:50"
+        },
+        {
+          "event_id": 40595,
+          "title": "Friesland - Friesische Verhältnisse",
+          "date": "61358",
+          "time": "19:15",
+          "duration": "01:30"
+        },
+        {
+          "event_id": 40596,
+          "title": "heute journal",
+          "date": "61358",
+          "time": "20:45",
+          "duration": "00:15"
+        },
+        {
+          "event_id": 40597,
+          "title": "Erzgebirgskrimi - Mord auf dem Jakobsweg",
+          "date": "61358",
+          "time": "21:00",
+          "duration": "01:30"
+        },
+        {
+          "event_id": 40598,
+          "title": "heute Xpress",
+          "date": "61358",
+          "time": "22:30",
+          "duration": "00:05"
+        },
+        {
+          "event_id": 40599,
+          "title": "2 Guns",
+          "date": "61358",
+          "time": "22:35",
+          "duration": "01:35"
+        },
+        {
+          "event_id": 40600,
+          "title": "heute-show",
+          "date": "61359",
+          "time": "00:10",
+          "duration": "00:30"
+        }
+      ]
+    },
+    {
+      "pat_index": 1,
+      "service_id": 10301,
+      "prog_idx": 1086128274,
+      "name": "Das Erste HD",
+      "events": [
+        {
+          "event_id": 14414,
+          "title": "Die Friesenjunkies (4/8)",
+          "date": "61358",
+          "time": "00:05",
+          "duration": "00:23"
+        },
+        {
+          "event_id": 14415,
+          "title": "Tagesschau",
+          "date": "61358",
+          "time": "00:28",
+          "duration": "00:02"
+        },
+        {
+          "event_id": 14416,
+          "title": "Der Zürich-Krimi: Borchert und der eisige Tod",
+          "date": "61358",
+          "time": "00:30",
+          "duration": "01:30"
+        },
+        {
+          "event_id": 14417,
+          "title": "Watzmann ermittelt (6)",
+          "date": "61358",
+          "time": "02:00",
+          "duration": "00:50"
+        },
+        {
+          "event_id": 14418,
+          "title": "Quarks im Ersten",
+          "date": "61358",
+          "time": "02:50",
+          "duration": "00:30"
+        },
+        {
+          "event_id": 14419,
+          "title": "Brisant",
+          "date": "61358",
+          "time": "03:20",
+          "duration": "00:23"
+        },
+        {
+          "event_id": 14420,
+          "title": "Tagesschau",
+          "date": "61358",
+          "time": "03:43",
+          "duration": "00:02"
+        },
+        {
+          "event_id": 14421,
+          "title": "Die Tierärzte - Retter mit Herz (17)",
+          "date": "61358",
+          "time": "03:45",
+          "duration": "00:45"
+        },
+        {
+          "event_id": 14422,
+          "title": "Arthur und die Freunde der Tafelrunde (37)",
+          "date": "61358",
+          "time": "04:30",
+          "duration": "00:10"
+        },
+        {
+          "event_id": 14423,
+          "title": "Arthur und die Freunde der Tafelrunde (38)",
+          "date": "61358",
+          "time": "04:40",
+          "duration": "00:15"
+        },
+        {
+          "event_id": 14424,
+          "title": "Dein großer Tag",
+          "date": "61358",
+          "time": "04:55",
+          "duration": "00:25"
+        },
+        {
+          "event_id": 14425,
+          "title": "Elefant, Tiger & Kids: Zoo-Praktikum Backstage (15/18)",
+          "date": "61358",
+          "time": "05:20",
+          "duration": "00:20"
+        },
+        {
+          "event_id": 14426,
+          "title": "Elefant, Tiger & Kids: Zoo-Praktikum Backstage (16/18)",
+          "date": "61358",
+          "time": "05:40",
+          "duration": "00:20"
+        },
+        {
+          "event_id": 14427,
+          "title": "Shaun das Schaf - Fuchs im Schafspelz",
+          "date": "61358",
+          "time": "06:00",
+          "duration": "00:10"
+        },
+        {
+          "event_id": 14428,
+          "title": "Anna und die wilden Tiere",
+          "date": "61358",
+          "time": "06:10",
+          "duration": "00:25"
+        },
+        {
+          "event_id": 14429,
+          "title": "Anna und die Haustiere",
+          "date": "61358",
+          "time": "06:35",
+          "duration": "00:15"
+        },
+        {
+          "event_id": 14430,
+          "title": "Checker Tobi",
+          "date": "61358",
+          "time": "06:50",
+          "duration": "00:25"
+        },
+        {
+          "event_id": 14431,
+          "title": "Wissen macht Ah!",
+          "date": "61358",
+          "time": "07:15",
+          "duration": "00:25"
+        },
+        {
+          "event_id": 14432,
+          "title": "POV - Deine Geschichte zählt",
+          "date": "61358",
+          "time": "07:40",
+          "duration": "00:10"
+        },
+        {
+          "event_id": 14433,
+          "title": "Nils Holgerssons wunderbare Reise (2/4)",
+          "date": "61358",
+          "time": "07:50",
+          "duration": "01:00"
+        },
+        {
+          "event_id": 14434,
+          "title": "Tagesschau",
+          "date": "61358",
+          "time": "08:50",
+          "duration": "00:05"
+        },
+        {
+          "event_id": 14435,
+          "title": "Panda, Gorilla & Co. (315)",
+          "date": "61358",
+          "time": "08:55",
+          "duration": "00:45"
+        },
+        {
+          "event_id": 14436,
+          "title": "Panda, Gorilla & Co. (316)",
+          "date": "61358",
+          "time": "09:40",
+          "duration": "00:50"
+        },
+        {
+          "event_id": 14437,
+          "title": "Quarks im Ersten",
+          "date": "61358",
+          "time": "10:30",
+          "duration": "00:30"
+        },
+        {
+          "event_id": 14438,
+          "title": "Tagesschau",
+          "date": "61358",
+          "time": "11:00",
+          "duration": "00:15"
+        },
+        {
+          "event_id": 14439,
+          "title": "Die Tierärzte - Retter mit Herz (18)",
+          "date": "61358",
+          "time": "11:15",
+          "duration": "00:45"
+        },
+        {
+          "event_id": 14440,
+          "title": "Die Tierärzte - Retter mit Herz (19)",
+          "date": "61358",
+          "time": "12:00",
+          "duration": "00:45"
+        },
+        {
+          "event_id": 14441,
+          "title": "Tagesschau",
+          "date": "61358",
+          "time": "12:45",
+          "duration": "00:15"
+        },
+        {
+          "event_id": 14442,
+          "title": "Zurück aufs Eis",
+          "date": "61358",
+          "time": "13:00",
+          "duration": "01:30"
+        },
+        {
+          "event_id": 14443,
+          "title": "Tagesschau",
+          "date": "61358",
+          "time": "14:30",
+          "duration": "00:15"
+        },
+        {
+          "event_id": 14444,
+          "title": "Sportschau",
+          "date": "61358",
+          "time": "14:45",
+          "duration": "02:00"
+        },
+        {
+          "event_id": 14445,
+          "title": "Tagesschau",
+          "date": "61358",
+          "time": "16:45",
+          "duration": "00:05"
+        },
+        {
+          "event_id": 14446,
+          "title": "Sportschau",
+          "date": "61358",
+          "time": "16:50",
+          "duration": "02:07"
+        },
+        {
+          "event_id": 14447,
+          "title": "Lotto am Samstag",
+          "date": "61358",
+          "time": "18:57",
+          "duration": "00:03"
+        },
+        {
+          "event_id": 14448,
+          "title": "Tagesschau",
+          "date": "61358",
+          "time": "19:00",
+          "duration": "00:15"
+        },
+        {
+          "event_id": 14449,
+          "title": "Schlaflos in Bochum",
+          "date": "61358",
+          "time": "19:15",
+          "duration": "01:30"
+        },
+        {
+          "event_id": 14450,
+          "title": "Tagesthemen",
+          "date": "61358",
+          "time": "20:45",
+          "duration": "00:20"
+        },
+        {
+          "event_id": 14451,
+          "title": "Geheimkommando Familie",
+          "date": "61358",
+          "time": "21:05",
+          "duration": "01:30"
+        },
+        {
+          "event_id": 14452,
+          "title": "Das Wort zum Sonntag",
+          "date": "61358",
+          "time": "22:35",
+          "duration": "00:05"
+        },
+        {
+          "event_id": 14453,
+          "title": "Die Friesenjunkies (5/8)",
+          "date": "61358",
+          "time": "22:40",
+          "duration": "00:20"
+        },
+        {
+          "event_id": 14454,
+          "title": "Die Friesenjunkies (6/8)",
+          "date": "61358",
+          "time": "23:00",
+          "duration": "00:30"
+        },
+        {
+          "event_id": 14455,
+          "title": "Die Friesenjunkies (7/8)",
+          "date": "61358",
+          "time": "23:30",
+          "duration": "00:20"
+        },
+        {
+          "event_id": 14456,
+          "title": "Die Friesenjunkies (8/8)",
+          "date": "61358",
+          "time": "23:50",
+          "duration": "00:25"
+        },
+        {
+          "event_id": 14457,
+          "title": "Tagesschau",
+          "date": "61359",
+          "time": "00:15",
+          "duration": "00:05"
+        },
+        {
+          "event_id": 14458,
+          "title": "Schlaflos in Bochum",
+          "date": "61359",
+          "time": "00:20",
+          "duration": "01:33"
+        },
+        {
+          "event_id": 14459,
+          "title": "Tagesschau",
+          "date": "61359",
+          "time": "01:53",
+          "duration": "00:02"
+        },
+        {
+          "event_id": 14460,
+          "title": "Geheimkommando Familie",
+          "date": "61359",
+          "time": "01:55",
+          "duration": "01:30"
+        },
+        {
+          "event_id": 14461,
+          "title": "Deutschlandbilder",
+          "date": "61359",
+          "time": "03:25",
+          "duration": "00:18"
+        },
+        {
+          "event_id": 14462,
+          "title": "Tagesschau",
+          "date": "61359",
+          "time": "03:43",
+          "duration": "00:02"
+        },
+        {
+          "event_id": 14463,
+          "title": "Die Tierärzte - Retter mit Herz (18)",
+          "date": "61359",
+          "time": "03:45",
+          "duration": "00:45"
+        },
+        {
+          "event_id": 14464,
+          "title": "Tierdetektive (9/13)",
+          "date": "61359",
+          "time": "04:30",
+          "duration": "00:25"
+        },
+        {
+          "event_id": 14465,
+          "title": "Unerschrocken! Echte Heldinnen (15/30)",
+          "date": "61359",
+          "time": "04:55",
+          "duration": "00:05"
+        },
+        {
+          "event_id": 14466,
+          "title": "Tigerenten Club",
+          "date": "61359",
+          "time": "05:00",
+          "duration": "01:00"
+        },
+        {
+          "event_id": 14467,
+          "title": "Shaun das Schaf - Bitzer-Billard",
+          "date": "61359",
+          "time": "06:00",
+          "duration": "00:10"
+        },
+        {
+          "event_id": 14468,
+          "title": "Hauptsache Bären!",
+          "date": "61359",
+          "time": "06:10",
+          "duration": "01:25"
+        },
+        {
+          "event_id": 14469,
+          "title": "Tiere bis unters Dach (146)",
+          "date": "61359",
+          "time": "07:35",
+          "duration": "00:25"
+        },
+        {
+          "event_id": 14470,
+          "title": "Tiere bis unters Dach (147)",
+          "date": "61359",
+          "time": "08:00",
+          "duration": "00:30"
+        },
+        {
+          "event_id": 14471,
+          "title": "Die Sendung mit der Maus Spezial",
+          "date": "61359",
+          "time": "08:30",
+          "duration": "00:30"
+        },
+        {
+          "event_id": 14472,
+          "title": "Tagesschau",
+          "date": "61359",
+          "time": "09:00",
+          "duration": "00:03"
+        },
+        {
+          "event_id": 14473,
+          "title": "Das Märchen von den 12 Monaten",
+          "date": "61359",
+          "time": "09:03",
+          "duration": "00:57"
+        },
+        {
+          "event_id": 14474,
+          "title": "Des Kaisers neue Kleider",
+          "date": "61359",
+          "time": "10:00",
+          "duration": "01:00"
+        },
+        {
+          "event_id": 14475,
+          "title": "Tagesschau",
+          "date": "61359",
+          "time": "11:00",
+          "duration": "00:03"
+        },
+        {
+          "event_id": 14476,
+          "title": "Presseclub",
+          "date": "61359",
+          "time": "11:03",
+          "duration": "00:42"
+        },
+        {
+          "event_id": 14477,
+          "title": "Europamagazin",
+          "date": "61359",
+          "time": "11:45",
+          "duration": "00:30"
+        },
+        {
+          "event_id": 14478,
+          "title": "#unsereKinder - wie kinderfreundlich ist Deutschland?",
+          "date": "61359",
+          "time": "12:15",
+          "duration": "00:45"
+        },
+        {
+          "event_id": 14479,
+          "title": "Tagesschau",
+          "date": "61359",
+          "time": "13:00",
+          "duration": "00:05"
+        },
+        {
+          "event_id": 14480,
+          "title": "Liebe versetzt Berge - Alpenglühen 2",
+          "date": "61359",
+          "time": "13:05",
+          "duration": "01:30"
+        },
+        {
+          "event_id": 14481,
+          "title": "Drei Haselnüsse für Aschenbrödel",
+          "date": "61359",
+          "time": "14:35",
+          "duration": "01:25"
+        },
+        {
+          "event_id": 14482,
+          "title": "Brisant",
+          "date": "61359",
+          "time": "16:00",
+          "duration": "00:44"
+        },
+        {
+          "event_id": 14483,
+          "title": "Gewinnzahlen Deutsche Fernsehlotterie",
+          "date": "61359",
+          "time": "16:44",
+          "duration": "00:01"
+        },
+        {
+          "event_id": 14484,
+          "title": "Tagesschau",
+          "date": "61359",
+          "time": "16:45",
+          "duration": "00:15"
+        },
+        {
+          "event_id": 14485,
+          "title": "Bericht aus Berlin",
+          "date": "61359",
+          "time": "17:00",
+          "duration": "00:30"
+        },
+        {
+          "event_id": 14486,
+          "title": "Weltspiegel",
+          "date": "61359",
+          "time": "17:30",
+          "duration": "00:45"
+        },
+        {
+          "event_id": 14487,
+          "title": "Sportschau",
+          "date": "61359",
+          "time": "18:15",
+          "duration": "00:45"
+        },
+        {
+          "event_id": 14488,
+          "title": "Tagesschau",
+          "date": "61359",
+          "time": "19:00",
+          "duration": "00:15"
+        },
+        {
+          "event_id": 14489,
+          "title": "Tatort: Narrentanz",
+          "date": "61359",
+          "time": "19:15",
+          "duration": "01:30"
+        },
+        {
+          "event_id": 14490,
+          "title": "Caren Miosga",
+          "date": "61359",
+          "time": "20:45",
+          "duration": "01:00"
+        },
+        {
+          "event_id": 14491,
+          "title": "Tagesthemen",
+          "date": "61359",
+          "time": "21:45",
+          "duration": "00:20"
+        },
+        {
+          "event_id": 14492,
+          "title": "ttt - titel thesen temperamente",
+          "date": "61359",
+          "time": "22:05",
+          "duration": "00:30"
+        },
+        {
+          "event_id": 14493,
+          "title": "Dream Scenario",
+          "date": "61359",
+          "time": "22:35",
+          "duration": "01:35"
+        },
+        {
+          "event_id": 14494,
+          "title": "Tagesschau",
+          "date": "61360",
+          "time": "00:10",
+          "duration": "00:05"
+        },
+        {
+          "event_id": 14495,
+          "title": "Liebe versetzt Berge - Alpenglühen 2",
+          "date": "61360",
+          "time": "00:15",
+          "duration": "01:33"
+        },
+        {
+          "event_id": 14496,
+          "title": "Tagesschau",
+          "date": "61360",
+          "time": "01:48",
+          "duration": "00:02"
+        },
+        {
+          "event_id": 14497,
+          "title": "Caren Miosga",
+          "date": "61360",
+          "time": "01:50",
+          "duration": "01:00"
+        },
+        {
+          "event_id": 14498,
+          "title": "ttt - titel thesen temperamente",
+          "date": "61360",
+          "time": "02:50",
+          "duration": "00:53"
+        },
+        {
+          "event_id": 14499,
+          "title": "Tagesschau",
+          "date": "61360",
+          "time": "03:43",
+          "duration": "00:02"
+        },
+        {
+          "event_id": 14500,
+          "title": "Weltspiegel",
+          "date": "61360",
+          "time": "03:45",
+          "duration": "00:45"
+        },
+        {
+          "event_id": 14501,
+          "title": "ARD-Morgenmagazin",
+          "date": "61360",
+          "time": "04:30",
+          "duration": "03:30"
+        },
+        {
+          "event_id": 14502,
+          "title": "Tagesschau",
+          "date": "61360",
+          "time": "08:00",
+          "duration": "00:05"
+        },
+        {
+          "event_id": 14503,
+          "title": "Watzmann ermittelt (7)",
+          "date": "61360",
+          "time": "08:05",
+          "duration": "00:50"
+        },
+        {
+          "event_id": 14504,
+          "title": "Morden im Norden (93)",
+          "date": "61360",
+          "time": "08:55",
+          "duration": "00:45"
+        },
+        {
+          "event_id": 14505,
+          "title": "Tagesschau",
+          "date": "61360",
+          "time": "09:40",
+          "duration": "00:05"
+        },
+        {
+          "event_id": 14506,
+          "title": "Meister des Alltags (211)",
+          "date": "61360",
+          "time": "09:45",
+          "duration": "00:30"
+        },
+        {
+          "event_id": 14507,
+          "title": "Wer weiß denn sowas? (1426)",
+          "date": "61360",
+          "time": "10:15",
+          "duration": "00:45"
+        },
+        {
+          "event_id": 14508,
+          "title": "ZDF-Mittagsmagazin",
+          "date": "61360",
+          "time": "11:00",
+          "duration": "02:00"
+        },
+        {
+          "event_id": 14509,
+          "title": "Tagesschau",
+          "date": "61360",
+          "time": "13:00",
+          "duration": "00:10"
+        },
+        {
+          "event_id": 14510,
+          "title": "Rote Rosen (4421)",
+          "date": "61360",
+          "time": "13:10",
+          "duration": "00:50"
+        },
+        {
+          "event_id": 14511,
+          "title": "Tagesschau",
+          "date": "61360",
+          "time": "14:00",
+          "duration": "00:10"
+        },
+        {
+          "event_id": 14512,
+          "title": "Sturm der Liebe (4674)",
+          "date": "61360",
+          "time": "14:10",
+          "duration": "00:50"
+        },
+        {
+          "event_id": 14513,
+          "title": "Tagesschau",
+          "date": "61360",
+          "time": "15:00",
+          "duration": "00:10"
+        },
+        {
+          "event_id": 14514,
+          "title": "Elefant, Tiger & Co. (441)",
+          "date": "61360",
+          "time": "15:10",
+          "duration": "00:50"
+        },
+        {
+          "event_id": 14515,
+          "title": "Tagesschau",
+          "date": "61360",
+          "time": "16:00",
+          "duration": "00:15"
+        },
+        {
+          "event_id": 14516,
+          "title": "Brisant",
+          "date": "61360",
+          "time": "16:15",
+          "duration": "00:45"
+        },
+        {
+          "event_id": 14517,
+          "title": "Wer weiß denn sowas? (1439)",
+          "date": "61360",
+          "time": "17:00",
+          "duration": "00:50"
+        },
+        {
+          "event_id": 14518,
+          "title": "Großstadtrevier (528)",
+          "date": "61360",
+          "time": "17:50",
+          "duration": "00:55"
+        },
+        {
+          "event_id": 14519,
+          "title": "Wissen vor acht - Zukunft",
+          "date": "61360",
+          "time": "18:45",
+          "duration": "00:05"
+        },
+        {
+          "event_id": 14520,
+          "title": "Wetter vor acht",
+          "date": "61360",
+          "time": "18:50",
+          "duration": "00:05"
+        },
+        {
+          "event_id": 14521,
+          "title": "Wirtschaft vor acht",
+          "date": "61360",
+          "time": "18:55",
+          "duration": "00:05"
+        },
+        {
+          "event_id": 14522,
+          "title": "Tagesschau",
+          "date": "61360",
+          "time": "19:00",
+          "duration": "00:15"
+        },
+        {
+          "event_id": 14523,
+          "title": "Sportschau",
+          "date": "61360",
+          "time": "19:15",
+          "duration": "03:15"
+        },
+        {
+          "event_id": 14524,
+          "title": "Geheimsache Doping: Kinder (1/6)",
+          "date": "61360",
+          "time": "22:30",
+          "duration": "00:30"
+        },
+        {
+          "event_id": 14525,
+          "title": "Geheimsache Doping: Kinder (2/6)",
+          "date": "61360",
+          "time": "23:00",
+          "duration": "00:30"
+        },
+        {
+          "event_id": 14526,
+          "title": "Geheimsache Doping: Kinder (3/6)",
+          "date": "61360",
+          "time": "23:30",
+          "duration": "00:35"
+        },
+        {
+          "event_id": 14527,
+          "title": "Geheimsache Doping: Kinder (4/6)",
+          "date": "61361",
+          "time": "00:05",
+          "duration": "00:35"
+        },
+        {
+          "event_id": 14528,
+          "title": "Geheimsache Doping: Kinder (5/6)",
+          "date": "61361",
+          "time": "00:40",
+          "duration": "00:30"
+        },
+        {
+          "event_id": 14529,
+          "title": "Geheimsache Doping: Kinder (6/6)",
+          "date": "61361",
+          "time": "01:10",
+          "duration": "00:43"
+        },
+        {
+          "event_id": 14530,
+          "title": "Tagesschau",
+          "date": "61361",
+          "time": "01:53",
+          "duration": "00:02"
+        },
+        {
+          "event_id": 14531,
+          "title": "Tatort: Narrentanz",
+          "date": "61361",
+          "time": "01:55",
+          "duration": "01:30"
+        },
+        {
+          "event_id": 14532,
+          "title": "Brisant",
+          "date": "61361",
+          "time": "03:25",
+          "duration": "00:33"
+        },
+        {
+          "event_id": 14533,
+          "title": "Tagesschau",
+          "date": "61361",
+          "time": "03:58",
+          "duration": "00:02"
+        },
+        {
+          "event_id": 14534,
+          "title": "Quarks im Ersten",
+          "date": "61361",
+          "time": "04:00",
+          "duration": "00:30"
+        },
+        {
+          "event_id": 14535,
+          "title": "ARD-Morgenmagazin",
+          "date": "61361",
+          "time": "04:30",
+          "duration": "03:30"
+        },
+        {
+          "event_id": 14536,
+          "title": "Tagesschau",
+          "date": "61361",
+          "time": "08:00",
+          "duration": "00:05"
+        },
+        {
+          "event_id": 14537,
+          "title": "Watzmann ermittelt (8)",
+          "date": "61361",
+          "time": "08:05",
+          "duration": "00:50"
+        },
+        {
+          "event_id": 14538,
+          "title": "Morden im Norden (94)",
+          "date": "61361",
+          "time": "08:55",
+          "duration": "00:45"
+        },
+        {
+          "event_id": 14539,
+          "title": "Tagesschau",
+          "date": "61361",
+          "time": "09:40",
+          "duration": "00:05"
+        },
+        {
+          "event_id": 14540,
+          "title": "Meister des Alltags (212)",
+          "date": "61361",
+          "time": "09:45",
+          "duration": "00:30"
+        },
+        {
+          "event_id": 14541,
+          "title": "Wer weiß denn sowas? (1427)",
+          "date": "61361",
+          "time": "10:15",
+          "duration": "00:45"
+        },
+        {
+          "event_id": 14542,
+          "title": "ZDF-Mittagsmagazin",
+          "date": "61361",
+          "time": "11:00",
+          "duration": "02:00"
+        },
+        {
+          "event_id": 14543,
+          "title": "Tagesschau",
+          "date": "61361",
+          "time": "13:00",
+          "duration": "00:10"
+        },
+        {
+          "event_id": 14544,
+          "title": "Rote Rosen (4422)",
+          "date": "61361",
+          "time": "13:10",
+          "duration": "00:50"
+        },
+        {
+          "event_id": 14545,
+          "title": "Tagesschau",
+          "date": "61361",
+          "time": "14:00",
+          "duration": "00:10"
+        },
+        {
+          "event_id": 14546,
+          "title": "Sturm der Liebe (4675)",
+          "date": "61361",
+          "time": "14:10",
+          "duration": "00:50"
+        },
+        {
+          "event_id": 14547,
+          "title": "Tagesschau",
+          "date": "61361",
+          "time": "15:00",
+          "duration": "00:10"
+        },
+        {
+          "event_id": 14548,
+          "title": "Elefant, Tiger & Co. (442)",
+          "date": "61361",
+          "time": "15:10",
+          "duration": "00:50"
+        },
+        {
+          "event_id": 14549,
+          "title": "Tagesschau",
+          "date": "61361",
+          "time": "16:00",
+          "duration": "00:15"
+        },
+        {
+          "event_id": 14550,
+          "title": "Brisant",
+          "date": "61361",
+          "time": "16:15",
+          "duration": "00:45"
+        },
+        {
+          "event_id": 14551,
+          "title": "Wer weiß denn sowas? (1440)",
+          "date": "61361",
+          "time": "17:00",
+          "duration": "00:50"
+        },
+        {
+          "event_id": 14552,
+          "title": "WaPo Elbe (23/24)",
+          "date": "61361",
+          "time": "17:50",
+          "duration": "00:55"
+        },
+        {
+          "event_id": 14553,
+          "title": "Wissen vor acht - Natur",
+          "date": "61361",
+          "time": "18:45",
+          "duration": "00:05"
+        },
+        {
+          "event_id": 14554,
+          "title": "Wetter vor acht",
+          "date": "61361",
+          "time": "18:50",
+          "duration": "00:05"
+        },
+        {
+          "event_id": 14555,
+          "title": "Wirtschaft vor acht",
+          "date": "61361",
+          "time": "18:55",
+          "duration": "00:05"
+        },
+        {
+          "event_id": 14556,
+          "title": "Tagesschau",
+          "date": "61361",
+          "time": "19:00",
+          "duration": "00:15"
+        },
+        {
+          "event_id": 14557,
+          "title": "Die Kanzlei (86/91)",
+          "date": "61361",
+          "time": "19:15",
+          "duration": "00:45"
+        },
+        {
+          "event_id": 14558,
+          "title": "In aller Freundschaft (1156)",
+          "date": "61361",
+          "time": "20:00",
+          "duration": "00:45"
+        },
+        {
+          "event_id": 14559,
+          "title": "Report Mainz",
+          "date": "61361",
+          "time": "20:45",
+          "duration": "00:30"
+        },
+        {
+          "event_id": 14560,
+          "title": "Tagesthemen",
+          "date": "61361",
+          "time": "21:15",
+          "duration": "00:35"
+        },
+        {
+          "event_id": 14561,
+          "title": "maischberger",
+          "date": "61361",
+          "time": "21:50",
+          "duration": "01:15"
+        },
+        {
+          "event_id": 14562,
+          "title": "Money Maker",
+          "date": "61361",
+          "time": "23:05",
+          "duration": "00:30"
+        },
+        {
+          "event_id": 14563,
+          "title": "Tagesschau",
+          "date": "61361",
+          "time": "23:35",
+          "duration": "00:10"
+        },
+        {
+          "event_id": 14564,
+          "title": "Die Kanzlei (86/91)",
+          "date": "61361",
+          "time": "23:45",
+          "duration": "00:45"
+        },
+        {
+          "event_id": 14565,
+          "title": "In aller Freundschaft (1156)",
+          "date": "61362",
+          "time": "00:30",
+          "duration": "00:48"
+        },
+        {
+          "event_id": 14566,
+          "title": "Tagesschau",
+          "date": "61362",
+          "time": "01:18",
+          "duration": "00:02"
+        },
+        {
+          "event_id": 14567,
+          "title": "Morden im Norden (94)",
+          "date": "61362",
+          "time": "01:20",
+          "duration": "00:50"
+        },
+        {
+          "event_id": 14568,
+          "title": "maischberger",
+          "date": "61362",
+          "time": "02:10",
+          "duration": "01:15"
+        },
+        {
+          "event_id": 15315,
+          "title": "Brisant",
+          "date": "61362",
+          "time": "03:25",
+          "duration": "00:33"
+        },
+        {
+          "event_id": 14571,
+          "title": "Tagesschau",
+          "date": "61362",
+          "time": "03:58",
+          "duration": "00:02"
+        },
+        {
+          "event_id": 14572,
+          "title": "Report Mainz",
+          "date": "61362",
+          "time": "04:00",
+          "duration": "00:30"
+        },
+        {
+          "event_id": 14577,
+          "title": "ARD-Morgenmagazin",
+          "date": "61362",
+          "time": "04:30",
+          "duration": "03:30"
+        },
+        {
+          "event_id": 14578,
+          "title": "Tagesschau",
+          "date": "61362",
+          "time": "08:00",
+          "duration": "00:05"
+        },
+        {
+          "event_id": 14579,
+          "title": "Watzmann ermittelt (9)",
+          "date": "61362",
+          "time": "08:05",
+          "duration": "00:45"
+        },
+        {
+          "event_id": 14580,
+          "title": "Tagesschau",
+          "date": "61362",
+          "time": "08:50",
+          "duration": "00:10"
+        },
+        {
+          "event_id": 14581,
+          "title": "Evangelischer Gottesdienst zum Buß- Bettag",
+          "date": "61362",
+          "time": "09:00",
+          "duration": "01:00"
+        },
+        {
+          "event_id": 14582,
+          "title": "Tagesschau",
+          "date": "61362",
+          "time": "10:00",
+          "duration": "00:15"
+        },
+        {
+          "event_id": 14583,
+          "title": "Wer weiß denn sowas? (1431)",
+          "date": "61362",
+          "time": "10:15",
+          "duration": "00:45"
+        },
+        {
+          "event_id": 14584,
+          "title": "ZDF-Mittagsmagazin",
+          "date": "61362",
+          "time": "11:00",
+          "duration": "02:00"
+        },
+        {
+          "event_id": 14585,
+          "title": "Tagesschau",
+          "date": "61362",
+          "time": "13:00",
+          "duration": "00:10"
+        },
+        {
+          "event_id": 14586,
+          "title": "Rote Rosen (4423)",
+          "date": "61362",
+          "time": "13:10",
+          "duration": "00:50"
+        },
+        {
+          "event_id": 14587,
+          "title": "Tagesschau",
+          "date": "61362",
+          "time": "14:00",
+          "duration": "00:10"
+        },
+        {
+          "event_id": 14588,
+          "title": "Sturm der Liebe (4676)",
+          "date": "61362",
+          "time": "14:10",
+          "duration": "00:50"
+        },
+        {
+          "event_id": 14589,
+          "title": "Tagesschau",
+          "date": "61362",
+          "time": "15:00",
+          "duration": "00:10"
+        },
+        {
+          "event_id": 14590,
+          "title": "Elefant, Tiger & Co. (443)",
+          "date": "61362",
+          "time": "15:10",
+          "duration": "00:50"
+        },
+        {
+          "event_id": 14591,
+          "title": "Tagesschau",
+          "date": "61362",
+          "time": "16:00",
+          "duration": "00:15"
+        },
+        {
+          "event_id": 14592,
+          "title": "Brisant",
+          "date": "61362",
+          "time": "16:15",
+          "duration": "00:45"
+        },
+        {
+          "event_id": 14593,
+          "title": "Wer weiß denn sowas? (1441)",
+          "date": "61362",
+          "time": "17:00",
+          "duration": "00:50"
+        },
+        {
+          "event_id": 14594,
+          "title": "Hubert ohne Staller (199)",
+          "date": "61362",
+          "time": "17:50",
+          "duration": "00:55"
+        },
+        {
+          "event_id": 14595,
+          "title": "Wissen vor acht - Erde",
+          "date": "61362",
+          "time": "18:45",
+          "duration": "00:05"
+        },
+        {
+          "event_id": 14596,
+          "title": "Wetter vor acht",
+          "date": "61362",
+          "time": "18:50",
+          "duration": "00:05"
+        },
+        {
+          "event_id": 14597,
+          "title": "Wirtschaft vor acht",
+          "date": "61362",
+          "time": "18:55",
+          "duration": "00:05"
+        },
+        {
+          "event_id": 14598,
+          "title": "Tagesschau",
+          "date": "61362",
+          "time": "19:00",
+          "duration": "00:15"
+        },
+        {
+          "event_id": 14599,
+          "title": "Wäldern - Das reine Herz (4)",
+          "date": "61362",
+          "time": "19:15",
+          "duration": "01:30"
+        },
+        {
+          "event_id": 14600,
+          "title": "Plusminus",
+          "date": "61362",
+          "time": "20:45",
+          "duration": "00:30"
+        },
+        {
+          "event_id": 14601,
+          "title": "Tagesthemen",
+          "date": "61362",
+          "time": "21:15",
+          "duration": "00:35"
+        },
+        {
+          "event_id": 14602,
+          "title": "maischberger",
+          "date": "61362",
+          "time": "21:50",
+          "duration": "01:15"
+        },
+        {
+          "event_id": 14603,
+          "title": "Tagesschau",
+          "date": "61362",
+          "time": "23:05",
+          "duration": "00:10"
+        },
+        {
+          "event_id": 14604,
+          "title": "Wäldern - Das reine Herz (4)",
+          "date": "61362",
+          "time": "23:15",
+          "duration": "01:33"
+        },
+        {
+          "event_id": 14605,
+          "title": "Tagesschau",
+          "date": "61363",
+          "time": "00:48",
+          "duration": "00:02"
+        },
+        {
+          "event_id": 14606,
+          "title": "Der Hafenpastor",
+          "date": "61363",
+          "time": "00:50",
+          "duration": "01:30"
+        },
+        {
+          "event_id": 14607,
+          "title": "maischberger",
+          "date": "61363",
+          "time": "02:20",
+          "duration": "01:15"
+        },
+        {
+          "event_id": 14608,
+          "title": "Brisant",
+          "date": "61363",
+          "time": "03:35",
+          "duration": "00:23"
+        },
+        {
+          "event_id": 14609,
+          "title": "Tagesschau",
+          "date": "61363",
+          "time": "03:58",
+          "duration": "00:02"
+        },
+        {
+          "event_id": 14610,
+          "title": "Plusminus",
+          "date": "61363",
+          "time": "04:00",
+          "duration": "00:30"
+        },
+        {
+          "event_id": 14611,
+          "title": "ARD-Morgenmagazin",
+          "date": "61363",
+          "time": "04:30",
+          "duration": "03:30"
+        },
+        {
+          "event_id": 14612,
+          "title": "Tagesschau",
+          "date": "61363",
+          "time": "08:00",
+          "duration": "00:05"
+        },
+        {
+          "event_id": 14613,
+          "title": "Watzmann ermittelt (10)",
+          "date": "61363",
+          "time": "08:05",
+          "duration": "00:50"
+        },
+        {
+          "event_id": 14614,
+          "title": "Morden im Norden (96)",
+          "date": "61363",
+          "time": "08:55",
+          "duration": "00:45"
+        },
+        {
+          "event_id": 14615,
+          "title": "Tagesschau",
+          "date": "61363",
+          "time": "09:40",
+          "duration": "00:05"
+        },
+        {
+          "event_id": 14616,
+          "title": "Meister des Alltags (213)",
+          "date": "61363",
+          "time": "09:45",
+          "duration": "00:30"
+        },
+        {
+          "event_id": 14617,
+          "title": "Wer weiß denn sowas? (1432)",
+          "date": "61363",
+          "time": "10:15",
+          "duration": "00:45"
+        },
+        {
+          "event_id": 14618,
+          "title": "ZDF-Mittagsmagazin",
+          "date": "61363",
+          "time": "11:00",
+          "duration": "02:00"
+        },
+        {
+          "event_id": 14619,
+          "title": "Tagesschau",
+          "date": "61363",
+          "time": "13:00",
+          "duration": "00:10"
+        },
+        {
+          "event_id": 14620,
+          "title": "Rote Rosen (4424)",
+          "date": "61363",
+          "time": "13:10",
+          "duration": "00:50"
+        },
+        {
+          "event_id": 14621,
+          "title": "Tagesschau",
+          "date": "61363",
+          "time": "14:00",
+          "duration": "00:10"
+        },
+        {
+          "event_id": 14622,
+          "title": "Sturm der Liebe (4677)",
+          "date": "61363",
+          "time": "14:10",
+          "duration": "00:50"
+        },
+        {
+          "event_id": 14623,
+          "title": "Tagesschau",
+          "date": "61363",
+          "time": "15:00",
+          "duration": "00:10"
+        },
+        {
+          "event_id": 14624,
+          "title": "Elefant, Tiger & Co. (444)",
+          "date": "61363",
+          "time": "15:10",
+          "duration": "00:50"
+        },
+        {
+          "event_id": 14625,
+          "title": "Tagesschau",
+          "date": "61363",
+          "time": "16:00",
+          "duration": "00:15"
+        },
+        {
+          "event_id": 14626,
+          "title": "Brisant",
+          "date": "61363",
+          "time": "16:15",
+          "duration": "00:45"
+        },
+        {
+          "event_id": 14627,
+          "title": "Wer weiß denn sowas? (1442)",
+          "date": "61363",
+          "time": "17:00",
+          "duration": "00:50"
+        },
+        {
+          "event_id": 14628,
+          "title": "In aller Freundschaft - Die jungen Ärzte (474)",
+          "date": "61363",
+          "time": "17:50",
+          "duration": "00:55"
+        },
+        {
+          "event_id": 14629,
+          "title": "Wissen vor acht - Mensch",
+          "date": "61363",
+          "time": "18:45",
+          "duration": "00:05"
+        },
+        {
+          "event_id": 14630,
+          "title": "Wetter vor acht",
+          "date": "61363",
+          "time": "18:50",
+          "duration": "00:05"
+        },
+        {
+          "event_id": 14631,
+          "title": "Wirtschaft vor acht",
+          "date": "61363",
+          "time": "18:55",
+          "duration": "00:05"
+        },
+        {
+          "event_id": 14632,
+          "title": "Tagesschau",
+          "date": "61363",
+          "time": "19:00",
+          "duration": "00:15"
+        },
+        {
+          "event_id": 14633,
+          "title": "Wolfsland - Muttermord",
+          "date": "61363",
+          "time": "19:15",
+          "duration": "01:30"
+        },
+        {
+          "event_id": 14634,
+          "title": "Panorama",
+          "date": "61363",
+          "time": "20:45",
+          "duration": "00:30"
+        },
+        {
+          "event_id": 14635,
+          "title": "Tagesthemen",
+          "date": "61363",
+          "time": "21:15",
+          "duration": "00:35"
+        },
+        {
+          "event_id": 14636,
+          "title": "Nuhr im Ersten",
+          "date": "61363",
+          "time": "21:50",
+          "duration": "00:45"
+        },
+        {
+          "event_id": 14637,
+          "title": "Die Carolin Kebekus Show",
+          "date": "61363",
+          "time": "22:35",
+          "duration": "00:30"
+        },
+        {
+          "event_id": 14638,
+          "title": "Tagesschau",
+          "date": "61363",
+          "time": "23:05",
+          "duration": "00:10"
+        },
+        {
+          "event_id": 14639,
+          "title": "Wolfsland - Muttermord",
+          "date": "61363",
+          "time": "23:15",
+          "duration": "01:33"
+        },
+        {
+          "event_id": 14640,
+          "title": "Tagesschau",
+          "date": "61364",
+          "time": "00:48",
+          "duration": "00:02"
+        },
+        {
+          "event_id": 14641,
+          "title": "Mankells Wallander - Vermisst",
+          "date": "61364",
+          "time": "00:50",
+          "duration": "01:30"
+        },
+        {
+          "event_id": 14642,
+          "title": "Nuhr im Ersten",
+          "date": "61364",
+          "time": "02:20",
+          "duration": "00:45"
+        },
+        {
+          "event_id": 14643,
+          "title": "Die Carolin Kebekus Show",
+          "date": "61364",
+          "time": "03:05",
+          "duration": "00:30"
+        },
+        {
+          "event_id": 14644,
+          "title": "Brisant",
+          "date": "61364",
+          "time": "03:35",
+          "duration": "00:23"
+        },
+        {
+          "event_id": 14645,
+          "title": "Tagesschau",
+          "date": "61364",
+          "time": "03:58",
+          "duration": "00:02"
+        },
+        {
+          "event_id": 14646,
+          "title": "Panorama",
+          "date": "61364",
+          "time": "04:00",
+          "duration": "00:30"
+        },
+        {
+          "event_id": 14648,
+          "title": "ARD-Morgenmagazin",
+          "date": "61364",
+          "time": "04:30",
+          "duration": "03:30"
+        },
+        {
+          "event_id": 14649,
+          "title": "Tagesschau",
+          "date": "61364",
+          "time": "08:00",
+          "duration": "00:05"
+        },
+        {
+          "event_id": 14650,
+          "title": "Watzmann ermittelt (11)",
+          "date": "61364",
+          "time": "08:05",
+          "duration": "00:50"
+        },
+        {
+          "event_id": 14651,
+          "title": "Morden im Norden (97)",
+          "date": "61364",
+          "time": "08:55",
+          "duration": "00:45"
+        },
+        {
+          "event_id": 14652,
+          "title": "Tagesschau",
+          "date": "61364",
+          "time": "09:40",
+          "duration": "00:05"
+        },
+        {
+          "event_id": 14653,
+          "title": "Meister des Alltags (214)",
+          "date": "61364",
+          "time": "09:45",
+          "duration": "00:30"
+        },
+        {
+          "event_id": 14654,
+          "title": "Wer weiß denn sowas? (1433)",
+          "date": "61364",
+          "time": "10:15",
+          "duration": "00:45"
+        },
+        {
+          "event_id": 14655,
+          "title": "ZDF-Mittagsmagazin",
+          "date": "61364",
+          "time": "11:00",
+          "duration": "02:00"
+        },
+        {
+          "event_id": 14656,
+          "title": "Tagesschau",
+          "date": "61364",
+          "time": "13:00",
+          "duration": "00:10"
+        },
+        {
+          "event_id": 14657,
+          "title": "Rote Rosen (4425)",
+          "date": "61364",
+          "time": "13:10",
+          "duration": "00:50"
+        },
+        {
+          "event_id": 14658,
+          "title": "Tagesschau",
+          "date": "61364",
+          "time": "14:00",
+          "duration": "00:10"
+        },
+        {
+          "event_id": 14659,
+          "title": "Sturm der Liebe (4678)",
+          "date": "61364",
+          "time": "14:10",
+          "duration": "00:50"
+        },
+        {
+          "event_id": 14660,
+          "title": "Tagesschau",
+          "date": "61364",
+          "time": "15:00",
+          "duration": "00:15"
+        },
+        {
+          "event_id": 14661,
+          "title": "In höchster Not - Bergretter im Einsatz (1/2)",
+          "date": "61364",
+          "time": "15:15",
+          "duration": "00:45"
+        },
+        {
+          "event_id": 14662,
+          "title": "Tagesschau",
+          "date": "61364",
+          "time": "16:00",
+          "duration": "00:15"
+        },
+        {
+          "event_id": 14663,
+          "title": "Brisant",
+          "date": "61364",
+          "time": "16:15",
+          "duration": "00:45"
+        },
+        {
+          "event_id": 14664,
+          "title": "Wer weiß denn sowas? (1443)",
+          "date": "61364",
+          "time": "17:00",
+          "duration": "00:50"
+        },
+        {
+          "event_id": 14665,
+          "title": "Quizduell-Olymp (578/589)",
+          "date": "61364",
+          "time": "17:50",
+          "duration": "00:55"
+        },
+        {
+          "event_id": 14666,
+          "title": "Sportschau vor acht",
+          "date": "61364",
+          "time": "18:45",
+          "duration": "00:05"
+        },
+        {
+          "event_id": 14667,
+          "title": "Wetter vor acht",
+          "date": "61364",
+          "time": "18:50",
+          "duration": "00:05"
+        },
+        {
+          "event_id": 14668,
+          "title": "Wirtschaft vor acht",
+          "date": "61364",
+          "time": "18:55",
+          "duration": "00:05"
+        },
+        {
+          "event_id": 14669,
+          "title": "Tagesschau",
+          "date": "61364",
+          "time": "19:00",
+          "duration": "00:15"
+        },
+        {
+          "event_id": 14670,
+          "title": "Zutaten fürs Glück",
+          "date": "61364",
+          "time": "19:15",
+          "duration": "01:30"
+        },
+        {
+          "event_id": 14671,
+          "title": "Tagesthemen",
+          "date": "61364",
+          "time": "20:45",
+          "duration": "00:35"
+        },
+        {
+          "event_id": 14672,
+          "title": "Die Kunst, Olli Dittrich zu sein",
+          "date": "61364",
+          "time": "21:20",
+          "duration": "01:00"
+        },
+        {
+          "event_id": 14673,
+          "title": "Sportschau",
+          "date": "61364",
+          "time": "22:20",
+          "duration": "00:45"
+        },
+        {
+          "event_id": 14674,
+          "title": "Jossi (1/6)",
+          "date": "61364",
+          "time": "23:05",
+          "duration": "00:20"
+        },
+        {
+          "event_id": 14675,
+          "title": "Jossi (2/6)",
+          "date": "61364",
+          "time": "23:25",
+          "duration": "00:30"
+        },
+        {
+          "event_id": 14676,
+          "title": "Jossi (3/6)",
+          "date": "61364",
+          "time": "23:55",
+          "duration": "00:35"
+        },
+        {
+          "event_id": 14677,
+          "title": "Jossi (4/6)",
+          "date": "61365",
+          "time": "00:30",
+          "duration": "00:25"
+        },
+        {
+          "event_id": 14678,
+          "title": "Jossi (5/6)",
+          "date": "61365",
+          "time": "00:55",
+          "duration": "00:30"
+        },
+        {
+          "event_id": 14679,
+          "title": "Jossi (6/6)",
+          "date": "61365",
+          "time": "01:25",
+          "duration": "00:33"
+        },
+        {
+          "event_id": 14680,
+          "title": "Tagesschau",
+          "date": "61365",
+          "time": "01:58",
+          "duration": "00:02"
+        },
+        {
+          "event_id": 14681,
+          "title": "Zutaten fürs Glück",
+          "date": "61365",
+          "time": "02:00",
+          "duration": "01:30"
+        },
+        {
+          "event_id": 14682,
+          "title": "Deutschlandbilder",
+          "date": "61365",
+          "time": "03:30",
+          "duration": "00:13"
+        },
+        {
+          "event_id": 14683,
+          "title": "Tagesschau",
+          "date": "61365",
+          "time": "03:43",
+          "duration": "00:02"
+        },
+        {
+          "event_id": 14684,
+          "title": "Die Tierärzte - Retter mit Herz (19)",
+          "date": "61365",
+          "time": "03:45",
+          "duration": "00:45"
+        },
+        {
+          "event_id": 14686,
+          "title": "Arthur und die Freunde der Tafelrunde (39/52)",
+          "date": "61365",
+          "time": "04:30",
+          "duration": "00:10"
+        },
+        {
+          "event_id": 14687,
+          "title": "Arthur und die Freunde der Tafelrunde (40/52)",
+          "date": "61365",
+          "time": "04:40",
+          "duration": "00:15"
+        },
+        {
+          "event_id": 14688,
+          "title": "Dein großer Tag (11/11)",
+          "date": "61365",
+          "time": "04:55",
+          "duration": "00:25"
+        },
+        {
+          "event_id": 14689,
+          "title": "Elefant, Tiger & Kids: Zoo-Praktikum Backstage (17/18)",
+          "date": "61365",
+          "time": "05:20",
+          "duration": "00:20"
+        },
+        {
+          "event_id": 14690,
+          "title": "Elefant, Tiger & Kids: Zoo-Praktikum Backstage (18/18)",
+          "date": "61365",
+          "time": "05:40",
+          "duration": "00:20"
+        },
+        {
+          "event_id": 14691,
+          "title": "Shaun das Schaf",
+          "date": "61365",
+          "time": "06:00",
+          "duration": "00:10"
+        },
+        {
+          "event_id": 14692,
+          "title": "Nina und die wilden Tiere",
+          "date": "61365",
+          "time": "06:10",
+          "duration": "00:25"
+        },
+        {
+          "event_id": 14693,
+          "title": "Nina und die Haustiere",
+          "date": "61365",
+          "time": "06:35",
+          "duration": "00:15"
+        },
+        {
+          "event_id": 14694,
+          "title": "Checkerin Marina",
+          "date": "61365",
+          "time": "06:50",
+          "duration": "00:25"
+        },
+        {
+          "event_id": 14695,
+          "title": "Wissen macht Ah!",
+          "date": "61365",
+          "time": "07:15",
+          "duration": "00:25"
+        },
+        {
+          "event_id": 14696,
+          "title": "POV - Deine Geschichte zählt",
+          "date": "61365",
+          "time": "07:40",
+          "duration": "00:10"
+        },
+        {
+          "event_id": 14697,
+          "title": "Nils Holgerssons wunderbare Reise (3/4)",
+          "date": "61365",
+          "time": "07:50",
+          "duration": "01:00"
+        },
+        {
+          "event_id": 14698,
+          "title": "Tagesschau",
+          "date": "61365",
+          "time": "08:50",
+          "duration": "00:05"
+        },
+        {
+          "event_id": 14699,
+          "title": "Panda, Gorilla & Co. (317)",
+          "date": "61365",
+          "time": "08:55",
+          "duration": "00:45"
+        },
+        {
+          "event_id": 14700,
+          "title": "Panda, Gorilla & Co. (318)",
+          "date": "61365",
+          "time": "09:40",
+          "duration": "00:50"
+        },
+        {
+          "event_id": 14701,
+          "title": "Quarks im Ersten",
+          "date": "61365",
+          "time": "10:30",
+          "duration": "00:30"
+        },
+        {
+          "event_id": 14702,
+          "title": "Tagesschau",
+          "date": "61365",
+          "time": "11:00",
+          "duration": "00:15"
+        },
+        {
+          "event_id": 14703,
+          "title": "Die Tierärzte - Retter mit Herz (20)",
+          "date": "61365",
+          "time": "11:15",
+          "duration": "00:45"
+        },
+        {
+          "event_id": 14704,
+          "title": "Die Tierärzte - Retter mit Herz (21)",
+          "date": "61365",
+          "time": "12:00",
+          "duration": "00:45"
+        },
+        {
+          "event_id": 14705,
+          "title": "Tagesschau",
+          "date": "61365",
+          "time": "12:45",
+          "duration": "00:15"
+        },
+        {
+          "event_id": 14706,
+          "title": "Nie zu spät",
+          "date": "61365",
+          "time": "13:00",
+          "duration": "01:30"
+        },
+        {
+          "event_id": 14707,
+          "title": "Toni, männlich, Hebamme - Das Glück der Anderen",
+          "date": "61365",
+          "time": "14:30",
+          "duration": "01:30"
+        },
+        {
+          "event_id": 14708,
+          "title": "Tagesschau",
+          "date": "61365",
+          "time": "16:00",
+          "duration": "00:15"
+        },
+        {
+          "event_id": 14709,
+          "title": "Brisant",
+          "date": "61365",
+          "time": "16:15",
+          "duration": "00:37"
+        },
+        {
+          "event_id": 14710,
+          "title": "Das Wetter im Ersten",
+          "date": "61365",
+          "time": "16:52",
+          "duration": "00:08"
+        },
+        {
+          "event_id": 14711,
+          "title": "Sportschau",
+          "date": "61365",
+          "time": "17:00",
+          "duration": "00:30"
+        },
+        {
+          "event_id": 14712,
+          "title": "Sportschau",
+          "date": "61365",
+          "time": "17:30",
+          "duration": "01:27"
+        },
+        {
+          "event_id": 14713,
+          "title": "Lotto am Samstag",
+          "date": "61365",
+          "time": "18:57",
+          "duration": "00:03"
+        },
+        {
+          "event_id": 14714,
+          "title": "Tagesschau",
+          "date": "61365",
+          "time": "19:00",
+          "duration": "00:15"
+        },
+        {
+          "event_id": 14715,
+          "title": "Mordach - Blutiger Schnee (1/2)",
+          "date": "61365",
+          "time": "19:15",
+          "duration": "01:30"
+        },
+        {
+          "event_id": 14716,
+          "title": "Mordach - Blutiger Schnee (2/2)",
+          "date": "61365",
+          "time": "20:45",
+          "duration": "01:30"
+        },
+        {
+          "event_id": 14717,
+          "title": "Tagesthemen",
+          "date": "61365",
+          "time": "22:15",
+          "duration": "00:20"
+        },
+        {
+          "event_id": 14718,
+          "title": "Das Wort zum Sonntag",
+          "date": "61365",
+          "time": "22:35",
+          "duration": "00:05"
+        },
+        {
+          "event_id": 14719,
+          "title": "Die Diplomatin - Böses Spiel",
+          "date": "61365",
+          "time": "22:40",
+          "duration": "01:30"
+        }
+      ]
+    },
+    {
+      "pat_index": 2,
+      "service_id": 4914,
+      "prog_idx": 1085538441,
+      "name": "ServusTV HD Deutschland",
+      "events": [
+        {
+          "event_id": 35401,
+          "title": "Ein Schloss am Wörthersee",
+          "date": "61359",
+          "time": "20:15",
+          "duration": "01:00"
+        },
+        {
+          "event_id": 35402,
+          "title": "Bergwelten",
+          "date": "61359",
+          "time": "21:15",
+          "duration": "01:00"
+        },
+        {
+          "event_id": 35403,
+          "title": "Bergwelten",
+          "date": "61359",
+          "time": "22:15",
+          "duration": "01:00"
+        },
+        {
+          "event_id": 35404,
+          "title": "Genius",
+          "date": "61359",
+          "time": "23:15",
+          "duration": "02:00"
+        },
+        {
+          "event_id": 35405,
+          "title": "AUTO, MOTOR, SEX",
+          "date": "61360",
+          "time": "01:15",
+          "duration": "00:30"
+        },
+        {
+          "event_id": 35406,
+          "title": "GEHEIME MOMENTE",
+          "date": "61360",
+          "time": "01:45",
+          "duration": "00:30"
+        },
+        {
+          "event_id": 35407,
+          "title": "Genius",
+          "date": "61360",
+          "time": "02:15",
+          "duration": "01:00"
+        },
+        {
+          "event_id": 35408,
+          "title": "Barcelona Heat",
+          "date": "61360",
+          "time": "03:15",
+          "duration": "00:30"
+        },
+        {
+          "event_id": 35409,
+          "title": "Little Caprice Homestory",
+          "date": "61360",
+          "time": "03:45",
+          "duration": "00:30"
+        },
+        {
+          "event_id": 35410,
+          "title": "Die Nachfolger - Mein Betrieb wird dein Betrieb",
+          "date": "61360",
+          "time": "04:15",
+          "duration": "00:55"
+        },
+        {
+          "event_id": 35411,
+          "title": "Quizjagd",
+          "date": "61360",
+          "time": "05:10",
+          "duration": "00:55"
+        },
+        {
+          "event_id": 35412,
+          "title": "Der Bergdoktor",
+          "date": "61360",
+          "time": "06:05",
+          "duration": "00:55"
+        },
+        {
+          "event_id": 35413,
+          "title": "Genius",
+          "date": "61360",
+          "time": "07:00",
+          "duration": "01:00"
+        },
+        {
+          "event_id": 35414,
+          "title": "Wetterpanorama",
+          "date": "61360",
+          "time": "08:00",
+          "duration": "01:00"
+        },
+        {
+          "event_id": 35415,
+          "title": "Genius",
+          "date": "61360",
+          "time": "09:00",
+          "duration": "02:00"
+        },
+        {
+          "event_id": 35416,
+          "title": "Die besten Köche der Welt - Zu Gast im Ikarus",
+          "date": "61360",
+          "time": "11:00",
+          "duration": "00:30"
+        },
+        {
+          "event_id": 35417,
+          "title": "Die besten Köche der Welt - Zu Gast im Ikarus",
+          "date": "61360",
+          "time": "11:30",
+          "duration": "00:30"
+        },
+        {
+          "event_id": 35418,
+          "title": "Genius",
+          "date": "61360",
+          "time": "12:00",
+          "duration": "01:00"
+        },
+        {
+          "event_id": 35419,
+          "title": "MareTV",
+          "date": "61360",
+          "time": "13:00",
+          "duration": "00:50"
+        },
+        {
+          "event_id": 35420,
+          "title": "Quizmaster",
+          "date": "61360",
+          "time": "13:50",
+          "duration": "00:35"
+        },
+        {
+          "event_id": 35421,
+          "title": "Quizjagd Classics",
+          "date": "61360",
+          "time": "14:25",
+          "duration": "01:00"
+        },
+        {
+          "event_id": 35422,
+          "title": "Quizjagd Classics",
+          "date": "61360",
+          "time": "15:25",
+          "duration": "00:55"
+        },
+        {
+          "event_id": 35423,
+          "title": "Quizjagd",
+          "date": "61360",
+          "time": "16:20",
+          "duration": "01:00"
+        },
+        {
+          "event_id": 35424,
+          "title": "Ein Schloss am Wörthersee",
+          "date": "61360",
+          "time": "17:20",
+          "duration": "01:00"
+        },
+        {
+          "event_id": 35425,
+          "title": "MareTV",
+          "date": "61360",
+          "time": "18:20",
+          "duration": "00:55"
+        },
+        {
+          "event_id": 35426,
+          "title": "Der Bergdoktor",
+          "date": "61360",
+          "time": "19:15",
+          "duration": "00:55"
+        },
+        {
+          "event_id": 35427,
+          "title": "Der Bergdoktor",
+          "date": "61360",
+          "time": "20:10",
+          "duration": "01:00"
+        },
+        {
+          "event_id": 35428,
+          "title": "\"Mensch-Otto\"",
+          "date": "61360",
+          "time": "21:10",
+          "duration": "01:00"
+        },
+        {
+          "event_id": 35429,
+          "title": "Bergwelten",
+          "date": "61360",
+          "time": "22:10",
+          "duration": "01:05"
+        },
+        {
+          "event_id": 35430,
+          "title": "Genius",
+          "date": "61360",
+          "time": "23:15",
+          "duration": "02:00"
+        },
+        {
+          "event_id": 35431,
+          "title": "Freche Früchtchen 2.0",
+          "date": "61361",
+          "time": "01:15",
+          "duration": "00:15"
+        },
+        {
+          "event_id": 35432,
+          "title": "STREIT LUST SEX",
+          "date": "61361",
+          "time": "01:30",
+          "duration": "00:25"
+        },
+        {
+          "event_id": 35433,
+          "title": "Freche Früchtchen 2.0",
+          "date": "61361",
+          "time": "01:55",
+          "duration": "00:20"
+        },
+        {
+          "event_id": 35434,
+          "title": "Genius",
+          "date": "61361",
+          "time": "02:15",
+          "duration": "01:00"
+        },
+        {
+          "event_id": 35435,
+          "title": "Sexpension Hüttenzauber",
+          "date": "61361",
+          "time": "03:15",
+          "duration": "00:30"
+        },
+        {
+          "event_id": 35436,
+          "title": "Sexcasting",
+          "date": "61361",
+          "time": "03:45",
+          "duration": "00:30"
+        },
+        {
+          "event_id": 35437,
+          "title": "Die Nachfolger - Mein Betrieb wird dein Betrieb",
+          "date": "61361",
+          "time": "04:15",
+          "duration": "00:55"
+        },
+        {
+          "event_id": 35438,
+          "title": "Quizjagd",
+          "date": "61361",
+          "time": "05:10",
+          "duration": "00:55"
+        },
+        {
+          "event_id": 35439,
+          "title": "Der Bergdoktor",
+          "date": "61361",
+          "time": "06:05",
+          "duration": "00:55"
+        },
+        {
+          "event_id": 35440,
+          "title": "Genius",
+          "date": "61361",
+          "time": "07:00",
+          "duration": "01:00"
+        },
+        {
+          "event_id": 35441,
+          "title": "Wetterpanorama",
+          "date": "61361",
+          "time": "08:00",
+          "duration": "01:00"
+        },
+        {
+          "event_id": 35442,
+          "title": "Genius",
+          "date": "61361",
+          "time": "09:00",
+          "duration": "02:00"
+        },
+        {
+          "event_id": 35443,
+          "title": "Die besten Köche der Welt - Zu Gast im Ikarus",
+          "date": "61361",
+          "time": "11:00",
+          "duration": "00:30"
+        },
+        {
+          "event_id": 35444,
+          "title": "Die besten Köche der Welt - Zu Gast im Ikarus",
+          "date": "61361",
+          "time": "11:30",
+          "duration": "00:30"
+        },
+        {
+          "event_id": 35445,
+          "title": "Genius",
+          "date": "61361",
+          "time": "12:00",
+          "duration": "01:00"
+        },
+        {
+          "event_id": 35446,
+          "title": "MareTV",
+          "date": "61361",
+          "time": "13:00",
+          "duration": "00:50"
+        },
+        {
+          "event_id": 35447,
+          "title": "Quizmaster",
+          "date": "61361",
+          "time": "13:50",
+          "duration": "00:35"
+        },
+        {
+          "event_id": 35448,
+          "title": "Quizjagd Classics",
+          "date": "61361",
+          "time": "14:25",
+          "duration": "01:00"
+        },
+        {
+          "event_id": 35449,
+          "title": "Quizjagd Classics",
+          "date": "61361",
+          "time": "15:25",
+          "duration": "00:55"
+        },
+        {
+          "event_id": 35450,
+          "title": "Quizjagd",
+          "date": "61361",
+          "time": "16:20",
+          "duration": "01:00"
+        },
+        {
+          "event_id": 35451,
+          "title": "Ein Schloss am Wörthersee",
+          "date": "61361",
+          "time": "17:20",
+          "duration": "01:00"
+        },
+        {
+          "event_id": 35452,
+          "title": "MareTV",
+          "date": "61361",
+          "time": "18:20",
+          "duration": "00:55"
+        },
+        {
+          "event_id": 35453,
+          "title": "Österreichische Hotellegenden - Traditionshäuser in Familienhand",
+          "date": "61361",
+          "time": "19:15",
+          "duration": "01:00"
+        },
+        {
+          "event_id": 35454,
+          "title": "Österreichische Hotellegenden - Traditionshäuser in Familienhand",
+          "date": "61361",
+          "time": "20:15",
+          "duration": "01:00"
+        },
+        {
+          "event_id": 35455,
+          "title": "Faszination Heimat",
+          "date": "61361",
+          "time": "21:15",
+          "duration": "01:00"
+        },
+        {
+          "event_id": 35456,
+          "title": "Ein Schloss am Wörthersee",
+          "date": "61361",
+          "time": "22:15",
+          "duration": "01:00"
+        },
+        {
+          "event_id": 35457,
+          "title": "Genius",
+          "date": "61361",
+          "time": "23:15",
+          "duration": "02:00"
+        },
+        {
+          "event_id": 35458,
+          "title": "Kopfkino",
+          "date": "61362",
+          "time": "01:15",
+          "duration": "00:45"
+        },
+        {
+          "event_id": 35459,
+          "title": "Freche Früchtchen 2.0",
+          "date": "61362",
+          "time": "02:00",
+          "duration": "00:15"
+        },
+        {
+          "event_id": 35460,
+          "title": "Genius",
+          "date": "61362",
+          "time": "02:15",
+          "duration": "01:00"
+        },
+        {
+          "event_id": 35461,
+          "title": "Gabis Castingcouch",
+          "date": "61362",
+          "time": "03:15",
+          "duration": "00:30"
+        },
+        {
+          "event_id": 35462,
+          "title": "Meine heisse Trainerin",
+          "date": "61362",
+          "time": "03:45",
+          "duration": "00:30"
+        },
+        {
+          "event_id": 35463,
+          "title": "Österreichische Hotellegenden - Traditionshäuser in Familienhand",
+          "date": "61362",
+          "time": "04:15",
+          "duration": "00:55"
+        },
+        {
+          "event_id": 35464,
+          "title": "Quizjagd",
+          "date": "61362",
+          "time": "05:10",
+          "duration": "00:50"
+        },
+        {
+          "event_id": 35465,
+          "title": "Ein Schloss am Wörthersee",
+          "date": "61362",
+          "time": "06:00",
+          "duration": "01:00"
+        },
+        {
+          "event_id": 35466,
+          "title": "Genius",
+          "date": "61362",
+          "time": "07:00",
+          "duration": "01:00"
+        },
+        {
+          "event_id": 35467,
+          "title": "Wetterpanorama",
+          "date": "61362",
+          "time": "08:00",
+          "duration": "01:00"
+        },
+        {
+          "event_id": 35468,
+          "title": "Genius",
+          "date": "61362",
+          "time": "09:00",
+          "duration": "02:00"
+        },
+        {
+          "event_id": 35469,
+          "title": "Die besten Köche der Welt - Zu Gast im Ikarus",
+          "date": "61362",
+          "time": "11:00",
+          "duration": "00:30"
+        },
+        {
+          "event_id": 35470,
+          "title": "Die besten Köche der Welt - Zu Gast im Ikarus",
+          "date": "61362",
+          "time": "11:30",
+          "duration": "00:30"
+        },
+        {
+          "event_id": 35471,
+          "title": "Genius",
+          "date": "61362",
+          "time": "12:00",
+          "duration": "01:00"
+        },
+        {
+          "event_id": 35472,
+          "title": "MareTV",
+          "date": "61362",
+          "time": "13:00",
+          "duration": "00:50"
+        },
+        {
+          "event_id": 35473,
+          "title": "Quizmaster",
+          "date": "61362",
+          "time": "13:50",
+          "duration": "00:35"
+        },
+        {
+          "event_id": 35474,
+          "title": "Quizjagd Classics",
+          "date": "61362",
+          "time": "14:25",
+          "duration": "01:00"
+        },
+        {
+          "event_id": 35475,
+          "title": "Quizjagd Classics",
+          "date": "61362",
+          "time": "15:25",
+          "duration": "00:55"
+        },
+        {
+          "event_id": 35476,
+          "title": "Quizjagd",
+          "date": "61362",
+          "time": "16:20",
+          "duration": "01:00"
+        },
+        {
+          "event_id": 35477,
+          "title": "\"Mensch-Otto\"",
+          "date": "61362",
+          "time": "17:20",
+          "duration": "01:00"
+        },
+        {
+          "event_id": 35478,
+          "title": "MareTV",
+          "date": "61362",
+          "time": "18:20",
+          "duration": "00:55"
+        },
+        {
+          "event_id": 35479,
+          "title": "Hubble Mission Universum",
+          "date": "61362",
+          "time": "19:15",
+          "duration": "01:00"
+        },
+        {
+          "event_id": 35480,
+          "title": "Hubble Mission Universum",
+          "date": "61362",
+          "time": "20:15",
+          "duration": "01:00"
+        },
+        {
+          "event_id": 35481,
+          "title": "Hubble Mission Universum",
+          "date": "61362",
+          "time": "21:15",
+          "duration": "01:00"
+        },
+        {
+          "event_id": 35482,
+          "title": "Hubble Mission Universum",
+          "date": "61362",
+          "time": "22:15",
+          "duration": "01:00"
+        },
+        {
+          "event_id": 35483,
+          "title": "Genius",
+          "date": "61362",
+          "time": "23:15",
+          "duration": "02:00"
+        },
+        {
+          "event_id": 35484,
+          "title": "Mountain Crush",
+          "date": "61363",
+          "time": "01:15",
+          "duration": "00:20"
+        },
+        {
+          "event_id": 35485,
+          "title": "Nudes",
+          "date": "61363",
+          "time": "01:35",
+          "duration": "00:25"
+        },
+        {
+          "event_id": 35486,
+          "title": "Freche Früchtchen 2.0",
+          "date": "61363",
+          "time": "02:00",
+          "duration": "00:15"
+        },
+        {
+          "event_id": 35487,
+          "title": "Genius",
+          "date": "61363",
+          "time": "02:15",
+          "duration": "01:00"
+        },
+        {
+          "event_id": 35488,
+          "title": "Barcelona Heat",
+          "date": "61363",
+          "time": "03:15",
+          "duration": "00:30"
+        },
+        {
+          "event_id": 35489,
+          "title": "Das Yoga-Studio",
+          "date": "61363",
+          "time": "03:45",
+          "duration": "00:30"
+        },
+        {
+          "event_id": 35490,
+          "title": "Österreichische Hotellegenden - Traditionshäuser in Familienhand",
+          "date": "61363",
+          "time": "04:15",
+          "duration": "00:55"
+        },
+        {
+          "event_id": 35491,
+          "title": "Quizjagd",
+          "date": "61363",
+          "time": "05:10",
+          "duration": "00:55"
+        },
+        {
+          "event_id": 35492,
+          "title": "Heimatleuchten",
+          "date": "61363",
+          "time": "06:05",
+          "duration": "00:55"
+        },
+        {
+          "event_id": 35493,
+          "title": "Genius",
+          "date": "61363",
+          "time": "07:00",
+          "duration": "01:00"
+        },
+        {
+          "event_id": 35494,
+          "title": "Wetterpanorama",
+          "date": "61363",
+          "time": "08:00",
+          "duration": "01:00"
+        },
+        {
+          "event_id": 35495,
+          "title": "Genius",
+          "date": "61363",
+          "time": "09:00",
+          "duration": "02:00"
+        },
+        {
+          "event_id": 35496,
+          "title": "Die besten Köche der Welt - Zu Gast im Ikarus",
+          "date": "61363",
+          "time": "11:00",
+          "duration": "00:30"
+        },
+        {
+          "event_id": 35497,
+          "title": "Die besten Köche der Welt - Zu Gast im Ikarus",
+          "date": "61363",
+          "time": "11:30",
+          "duration": "00:30"
+        },
+        {
+          "event_id": 35498,
+          "title": "Genius",
+          "date": "61363",
+          "time": "12:00",
+          "duration": "01:00"
+        },
+        {
+          "event_id": 35499,
+          "title": "MareTV",
+          "date": "61363",
+          "time": "13:00",
+          "duration": "00:50"
+        },
+        {
+          "event_id": 35500,
+          "title": "Quizmaster",
+          "date": "61363",
+          "time": "13:50",
+          "duration": "00:35"
+        },
+        {
+          "event_id": 35501,
+          "title": "Quizjagd Classics",
+          "date": "61363",
+          "time": "14:25",
+          "duration": "01:00"
+        },
+        {
+          "event_id": 35502,
+          "title": "Quizjagd Classics",
+          "date": "61363",
+          "time": "15:25",
+          "duration": "00:55"
+        },
+        {
+          "event_id": 35503,
+          "title": "Quizjagd",
+          "date": "61363",
+          "time": "16:20",
+          "duration": "01:00"
+        },
+        {
+          "event_id": 35504,
+          "title": "Hubble Mission Universum",
+          "date": "61363",
+          "time": "17:20",
+          "duration": "01:00"
+        },
+        {
+          "event_id": 35505,
+          "title": "MareTV",
+          "date": "61363",
+          "time": "18:20",
+          "duration": "00:55"
+        },
+        {
+          "event_id": 35506,
+          "title": "Das Küstenrevier",
+          "date": "61363",
+          "time": "19:15",
+          "duration": "00:45"
+        },
+        {
+          "event_id": 35507,
+          "title": "Das Küstenrevier",
+          "date": "61363",
+          "time": "20:00",
+          "duration": "00:45"
+        },
+        {
+          "event_id": 35508,
+          "title": "Das Küstenrevier",
+          "date": "61363",
+          "time": "20:45",
+          "duration": "00:45"
+        },
+        {
+          "event_id": 35509,
+          "title": "Kommissar Rex",
+          "date": "61363",
+          "time": "21:30",
+          "duration": "00:50"
+        },
+        {
+          "event_id": 35510,
+          "title": "Kommissar Rex",
+          "date": "61363",
+          "time": "22:20",
+          "duration": "00:55"
+        },
+        {
+          "event_id": 35511,
+          "title": "Genius",
+          "date": "61363",
+          "time": "23:15",
+          "duration": "02:00"
+        },
+        {
+          "event_id": 35512,
+          "title": "Barcelona Heat",
+          "date": "61364",
+          "time": "01:15",
+          "duration": "00:30"
+        },
+        {
+          "event_id": 35513,
+          "title": "Die Handwerker-Agentur",
+          "date": "61364",
+          "time": "01:45",
+          "duration": "00:30"
+        },
+        {
+          "event_id": 35514,
+          "title": "Genius",
+          "date": "61364",
+          "time": "02:15",
+          "duration": "01:00"
+        },
+        {
+          "event_id": 35515,
+          "title": "Outdoorsex in Berlin",
+          "date": "61364",
+          "time": "03:15",
+          "duration": "00:25"
+        },
+        {
+          "event_id": 35516,
+          "title": "Das Yoga-Studio",
+          "date": "61364",
+          "time": "03:40",
+          "duration": "00:20"
+        },
+        {
+          "event_id": 35517,
+          "title": "Freche Früchtchen 2.0",
+          "date": "61364",
+          "time": "04:00",
+          "duration": "00:15"
+        },
+        {
+          "event_id": 35518,
+          "title": "Faszination Heimat",
+          "date": "61364",
+          "time": "04:15",
+          "duration": "00:55"
+        },
+        {
+          "event_id": 35519,
+          "title": "Quizjagd",
+          "date": "61364",
+          "time": "05:10",
+          "duration": "00:55"
+        },
+        {
+          "event_id": 35520,
+          "title": "Heimatleuchten",
+          "date": "61364",
+          "time": "06:05",
+          "duration": "00:55"
+        },
+        {
+          "event_id": 35521,
+          "title": "Genius",
+          "date": "61364",
+          "time": "07:00",
+          "duration": "01:00"
+        },
+        {
+          "event_id": 35522,
+          "title": "Wetterpanorama",
+          "date": "61364",
+          "time": "08:00",
+          "duration": "01:00"
+        },
+        {
+          "event_id": 35523,
+          "title": "Genius",
+          "date": "61364",
+          "time": "09:00",
+          "duration": "02:00"
+        },
+        {
+          "event_id": 35524,
+          "title": "Die besten Köche der Welt - Zu Gast im Ikarus",
+          "date": "61364",
+          "time": "11:00",
+          "duration": "00:30"
+        },
+        {
+          "event_id": 35525,
+          "title": "Die besten Köche der Welt - Zu Gast im Ikarus",
+          "date": "61364",
+          "time": "11:30",
+          "duration": "00:30"
+        },
+        {
+          "event_id": 35526,
+          "title": "Genius",
+          "date": "61364",
+          "time": "12:00",
+          "duration": "01:00"
+        },
+        {
+          "event_id": 35527,
+          "title": "MareTV",
+          "date": "61364",
+          "time": "13:00",
+          "duration": "00:50"
+        },
+        {
+          "event_id": 35528,
+          "title": "Quizmaster",
+          "date": "61364",
+          "time": "13:50",
+          "duration": "00:35"
+        },
+        {
+          "event_id": 35529,
+          "title": "Quizjagd Classics",
+          "date": "61364",
+          "time": "14:25",
+          "duration": "01:00"
+        },
+        {
+          "event_id": 35530,
+          "title": "Quizjagd Classics",
+          "date": "61364",
+          "time": "15:25",
+          "duration": "00:55"
+        },
+        {
+          "event_id": 35531,
+          "title": "Quizjagd",
+          "date": "61364",
+          "time": "16:20",
+          "duration": "01:00"
+        },
+        {
+          "event_id": 35532,
+          "title": "Hubble Mission Universum",
+          "date": "61364",
+          "time": "17:20",
+          "duration": "01:00"
+        },
+        {
+          "event_id": 35533,
+          "title": "MareTV",
+          "date": "61364",
+          "time": "18:20",
+          "duration": "00:55"
+        },
+        {
+          "event_id": 35534,
+          "title": "Klinik unter Palmen",
+          "date": "61364",
+          "time": "19:15",
+          "duration": "01:50"
+        },
+        {
+          "event_id": 35535,
+          "title": "Heimatleuchten",
+          "date": "61364",
+          "time": "21:05",
+          "duration": "00:55"
+        },
+        {
+          "event_id": 35536,
+          "title": "Heimatleuchten",
+          "date": "61364",
+          "time": "22:00",
+          "duration": "01:00"
+        },
+        {
+          "event_id": 35537,
+          "title": "Einfach gut leben",
+          "date": "61364",
+          "time": "23:00",
+          "duration": "00:15"
+        },
+        {
+          "event_id": 35538,
+          "title": "Genius",
+          "date": "61364",
+          "time": "23:15",
+          "duration": "02:00"
+        },
+        {
+          "event_id": 35539,
+          "title": "Das Yoga-Studio",
+          "date": "61365",
+          "time": "01:15",
+          "duration": "00:15"
+        },
+        {
+          "event_id": 35540,
+          "title": "Last Minute Deal",
+          "date": "61365",
+          "time": "01:30",
+          "duration": "00:20"
+        },
+        {
+          "event_id": 35541,
+          "title": "GEHEIME MOMENTE",
+          "date": "61365",
+          "time": "01:50",
+          "duration": "00:25"
+        },
+        {
+          "event_id": 35542,
+          "title": "Genius",
+          "date": "61365",
+          "time": "02:15",
+          "duration": "01:00"
+        },
+        {
+          "event_id": 35543,
+          "title": "Die Handwerker-Agentur",
+          "date": "61365",
+          "time": "03:15",
+          "duration": "00:30"
+        },
+        {
+          "event_id": 35544,
+          "title": "Sexcasting",
+          "date": "61365",
+          "time": "03:45",
+          "duration": "00:30"
+        },
+        {
+          "event_id": 35545,
+          "title": "Bergwelten",
+          "date": "61365",
+          "time": "04:15",
+          "duration": "00:55"
+        },
+        {
+          "event_id": 35546,
+          "title": "Hubble Mission Universum",
+          "date": "61365",
+          "time": "05:10",
+          "duration": "00:55"
+        },
+        {
+          "event_id": 35547,
+          "title": "Hubble Mission Universum",
+          "date": "61365",
+          "time": "06:05",
+          "duration": "00:55"
+        },
+        {
+          "event_id": 35548,
+          "title": "Genius",
+          "date": "61365",
+          "time": "07:00",
+          "duration": "01:00"
+        },
+        {
+          "event_id": 35549,
+          "title": "Wetterpanorama",
+          "date": "61365",
+          "time": "08:00",
+          "duration": "01:05"
+        },
+        {
+          "event_id": 35550,
+          "title": "Genius",
+          "date": "61365",
+          "time": "09:05",
+          "duration": "01:35"
+        },
+        {
+          "event_id": 35551,
+          "title": "Grand Prix von Portugal",
+          "date": "61365",
+          "time": "10:40",
+          "duration": "00:10"
+        },
+        {
+          "event_id": 35552,
+          "title": "Grand Prix von Portugal",
+          "date": "61365",
+          "time": "10:50",
+          "duration": "00:45"
+        },
+        {
+          "event_id": 35553,
+          "title": "Grand Prix von Portugal",
+          "date": "61365",
+          "time": "11:35",
+          "duration": "00:20"
+        },
+        {
+          "event_id": 35554,
+          "title": "Einfach gut leben",
+          "date": "61365",
+          "time": "11:55",
+          "duration": "00:10"
+        },
+        {
+          "event_id": 35555,
+          "title": "Genius",
+          "date": "61365",
+          "time": "12:05",
+          "duration": "00:35"
+        },
+        {
+          "event_id": 35556,
+          "title": "Grand Prix von Portugal",
+          "date": "61365",
+          "time": "12:40",
+          "duration": "00:05"
+        },
+        {
+          "event_id": 35557,
+          "title": "Grand Prix von Portugal",
+          "date": "61365",
+          "time": "12:45",
+          "duration": "00:55"
+        },
+        {
+          "event_id": 35558,
+          "title": "Grand Prix von Portugal",
+          "date": "61365",
+          "time": "13:40",
+          "duration": "00:45"
+        },
+        {
+          "event_id": 35559,
+          "title": "Grand Prix von Portugal",
+          "date": "61365",
+          "time": "14:25",
+          "duration": "00:35"
+        },
+        {
+          "event_id": 35560,
+          "title": "Grand Prix von Portugal",
+          "date": "61365",
+          "time": "15:00",
+          "duration": "00:25"
+        },
+        {
+          "event_id": 35561,
+          "title": "Grand Prix von Portugal",
+          "date": "61365",
+          "time": "15:25",
+          "duration": "00:20"
+        },
+        {
+          "event_id": 35562,
+          "title": "Klinik unter Palmen",
+          "date": "61365",
+          "time": "15:45",
+          "duration": "02:00"
+        },
+        {
+          "event_id": 35563,
+          "title": "Das Küstenrevier",
+          "date": "61365",
+          "time": "17:45",
+          "duration": "00:45"
+        },
+        {
+          "event_id": 35564,
+          "title": "Das Küstenrevier",
+          "date": "61365",
+          "time": "18:30",
+          "duration": "00:45"
+        },
+        {
+          "event_id": 35565,
+          "title": "Kommissar Rex",
+          "date": "61365",
+          "time": "19:15",
+          "duration": "00:55"
+        },
+        {
+          "event_id": 35566,
+          "title": "Kommissar Rex",
+          "date": "61365",
+          "time": "20:10",
+          "duration": "00:55"
+        },
+        {
+          "event_id": 35567,
+          "title": "Der Bergdoktor",
+          "date": "61365",
+          "time": "21:05",
+          "duration": "00:55"
+        },
+        {
+          "event_id": 35568,
+          "title": "Der Bergdoktor",
+          "date": "61365",
+          "time": "22:00",
+          "duration": "01:00"
+        },
+        {
+          "event_id": 35569,
+          "title": "Einfach gut leben",
+          "date": "61365",
+          "time": "23:00",
+          "duration": "00:15"
+        },
+        {
+          "event_id": 35570,
+          "title": "Genius",
+          "date": "61365",
+          "time": "23:15",
+          "duration": "02:00"
+        },
+        {
+          "event_id": 35571,
+          "title": "Barcelona Heat",
+          "date": "61366",
+          "time": "01:15",
+          "duration": "00:30"
+        },
+        {
+          "event_id": 35572,
+          "title": "Sexcasting",
+          "date": "61366",
+          "time": "01:45",
+          "duration": "00:30"
+        },
+        {
+          "event_id": 35573,
+          "title": "Genius",
+          "date": "61366",
+          "time": "02:15",
+          "duration": "01:00"
+        },
+        {
+          "event_id": 35574,
+          "title": "Sexgeschichten aus den Bergen",
+          "date": "61366",
+          "time": "03:15",
+          "duration": "00:20"
+        },
+        {
+          "event_id": 35575,
+          "title": "Freche Früchtchen 2.0",
+          "date": "61366",
+          "time": "03:35",
+          "duration": "00:15"
+        },
+        {
+          "event_id": 35576,
+          "title": "STREIT LUST SEX",
+          "date": "61366",
+          "time": "03:50",
+          "duration": "00:25"
+        },
+        {
+          "event_id": 35577,
+          "title": "Bergwelten",
+          "date": "61366",
+          "time": "04:15",
+          "duration": "00:55"
+        },
+        {
+          "event_id": 35578,
+          "title": "Kommissar Rex",
+          "date": "61366",
+          "time": "05:10",
+          "duration": "00:55"
+        },
+        {
+          "event_id": 35579,
+          "title": "Kommissar Rex",
+          "date": "61366",
+          "time": "06:05",
+          "duration": "00:55"
+        },
+        {
+          "event_id": 35580,
+          "title": "Genius",
+          "date": "61366",
+          "time": "07:00",
+          "duration": "01:00"
+        },
+        {
+          "event_id": 35581,
+          "title": "Wetterpanorama",
+          "date": "61366",
+          "time": "08:00",
+          "duration": "01:00"
+        },
+        {
+          "event_id": 35582,
+          "title": "Genius",
+          "date": "61366",
+          "time": "09:00",
+          "duration": "01:35"
+        },
+        {
+          "event_id": 35583,
+          "title": "Grand Prix von Portugal",
+          "date": "61366",
+          "time": "10:35",
+          "duration": "00:40"
+        },
+        {
+          "event_id": 35584,
+          "title": "Grand Prix von Portugal",
+          "date": "61366",
+          "time": "11:15",
+          "duration": "01:00"
+        },
+        {
+          "event_id": 35585,
+          "title": "Grand Prix von Portugal",
+          "date": "61366",
+          "time": "12:15",
+          "duration": "00:45"
+        },
+        {
+          "event_id": 35586,
+          "title": "Grand Prix von Portugal",
+          "date": "61366",
+          "time": "13:00",
+          "duration": "00:45"
+        },
+        {
+          "event_id": 35587,
+          "title": "Grand Prix von Portugal",
+          "date": "61366",
+          "time": "13:45",
+          "duration": "00:30"
+        },
+        {
+          "event_id": 35588,
+          "title": "Grand Prix von Portugal",
+          "date": "61366",
+          "time": "14:15",
+          "duration": "00:15"
+        },
+        {
+          "event_id": 35589,
+          "title": "Grand Prix von Portugal",
+          "date": "61366",
+          "time": "14:30",
+          "duration": "01:00"
+        },
+        {
+          "event_id": 35590,
+          "title": "Penny DEL Hauptrunde",
+          "date": "61366",
+          "time": "15:30",
+          "duration": "02:35"
+        },
+        {
+          "event_id": 35591,
+          "title": "Die Nachfolger - Mein Betrieb wird dein Betrieb",
+          "date": "61366",
+          "time": "18:05",
+          "duration": "00:55"
+        },
+        {
+          "event_id": 35592,
+          "title": "Einfach gut leben",
+          "date": "61366",
+          "time": "19:00",
+          "duration": "00:15"
+        },
+        {
+          "event_id": 35593,
+          "title": "Ein Schloss am Wörthersee",
+          "date": "61366",
+          "time": "19:15",
+          "duration": "01:00"
+        },
+        {
+          "event_id": 35594,
+          "title": "Ein Schloss am Wörthersee",
+          "date": "61366",
+          "time": "20:15",
+          "duration": "01:00"
+        },
+        {
+          "event_id": 35595,
+          "title": "Bergwelten",
+          "date": "61366",
+          "time": "21:15",
+          "duration": "01:00"
+        }
+      ]
+    },
+    {
+      "pat_index": 3,
+      "service_id": 28805,
+      "prog_idx": 1088291089,
+      "name": "VOX Austria",
+      "events": [
+        {
+          "event_id": 45449,
+          "title": "Grill den Henssler",
+          "date": "61359",
+          "time": "19:15",
+          "duration": "03:25"
+        },
+        {
+          "event_id": 45450,
+          "title": "Hot oder Schrott - Die Allestester",
+          "date": "61359",
+          "time": "22:40",
+          "duration": "01:00"
+        },
+        {
+          "event_id": 45451,
+          "title": "Medical Detectives - Geheimnisse der Gerichtsmedizin",
+          "date": "61359",
+          "time": "23:40",
+          "duration": "00:55"
+        },
+        {
+          "event_id": 45452,
+          "title": "Medical Detectives - Geheimnisse der Gerichtsmedizin",
+          "date": "61360",
+          "time": "00:35",
+          "duration": "00:45"
+        },
+        {
+          "event_id": 45453,
+          "title": "Medical Detectives - Geheimnisse der Gerichtsmedizin",
+          "date": "61360",
+          "time": "01:20",
+          "duration": "00:50"
+        },
+        {
+          "event_id": 45454,
+          "title": "Medical Detectives - Geheimnisse der Gerichtsmedizin",
+          "date": "61360",
+          "time": "02:10",
+          "duration": "00:50"
+        },
+        {
+          "event_id": 45455,
+          "title": "Medical Detectives - Geheimnisse der Gerichtsmedizin",
+          "date": "61360",
+          "time": "03:00",
+          "duration": "00:45"
+        },
+        {
+          "event_id": 45456,
+          "title": "Medical Detectives - Geheimnisse der Gerichtsmedizin",
+          "date": "61360",
+          "time": "03:45",
+          "duration": "00:20"
+        },
+        {
+          "event_id": 45875,
+          "title": "Medical Detectives - Geheimnisse der Gerichtsmedizin",
+          "date": "61360",
+          "time": "04:05",
+          "duration": "01:30"
+        },
+        {
+          "event_id": 45333,
+          "title": "CSI: New York",
+          "date": "61360",
+          "time": "05:35",
+          "duration": "00:45"
+        },
+        {
+          "event_id": 45334,
+          "title": "CSI: New York",
+          "date": "61360",
+          "time": "06:20",
+          "duration": "00:50"
+        },
+        {
+          "event_id": 45335,
+          "title": "CSI: Vegas",
+          "date": "61360",
+          "time": "07:10",
+          "duration": "00:45"
+        },
+        {
+          "event_id": 45336,
+          "title": "CSI: Vegas",
+          "date": "61360",
+          "time": "07:55",
+          "duration": "00:50"
+        },
+        {
+          "event_id": 45337,
+          "title": "vox nachrichten",
+          "date": "61360",
+          "time": "08:45",
+          "duration": "00:05"
+        },
+        {
+          "event_id": 45338,
+          "title": "CSI: Vegas",
+          "date": "61360",
+          "time": "08:50",
+          "duration": "00:50"
+        },
+        {
+          "event_id": 45339,
+          "title": "CSI: Vegas",
+          "date": "61360",
+          "time": "09:40",
+          "duration": "00:55"
+        },
+        {
+          "event_id": 45340,
+          "title": "CSI: Vegas",
+          "date": "61360",
+          "time": "10:35",
+          "duration": "00:55"
+        },
+        {
+          "event_id": 45341,
+          "title": "CSI: Miami",
+          "date": "61360",
+          "time": "11:30",
+          "duration": "00:45"
+        },
+        {
+          "event_id": 45342,
+          "title": "CSI: Miami",
+          "date": "61360",
+          "time": "12:15",
+          "duration": "00:55"
+        },
+        {
+          "event_id": 45343,
+          "title": "CSI: Miami",
+          "date": "61360",
+          "time": "13:10",
+          "duration": "00:50"
+        },
+        {
+          "event_id": 45344,
+          "title": "Shopping Queen",
+          "date": "61360",
+          "time": "14:00",
+          "duration": "01:00"
+        },
+        {
+          "event_id": 45345,
+          "title": "Guidos Deko Queen",
+          "date": "61360",
+          "time": "15:00",
+          "duration": "01:00"
+        },
+        {
+          "event_id": 45346,
+          "title": "Zwischen Tüll und Tränen",
+          "date": "61360",
+          "time": "16:00",
+          "duration": "01:00"
+        },
+        {
+          "event_id": 45347,
+          "title": "First Dates - Ein Tisch für zwei",
+          "date": "61360",
+          "time": "17:00",
+          "duration": "01:00"
+        },
+        {
+          "event_id": 45348,
+          "title": "Das perfekte Dinner",
+          "date": "61360",
+          "time": "18:00",
+          "duration": "01:15"
+        },
+        {
+          "event_id": 45349,
+          "title": "Lege kommt auf den Geschmack",
+          "date": "61360",
+          "time": "19:15",
+          "duration": "02:00"
+        },
+        {
+          "event_id": 45350,
+          "title": "Goodbye Deutschland! Die Auswanderer",
+          "date": "61360",
+          "time": "21:15",
+          "duration": "01:05"
+        },
+        {
+          "event_id": 45888,
+          "title": "Goodbye Deutschland! Die Auswanderer",
+          "date": "61360",
+          "time": "22:20",
+          "duration": "01:05"
+        },
+        {
+          "event_id": 45351,
+          "title": "vox nachrichten",
+          "date": "61360",
+          "time": "23:25",
+          "duration": "00:20"
+        },
+        {
+          "event_id": 45352,
+          "title": "Medical Detectives - Geheimnisse der Gerichtsmedizin",
+          "date": "61360",
+          "time": "23:45",
+          "duration": "00:50"
+        },
+        {
+          "event_id": 45353,
+          "title": "Medical Detectives - Geheimnisse der Gerichtsmedizin",
+          "date": "61361",
+          "time": "00:35",
+          "duration": "00:50"
+        },
+        {
+          "event_id": 45354,
+          "title": "Medical Detectives - Geheimnisse der Gerichtsmedizin",
+          "date": "61361",
+          "time": "01:25",
+          "duration": "00:50"
+        },
+        {
+          "event_id": 45355,
+          "title": "Medical Detectives - Geheimnisse der Gerichtsmedizin",
+          "date": "61361",
+          "time": "02:15",
+          "duration": "00:45"
+        },
+        {
+          "event_id": 45356,
+          "title": "Medical Detectives - Geheimnisse der Gerichtsmedizin",
+          "date": "61361",
+          "time": "03:00",
+          "duration": "00:50"
+        },
+        {
+          "event_id": 45357,
+          "title": "Medical Detectives - Geheimnisse der Gerichtsmedizin",
+          "date": "61361",
+          "time": "03:50",
+          "duration": "00:20"
+        },
+        {
+          "event_id": 45879,
+          "title": "Medical Detectives - Geheimnisse der Gerichtsmedizin",
+          "date": "61361",
+          "time": "04:10",
+          "duration": "00:45"
+        },
+        {
+          "event_id": 45358,
+          "title": "CSI: New York",
+          "date": "61361",
+          "time": "04:55",
+          "duration": "00:20"
+        },
+        {
+          "event_id": 45359,
+          "title": "CSI: New York",
+          "date": "61361",
+          "time": "05:15",
+          "duration": "00:50"
+        },
+        {
+          "event_id": 45360,
+          "title": "CSI: New York",
+          "date": "61361",
+          "time": "06:05",
+          "duration": "00:55"
+        },
+        {
+          "event_id": 45361,
+          "title": "CSI: Vegas",
+          "date": "61361",
+          "time": "07:00",
+          "duration": "00:45"
+        },
+        {
+          "event_id": 45362,
+          "title": "CSI: Vegas",
+          "date": "61361",
+          "time": "07:45",
+          "duration": "00:50"
+        },
+        {
+          "event_id": 45363,
+          "title": "vox nachrichten",
+          "date": "61361",
+          "time": "08:35",
+          "duration": "00:05"
+        },
+        {
+          "event_id": 45364,
+          "title": "CSI: Vegas",
+          "date": "61361",
+          "time": "08:40",
+          "duration": "00:55"
+        },
+        {
+          "event_id": 45365,
+          "title": "CSI: Vegas",
+          "date": "61361",
+          "time": "09:35",
+          "duration": "00:50"
+        },
+        {
+          "event_id": 45366,
+          "title": "CSI: Vegas",
+          "date": "61361",
+          "time": "10:25",
+          "duration": "00:55"
+        },
+        {
+          "event_id": 45367,
+          "title": "CSI: Miami",
+          "date": "61361",
+          "time": "11:20",
+          "duration": "00:50"
+        },
+        {
+          "event_id": 45368,
+          "title": "CSI: Miami",
+          "date": "61361",
+          "time": "12:10",
+          "duration": "00:55"
+        },
+        {
+          "event_id": 45369,
+          "title": "CSI: Miami",
+          "date": "61361",
+          "time": "13:05",
+          "duration": "00:55"
+        },
+        {
+          "event_id": 45370,
+          "title": "Shopping Queen",
+          "date": "61361",
+          "time": "14:00",
+          "duration": "01:00"
+        },
+        {
+          "event_id": 45371,
+          "title": "Guidos Deko Queen",
+          "date": "61361",
+          "time": "15:00",
+          "duration": "01:00"
+        },
+        {
+          "event_id": 45372,
+          "title": "Zwischen Tüll und Tränen",
+          "date": "61361",
+          "time": "16:00",
+          "duration": "01:00"
+        },
+        {
+          "event_id": 45373,
+          "title": "First Dates - Ein Tisch für zwei",
+          "date": "61361",
+          "time": "17:00",
+          "duration": "01:00"
+        },
+        {
+          "event_id": 45374,
+          "title": "Das perfekte Dinner",
+          "date": "61361",
+          "time": "18:00",
+          "duration": "01:15"
+        },
+        {
+          "event_id": 45375,
+          "title": "Guidos Deko Queen - Die Challenge",
+          "date": "61361",
+          "time": "19:15",
+          "duration": "02:00"
+        },
+        {
+          "event_id": 45376,
+          "title": "Hot oder Schrott - Die Allestester",
+          "date": "61361",
+          "time": "21:15",
+          "duration": "02:05"
+        },
+        {
+          "event_id": 45377,
+          "title": "vox nachrichten",
+          "date": "61361",
+          "time": "23:20",
+          "duration": "00:20"
+        },
+        {
+          "event_id": 45378,
+          "title": "Medical Detectives - Geheimnisse der Gerichtsmedizin",
+          "date": "61361",
+          "time": "23:40",
+          "duration": "00:55"
+        },
+        {
+          "event_id": 45379,
+          "title": "Medical Detectives - Geheimnisse der Gerichtsmedizin",
+          "date": "61362",
+          "time": "00:35",
+          "duration": "00:50"
+        },
+        {
+          "event_id": 45380,
+          "title": "Medical Detectives - Geheimnisse der Gerichtsmedizin",
+          "date": "61362",
+          "time": "01:25",
+          "duration": "00:50"
+        },
+        {
+          "event_id": 45381,
+          "title": "Medical Detectives - Geheimnisse der Gerichtsmedizin",
+          "date": "61362",
+          "time": "02:15",
+          "duration": "00:50"
+        },
+        {
+          "event_id": 45382,
+          "title": "Medical Detectives - Geheimnisse der Gerichtsmedizin",
+          "date": "61362",
+          "time": "03:05",
+          "duration": "00:45"
+        },
+        {
+          "event_id": 45383,
+          "title": "Medical Detectives - Geheimnisse der Gerichtsmedizin",
+          "date": "61362",
+          "time": "03:50",
+          "duration": "00:05"
+        },
+        {
+          "event_id": 45876,
+          "title": "Medical Detectives - Geheimnisse der Gerichtsmedizin",
+          "date": "61362",
+          "time": "03:55",
+          "duration": "00:35"
+        },
+        {
+          "event_id": 45384,
+          "title": "CSI: New York",
+          "date": "61362",
+          "time": "04:30",
+          "duration": "00:45"
+        },
+        {
+          "event_id": 45307,
+          "title": "CSI: New York",
+          "date": "61362",
+          "time": "05:15",
+          "duration": "00:50"
+        },
+        {
+          "event_id": 45308,
+          "title": "CSI: New York",
+          "date": "61362",
+          "time": "06:05",
+          "duration": "00:55"
+        },
+        {
+          "event_id": 45309,
+          "title": "CSI: Vegas",
+          "date": "61362",
+          "time": "07:00",
+          "duration": "00:45"
+        },
+        {
+          "event_id": 45310,
+          "title": "CSI: Vegas",
+          "date": "61362",
+          "time": "07:45",
+          "duration": "00:50"
+        },
+        {
+          "event_id": 45311,
+          "title": "vox nachrichten",
+          "date": "61362",
+          "time": "08:35",
+          "duration": "00:05"
+        },
+        {
+          "event_id": 45312,
+          "title": "CSI: Vegas",
+          "date": "61362",
+          "time": "08:40",
+          "duration": "00:55"
+        },
+        {
+          "event_id": 45313,
+          "title": "CSI: Vegas",
+          "date": "61362",
+          "time": "09:35",
+          "duration": "00:50"
+        },
+        {
+          "event_id": 45314,
+          "title": "CSI: Vegas",
+          "date": "61362",
+          "time": "10:25",
+          "duration": "00:55"
+        },
+        {
+          "event_id": 45315,
+          "title": "CSI: Miami",
+          "date": "61362",
+          "time": "11:20",
+          "duration": "00:50"
+        },
+        {
+          "event_id": 45316,
+          "title": "CSI: Miami",
+          "date": "61362",
+          "time": "12:10",
+          "duration": "00:55"
+        },
+        {
+          "event_id": 45317,
+          "title": "CSI: Miami",
+          "date": "61362",
+          "time": "13:05",
+          "duration": "00:55"
+        },
+        {
+          "event_id": 45318,
+          "title": "Shopping Queen",
+          "date": "61362",
+          "time": "14:00",
+          "duration": "01:00"
+        },
+        {
+          "event_id": 45319,
+          "title": "Guidos Deko Queen",
+          "date": "61362",
+          "time": "15:00",
+          "duration": "01:00"
+        },
+        {
+          "event_id": 45320,
+          "title": "Zwischen Tüll und Tränen",
+          "date": "61362",
+          "time": "16:00",
+          "duration": "01:00"
+        },
+        {
+          "event_id": 45321,
+          "title": "First Dates - Ein Tisch für zwei",
+          "date": "61362",
+          "time": "17:00",
+          "duration": "01:00"
+        },
+        {
+          "event_id": 45322,
+          "title": "Das perfekte Dinner",
+          "date": "61362",
+          "time": "18:00",
+          "duration": "01:15"
+        },
+        {
+          "event_id": 45323,
+          "title": "Doc Caro - Jedes Leben zählt",
+          "date": "61362",
+          "time": "19:15",
+          "duration": "02:00"
+        },
+        {
+          "event_id": 45324,
+          "title": "Feuer, Wasser, Erde, Luft - Retter in ihrem Element",
+          "date": "61362",
+          "time": "21:15",
+          "duration": "02:05"
+        },
+        {
+          "event_id": 45325,
+          "title": "vox nachrichten",
+          "date": "61362",
+          "time": "23:20",
+          "duration": "00:20"
+        },
+        {
+          "event_id": 45326,
+          "title": "Medical Detectives - Geheimnisse der Gerichtsmedizin",
+          "date": "61362",
+          "time": "23:40",
+          "duration": "00:55"
+        },
+        {
+          "event_id": 45327,
+          "title": "Medical Detectives - Geheimnisse der Gerichtsmedizin",
+          "date": "61363",
+          "time": "00:35",
+          "duration": "00:50"
+        },
+        {
+          "event_id": 45328,
+          "title": "Medical Detectives - Geheimnisse der Gerichtsmedizin",
+          "date": "61363",
+          "time": "01:25",
+          "duration": "00:50"
+        },
+        {
+          "event_id": 45329,
+          "title": "Medical Detectives - Geheimnisse der Gerichtsmedizin",
+          "date": "61363",
+          "time": "02:15",
+          "duration": "00:50"
+        },
+        {
+          "event_id": 45330,
+          "title": "Medical Detectives - Geheimnisse der Gerichtsmedizin",
+          "date": "61363",
+          "time": "03:05",
+          "duration": "00:45"
+        },
+        {
+          "event_id": 45331,
+          "title": "Medical Detectives - Geheimnisse der Gerichtsmedizin",
+          "date": "61363",
+          "time": "03:50",
+          "duration": "00:05"
+        },
+        {
+          "event_id": 45877,
+          "title": "Medical Detectives - Geheimnisse der Gerichtsmedizin",
+          "date": "61363",
+          "time": "03:55",
+          "duration": "00:35"
+        },
+        {
+          "event_id": 45332,
+          "title": "CSI: New York",
+          "date": "61363",
+          "time": "04:30",
+          "duration": "00:45"
+        },
+        {
+          "event_id": 45409,
+          "title": "CSI: New York",
+          "date": "61363",
+          "time": "05:15",
+          "duration": "00:50"
+        },
+        {
+          "event_id": 45410,
+          "title": "CSI: New York",
+          "date": "61363",
+          "time": "06:05",
+          "duration": "00:55"
+        },
+        {
+          "event_id": 45411,
+          "title": "CSI: Vegas",
+          "date": "61363",
+          "time": "07:00",
+          "duration": "00:45"
+        },
+        {
+          "event_id": 45412,
+          "title": "CSI: Vegas",
+          "date": "61363",
+          "time": "07:45",
+          "duration": "00:50"
+        },
+        {
+          "event_id": 45413,
+          "title": "vox nachrichten",
+          "date": "61363",
+          "time": "08:35",
+          "duration": "00:05"
+        },
+        {
+          "event_id": 45414,
+          "title": "CSI: Vegas",
+          "date": "61363",
+          "time": "08:40",
+          "duration": "00:55"
+        },
+        {
+          "event_id": 45415,
+          "title": "CSI: Vegas",
+          "date": "61363",
+          "time": "09:35",
+          "duration": "00:50"
+        },
+        {
+          "event_id": 45416,
+          "title": "CSI: Vegas",
+          "date": "61363",
+          "time": "10:25",
+          "duration": "00:55"
+        },
+        {
+          "event_id": 45417,
+          "title": "CSI: Miami",
+          "date": "61363",
+          "time": "11:20",
+          "duration": "00:50"
+        },
+        {
+          "event_id": 45418,
+          "title": "CSI: Miami",
+          "date": "61363",
+          "time": "12:10",
+          "duration": "00:55"
+        },
+        {
+          "event_id": 45419,
+          "title": "CSI: Miami",
+          "date": "61363",
+          "time": "13:05",
+          "duration": "00:55"
+        },
+        {
+          "event_id": 45420,
+          "title": "Shopping Queen",
+          "date": "61363",
+          "time": "14:00",
+          "duration": "01:00"
+        },
+        {
+          "event_id": 45421,
+          "title": "Guidos Deko Queen",
+          "date": "61363",
+          "time": "15:00",
+          "duration": "01:00"
+        },
+        {
+          "event_id": 45422,
+          "title": "Zwischen Tüll und Tränen",
+          "date": "61363",
+          "time": "16:00",
+          "duration": "01:00"
+        },
+        {
+          "event_id": 45423,
+          "title": "RTL-Spendenmarathon - Wir helfen Kindern",
+          "date": "61363",
+          "time": "17:00",
+          "duration": "00:15"
+        },
+        {
+          "event_id": 45424,
+          "title": "First Dates - Ein Tisch für zwei",
+          "date": "61363",
+          "time": "17:15",
+          "duration": "00:45"
+        },
+        {
+          "event_id": 45425,
+          "title": "Das perfekte Dinner",
+          "date": "61363",
+          "time": "18:00",
+          "duration": "01:15"
+        },
+        {
+          "event_id": 45426,
+          "title": "Der Tag, an dem die Erde stillstand",
+          "date": "61363",
+          "time": "19:15",
+          "duration": "02:10"
+        },
+        {
+          "event_id": 45427,
+          "title": "Harry Potter und der Orden des Phönix",
+          "date": "61363",
+          "time": "21:25",
+          "duration": "02:40"
+        },
+        {
+          "event_id": 45428,
+          "title": "vox nachrichten",
+          "date": "61364",
+          "time": "00:05",
+          "duration": "00:20"
+        },
+        {
+          "event_id": 45429,
+          "title": "Medical Detectives - Geheimnisse der Gerichtsmedizin",
+          "date": "61364",
+          "time": "00:25",
+          "duration": "00:50"
+        },
+        {
+          "event_id": 45430,
+          "title": "Medical Detectives - Geheimnisse der Gerichtsmedizin",
+          "date": "61364",
+          "time": "01:15",
+          "duration": "00:50"
+        },
+        {
+          "event_id": 45431,
+          "title": "Medical Detectives - Geheimnisse der Gerichtsmedizin",
+          "date": "61364",
+          "time": "02:05",
+          "duration": "00:50"
+        },
+        {
+          "event_id": 45432,
+          "title": "Medical Detectives - Geheimnisse der Gerichtsmedizin",
+          "date": "61364",
+          "time": "02:55",
+          "duration": "00:45"
+        },
+        {
+          "event_id": 45433,
+          "title": "Medical Detectives - Geheimnisse der Gerichtsmedizin",
+          "date": "61364",
+          "time": "03:40",
+          "duration": "00:05"
+        },
+        {
+          "event_id": 45878,
+          "title": "Medical Detectives - Geheimnisse der Gerichtsmedizin",
+          "date": "61364",
+          "time": "03:45",
+          "duration": "00:45"
+        },
+        {
+          "event_id": 45434,
+          "title": "CSI: New York",
+          "date": "61364",
+          "time": "04:30",
+          "duration": "00:45"
+        },
+        {
+          "event_id": 45458,
+          "title": "CSI: New York",
+          "date": "61364",
+          "time": "05:15",
+          "duration": "00:50"
+        },
+        {
+          "event_id": 45459,
+          "title": "CSI: New York",
+          "date": "61364",
+          "time": "06:05",
+          "duration": "00:55"
+        },
+        {
+          "event_id": 45460,
+          "title": "CSI: Vegas",
+          "date": "61364",
+          "time": "07:00",
+          "duration": "00:45"
+        },
+        {
+          "event_id": 45461,
+          "title": "CSI: Vegas",
+          "date": "61364",
+          "time": "07:45",
+          "duration": "00:50"
+        },
+        {
+          "event_id": 45462,
+          "title": "vox nachrichten",
+          "date": "61364",
+          "time": "08:35",
+          "duration": "00:05"
+        },
+        {
+          "event_id": 45463,
+          "title": "CSI: Vegas",
+          "date": "61364",
+          "time": "08:40",
+          "duration": "00:55"
+        },
+        {
+          "event_id": 45464,
+          "title": "CSI: Vegas",
+          "date": "61364",
+          "time": "09:35",
+          "duration": "00:50"
+        },
+        {
+          "event_id": 45465,
+          "title": "CSI: Vegas",
+          "date": "61364",
+          "time": "10:25",
+          "duration": "00:55"
+        },
+        {
+          "event_id": 45466,
+          "title": "CSI: Miami",
+          "date": "61364",
+          "time": "11:20",
+          "duration": "00:50"
+        },
+        {
+          "event_id": 45467,
+          "title": "CSI: Miami",
+          "date": "61364",
+          "time": "12:10",
+          "duration": "00:55"
+        },
+        {
+          "event_id": 45468,
+          "title": "CSI: Miami",
+          "date": "61364",
+          "time": "13:05",
+          "duration": "00:55"
+        },
+        {
+          "event_id": 45469,
+          "title": "Shopping Queen",
+          "date": "61364",
+          "time": "14:00",
+          "duration": "01:00"
+        },
+        {
+          "event_id": 45470,
+          "title": "Guidos Deko Queen",
+          "date": "61364",
+          "time": "15:00",
+          "duration": "01:00"
+        },
+        {
+          "event_id": 45471,
+          "title": "Zwischen Tüll und Tränen",
+          "date": "61364",
+          "time": "16:00",
+          "duration": "01:00"
+        },
+        {
+          "event_id": 45472,
+          "title": "First Dates - Ein Tisch für zwei",
+          "date": "61364",
+          "time": "17:00",
+          "duration": "01:00"
+        },
+        {
+          "event_id": 45473,
+          "title": "Das perfekte Dinner",
+          "date": "61364",
+          "time": "18:00",
+          "duration": "01:15"
+        },
+        {
+          "event_id": 45474,
+          "title": "Goodbye Deutschland! Die Auswanderer",
+          "date": "61364",
+          "time": "19:15",
+          "duration": "02:00"
+        },
+        {
+          "event_id": 45475,
+          "title": "Der Tag, an dem die Erde stillstand",
+          "date": "61364",
+          "time": "21:15",
+          "duration": "02:05"
+        },
+        {
+          "event_id": 45476,
+          "title": "vox nachrichten",
+          "date": "61364",
+          "time": "23:20",
+          "duration": "00:20"
+        },
+        {
+          "event_id": 45477,
+          "title": "Medical Detectives - Geheimnisse der Gerichtsmedizin",
+          "date": "61364",
+          "time": "23:40",
+          "duration": "00:55"
+        },
+        {
+          "event_id": 45478,
+          "title": "Medical Detectives - Geheimnisse der Gerichtsmedizin",
+          "date": "61365",
+          "time": "00:35",
+          "duration": "00:50"
+        },
+        {
+          "event_id": 45479,
+          "title": "Medical Detectives - Geheimnisse der Gerichtsmedizin",
+          "date": "61365",
+          "time": "01:25",
+          "duration": "00:50"
+        },
+        {
+          "event_id": 45480,
+          "title": "Medical Detectives - Geheimnisse der Gerichtsmedizin",
+          "date": "61365",
+          "time": "02:15",
+          "duration": "00:50"
+        },
+        {
+          "event_id": 45481,
+          "title": "Medical Detectives - Geheimnisse der Gerichtsmedizin",
+          "date": "61365",
+          "time": "03:05",
+          "duration": "00:50"
+        },
+        {
+          "event_id": 45482,
+          "title": "Medical Detectives - Geheimnisse der Gerichtsmedizin",
+          "date": "61365",
+          "time": "03:55",
+          "duration": "00:10"
+        },
+        {
+          "event_id": 45483,
+          "title": "Medical Detectives - Geheimnisse der Gerichtsmedizin",
+          "date": "61365",
+          "time": "04:05",
+          "duration": "00:50"
+        },
+        {
+          "event_id": 45685,
+          "title": "CSI: New York",
+          "date": "61365",
+          "time": "04:55",
+          "duration": "00:50"
+        },
+        {
+          "event_id": 45510,
+          "title": "Criminal Intent - Verbrechen im Visier",
+          "date": "61365",
+          "time": "05:45",
+          "duration": "00:40"
+        },
+        {
+          "event_id": 45511,
+          "title": "Criminal Intent - Verbrechen im Visier",
+          "date": "61365",
+          "time": "06:25",
+          "duration": "00:55"
+        },
+        {
+          "event_id": 45512,
+          "title": "Criminal Intent - Verbrechen im Visier",
+          "date": "61365",
+          "time": "07:20",
+          "duration": "00:50"
+        },
+        {
+          "event_id": 45513,
+          "title": "Criminal Intent - Verbrechen im Visier",
+          "date": "61365",
+          "time": "08:10",
+          "duration": "00:55"
+        },
+        {
+          "event_id": 45514,
+          "title": "Criminal Intent - Verbrechen im Visier",
+          "date": "61365",
+          "time": "09:05",
+          "duration": "00:55"
+        },
+        {
+          "event_id": 45515,
+          "title": "Criminal Intent - Verbrechen im Visier",
+          "date": "61365",
+          "time": "10:00",
+          "duration": "00:50"
+        },
+        {
+          "event_id": 45516,
+          "title": "Shopping Queen",
+          "date": "61365",
+          "time": "10:50",
+          "duration": "01:00"
+        },
+        {
+          "event_id": 45517,
+          "title": "Shopping Queen",
+          "date": "61365",
+          "time": "11:50",
+          "duration": "01:00"
+        },
+        {
+          "event_id": 45518,
+          "title": "Shopping Queen",
+          "date": "61365",
+          "time": "12:50",
+          "duration": "01:00"
+        },
+        {
+          "event_id": 45519,
+          "title": "Shopping Queen",
+          "date": "61365",
+          "time": "13:50",
+          "duration": "01:00"
+        },
+        {
+          "event_id": 45520,
+          "title": "Shopping Queen",
+          "date": "61365",
+          "time": "14:50",
+          "duration": "01:00"
+        },
+        {
+          "event_id": 45521,
+          "title": "Der Hundeprofi - Rütters Team",
+          "date": "61365",
+          "time": "15:50",
+          "duration": "01:05"
+        },
+        {
+          "event_id": 45522,
+          "title": "hundkatzemaus",
+          "date": "61365",
+          "time": "16:55",
+          "duration": "01:15"
+        },
+        {
+          "event_id": 45523,
+          "title": "Martin Rütters Tierheimhelden",
+          "date": "61365",
+          "time": "18:10",
+          "duration": "01:05"
+        },
+        {
+          "event_id": 45524,
+          "title": "Pearl Harbor",
+          "date": "61365",
+          "time": "19:15",
+          "duration": "03:45"
+        },
+        {
+          "event_id": 45525,
+          "title": "Medical Detectives - Geheimnisse der Gerichtsmedizin",
+          "date": "61365",
+          "time": "23:00",
+          "duration": "01:00"
+        },
+        {
+          "event_id": 45526,
+          "title": "Medical Detectives - Geheimnisse der Gerichtsmedizin",
+          "date": "61366",
+          "time": "00:00",
+          "duration": "00:50"
+        },
+        {
+          "event_id": 45527,
+          "title": "Medical Detectives - Geheimnisse der Gerichtsmedizin",
+          "date": "61366",
+          "time": "00:50",
+          "duration": "00:50"
+        },
+        {
+          "event_id": 45528,
+          "title": "Medical Detectives - Geheimnisse der Gerichtsmedizin",
+          "date": "61366",
+          "time": "01:40",
+          "duration": "00:50"
+        },
+        {
+          "event_id": 45529,
+          "title": "Medical Detectives - Geheimnisse der Gerichtsmedizin",
+          "date": "61366",
+          "time": "02:30",
+          "duration": "00:50"
+        },
+        {
+          "event_id": 45530,
+          "title": "Medical Detectives - Geheimnisse der Gerichtsmedizin",
+          "date": "61366",
+          "time": "03:20",
+          "duration": "00:35"
+        },
+        {
+          "event_id": 45531,
+          "title": "Medical Detectives - Geheimnisse der Gerichtsmedizin",
+          "date": "61366",
+          "time": "03:55",
+          "duration": "00:10"
+        },
+        {
+          "event_id": 45882,
+          "title": "Medical Detectives - Geheimnisse der Gerichtsmedizin",
+          "date": "61366",
+          "time": "04:05",
+          "duration": "00:45"
+        },
+        {
+          "event_id": 45532,
+          "title": "CSI: New York",
+          "date": "61366",
+          "time": "04:50",
+          "duration": "00:50"
+        },
+        {
+          "event_id": 45533,
+          "title": "Criminal Intent - Verbrechen im Visier",
+          "date": "61366",
+          "time": "05:40",
+          "duration": "00:40"
+        },
+        {
+          "event_id": 45534,
+          "title": "Criminal Intent - Verbrechen im Visier",
+          "date": "61366",
+          "time": "06:20",
+          "duration": "00:50"
+        },
+        {
+          "event_id": 45535,
+          "title": "Criminal Intent - Verbrechen im Visier",
+          "date": "61366",
+          "time": "07:10",
+          "duration": "00:55"
+        },
+        {
+          "event_id": 45536,
+          "title": "Criminal Intent - Verbrechen im Visier",
+          "date": "61366",
+          "time": "08:05",
+          "duration": "00:55"
+        },
+        {
+          "event_id": 45538,
+          "title": "Criminal Intent - Verbrechen im Visier",
+          "date": "61366",
+          "time": "09:00",
+          "duration": "00:55"
+        },
+        {
+          "event_id": 45537,
+          "title": "Criminal Intent - Verbrechen im Visier",
+          "date": "61366",
+          "time": "09:55",
+          "duration": "00:50"
+        },
+        {
+          "event_id": 45539,
+          "title": "Criminal Intent - Verbrechen im Visier",
+          "date": "61366",
+          "time": "10:45",
+          "duration": "00:40"
+        },
+        {
+          "event_id": 45540,
+          "title": "Criminal Intent - Verbrechen im Visier",
+          "date": "61366",
+          "time": "11:25",
+          "duration": "00:55"
+        },
+        {
+          "event_id": 45541,
+          "title": "Criminal Intent - Verbrechen im Visier",
+          "date": "61366",
+          "time": "12:20",
+          "duration": "00:55"
+        },
+        {
+          "event_id": 45542,
+          "title": "Criminal Intent - Verbrechen im Visier",
+          "date": "61366",
+          "time": "13:15",
+          "duration": "00:50"
+        },
+        {
+          "event_id": 45543,
+          "title": "Criminal Intent - Verbrechen im Visier",
+          "date": "61366",
+          "time": "14:05",
+          "duration": "00:55"
+        },
+        {
+          "event_id": 45544,
+          "title": "Die Tuning Profis",
+          "date": "61366",
+          "time": "15:00",
+          "duration": "01:00"
+        },
+        {
+          "event_id": 45545,
+          "title": "auto mobil - Das VOX Automagazin",
+          "date": "61366",
+          "time": "16:00",
+          "duration": "01:10"
+        },
+        {
+          "event_id": 45546,
+          "title": "Die Beet-Brüder",
+          "date": "61366",
+          "time": "17:10",
+          "duration": "02:05"
+        },
+        {
+          "event_id": 45547,
+          "title": "Grill den Henssler",
+          "date": "61366",
+          "time": "19:15",
+          "duration": "03:20"
+        }
+      ]
+    },
+    {
+      "pat_index": 4,
+      "service_id": 28800,
+      "prog_idx": 1088291088,
+      "name": "RTL Austria",
+      "events": [
+        {
+          "event_id": 51226,
+          "title": "NFL LIVE",
+          "date": "61359",
+          "time": "18:00",
+          "duration": "03:25"
+        },
+        {
+          "event_id": 51227,
+          "title": "NFL LIVE",
+          "date": "61359",
+          "time": "21:25",
+          "duration": "03:35"
+        },
+        {
+          "event_id": 51228,
+          "title": "NFL LIVE",
+          "date": "61360",
+          "time": "01:00",
+          "duration": "03:25"
+        },
+        {
+          "event_id": 51229,
+          "title": "Der Blaulicht Report",
+          "date": "61360",
+          "time": "04:25",
+          "duration": "00:30"
+        },
+        {
+          "event_id": 52207,
+          "title": "Der Blaulicht Report",
+          "date": "61360",
+          "time": "04:55",
+          "duration": "00:05"
+        },
+        {
+          "event_id": 51248,
+          "title": "Deutschland am Morgen",
+          "date": "61360",
+          "time": "05:00",
+          "duration": "00:10"
+        },
+        {
+          "event_id": 52205,
+          "title": "Der Blaulicht Report",
+          "date": "61360",
+          "time": "05:10",
+          "duration": "02:50"
+        },
+        {
+          "event_id": 51249,
+          "title": "Gute Zeiten, schlechte Zeiten",
+          "date": "61360",
+          "time": "08:00",
+          "duration": "00:30"
+        },
+        {
+          "event_id": 51250,
+          "title": "Verklag mich doch!",
+          "date": "61360",
+          "time": "08:30",
+          "duration": "00:30"
+        },
+        {
+          "event_id": 51251,
+          "title": "Ulrich Wetzel - Das Strafgericht",
+          "date": "61360",
+          "time": "09:00",
+          "duration": "01:00"
+        },
+        {
+          "event_id": 51252,
+          "title": "Barbara Salesch - Das Strafgericht",
+          "date": "61360",
+          "time": "10:00",
+          "duration": "01:00"
+        },
+        {
+          "event_id": 51253,
+          "title": "Punkt 12 - Das RTL-Mittagsjournal",
+          "date": "61360",
+          "time": "11:00",
+          "duration": "03:00"
+        },
+        {
+          "event_id": 51254,
+          "title": "Barbara Salesch - Das Strafgericht",
+          "date": "61360",
+          "time": "14:00",
+          "duration": "00:55"
+        },
+        {
+          "event_id": 51255,
+          "title": "Ulrich Wetzel - Das Strafgericht",
+          "date": "61360",
+          "time": "14:55",
+          "duration": "01:05"
+        },
+        {
+          "event_id": 51573,
+          "title": "Ulrich Wetzel - Das Jugendgericht",
+          "date": "61360",
+          "time": "16:00",
+          "duration": "00:30"
+        },
+        {
+          "event_id": 51257,
+          "title": "Unter uns",
+          "date": "61360",
+          "time": "16:30",
+          "duration": "00:30"
+        },
+        {
+          "event_id": 51258,
+          "title": "Explosiv - Das Magazin",
+          "date": "61360",
+          "time": "17:00",
+          "duration": "00:30"
+        },
+        {
+          "event_id": 51259,
+          "title": "Exclusiv - Das Starmagazin",
+          "date": "61360",
+          "time": "17:30",
+          "duration": "00:15"
+        },
+        {
+          "event_id": 51260,
+          "title": "RTL Aktuell",
+          "date": "61360",
+          "time": "17:45",
+          "duration": "00:20"
+        },
+        {
+          "event_id": 51261,
+          "title": "Alles was zählt",
+          "date": "61360",
+          "time": "18:05",
+          "duration": "00:35"
+        },
+        {
+          "event_id": 51262,
+          "title": "Gute Zeiten, schlechte Zeiten",
+          "date": "61360",
+          "time": "18:40",
+          "duration": "00:35"
+        },
+        {
+          "event_id": 51263,
+          "title": "Bauer sucht Frau",
+          "date": "61360",
+          "time": "19:15",
+          "duration": "02:15"
+        },
+        {
+          "event_id": 51264,
+          "title": "Ralf, der Bauernreporter",
+          "date": "61360",
+          "time": "21:30",
+          "duration": "00:55"
+        },
+        {
+          "event_id": 51265,
+          "title": "SPIEGEL TV",
+          "date": "61360",
+          "time": "22:25",
+          "duration": "00:35"
+        },
+        {
+          "event_id": 51266,
+          "title": "RTL Nachtjournal",
+          "date": "61360",
+          "time": "23:00",
+          "duration": "00:35"
+        },
+        {
+          "event_id": 51267,
+          "title": "Justice - Die Justizreportage",
+          "date": "61360",
+          "time": "23:35",
+          "duration": "00:40"
+        },
+        {
+          "event_id": 51268,
+          "title": "Seitenwechsel - Die Welt mit anderen Augen sehen",
+          "date": "61361",
+          "time": "00:15",
+          "duration": "00:55"
+        },
+        {
+          "event_id": 51269,
+          "title": "NFL LIVE",
+          "date": "61361",
+          "time": "01:10",
+          "duration": "03:15"
+        },
+        {
+          "event_id": 51270,
+          "title": "Der Blaulicht Report",
+          "date": "61361",
+          "time": "04:25",
+          "duration": "00:35"
+        },
+        {
+          "event_id": 51271,
+          "title": "Deutschland am Morgen",
+          "date": "61361",
+          "time": "05:00",
+          "duration": "03:00"
+        },
+        {
+          "event_id": 51272,
+          "title": "Gute Zeiten, schlechte Zeiten",
+          "date": "61361",
+          "time": "08:00",
+          "duration": "00:30"
+        },
+        {
+          "event_id": 51273,
+          "title": "Verklag mich doch!",
+          "date": "61361",
+          "time": "08:30",
+          "duration": "00:30"
+        },
+        {
+          "event_id": 51274,
+          "title": "Ulrich Wetzel - Das Strafgericht",
+          "date": "61361",
+          "time": "09:00",
+          "duration": "01:00"
+        },
+        {
+          "event_id": 51275,
+          "title": "Barbara Salesch - Das Strafgericht",
+          "date": "61361",
+          "time": "10:00",
+          "duration": "01:00"
+        },
+        {
+          "event_id": 51276,
+          "title": "Punkt 12 - Das RTL-Mittagsjournal",
+          "date": "61361",
+          "time": "11:00",
+          "duration": "03:00"
+        },
+        {
+          "event_id": 51277,
+          "title": "Barbara Salesch - Das Strafgericht",
+          "date": "61361",
+          "time": "14:00",
+          "duration": "00:55"
+        },
+        {
+          "event_id": 51278,
+          "title": "Ulrich Wetzel - Das Strafgericht",
+          "date": "61361",
+          "time": "14:55",
+          "duration": "01:05"
+        },
+        {
+          "event_id": 51571,
+          "title": "Ulrich Wetzel - Das Jugendgericht",
+          "date": "61361",
+          "time": "16:00",
+          "duration": "00:30"
+        },
+        {
+          "event_id": 51280,
+          "title": "Unter uns",
+          "date": "61361",
+          "time": "16:30",
+          "duration": "00:30"
+        },
+        {
+          "event_id": 51281,
+          "title": "Explosiv - Das Magazin",
+          "date": "61361",
+          "time": "17:00",
+          "duration": "00:30"
+        },
+        {
+          "event_id": 51282,
+          "title": "Exclusiv - Das Starmagazin",
+          "date": "61361",
+          "time": "17:30",
+          "duration": "00:15"
+        },
+        {
+          "event_id": 51283,
+          "title": "RTL Aktuell",
+          "date": "61361",
+          "time": "17:45",
+          "duration": "00:20"
+        },
+        {
+          "event_id": 51284,
+          "title": "Alles was zählt",
+          "date": "61361",
+          "time": "18:05",
+          "duration": "00:35"
+        },
+        {
+          "event_id": 51285,
+          "title": "Gute Zeiten, schlechte Zeiten",
+          "date": "61361",
+          "time": "18:40",
+          "duration": "00:35"
+        },
+        {
+          "event_id": 51286,
+          "title": "Bauer sucht Frau",
+          "date": "61361",
+          "time": "19:15",
+          "duration": "02:15"
+        },
+        {
+          "event_id": 51287,
+          "title": "Extra - Das RTL Magazin",
+          "date": "61361",
+          "time": "21:30",
+          "duration": "01:30"
+        },
+        {
+          "event_id": 51288,
+          "title": "RTL Nachtjournal",
+          "date": "61361",
+          "time": "23:00",
+          "duration": "00:25"
+        },
+        {
+          "event_id": 51289,
+          "title": "RTL Nachtjournal Spezial: Ministerpräsident Markus Söder im Interview",
+          "date": "61361",
+          "time": "23:25",
+          "duration": "00:20"
+        },
+        {
+          "event_id": 51290,
+          "title": "CSI: Miami",
+          "date": "61361",
+          "time": "23:45",
+          "duration": "00:50"
+        },
+        {
+          "event_id": 51291,
+          "title": "CSI: Miami",
+          "date": "61362",
+          "time": "00:35",
+          "duration": "00:45"
+        },
+        {
+          "event_id": 51292,
+          "title": "CSI: Miami",
+          "date": "61362",
+          "time": "01:20",
+          "duration": "00:45"
+        },
+        {
+          "event_id": 51293,
+          "title": "CSI: Den Tätern auf der Spur",
+          "date": "61362",
+          "time": "02:05",
+          "duration": "00:50"
+        },
+        {
+          "event_id": 51294,
+          "title": "CSI: Den Tätern auf der Spur",
+          "date": "61362",
+          "time": "02:55",
+          "duration": "00:40"
+        },
+        {
+          "event_id": 51295,
+          "title": "CSI: Den Tätern auf der Spur",
+          "date": "61362",
+          "time": "03:35",
+          "duration": "00:45"
+        },
+        {
+          "event_id": 51296,
+          "title": "CSI: Den Tätern auf der Spur",
+          "date": "61362",
+          "time": "04:20",
+          "duration": "00:40"
+        },
+        {
+          "event_id": 51353,
+          "title": "Deutschland am Morgen",
+          "date": "61362",
+          "time": "05:00",
+          "duration": "03:00"
+        },
+        {
+          "event_id": 51354,
+          "title": "Gute Zeiten, schlechte Zeiten",
+          "date": "61362",
+          "time": "08:00",
+          "duration": "00:30"
+        },
+        {
+          "event_id": 51355,
+          "title": "Verklag mich doch!",
+          "date": "61362",
+          "time": "08:30",
+          "duration": "00:30"
+        },
+        {
+          "event_id": 51356,
+          "title": "Ulrich Wetzel - Das Strafgericht",
+          "date": "61362",
+          "time": "09:00",
+          "duration": "01:00"
+        },
+        {
+          "event_id": 51357,
+          "title": "Barbara Salesch - Das Strafgericht",
+          "date": "61362",
+          "time": "10:00",
+          "duration": "01:00"
+        },
+        {
+          "event_id": 51358,
+          "title": "Punkt 12 - Das RTL-Mittagsjournal",
+          "date": "61362",
+          "time": "11:00",
+          "duration": "03:00"
+        },
+        {
+          "event_id": 51359,
+          "title": "Barbara Salesch - Das Strafgericht",
+          "date": "61362",
+          "time": "14:00",
+          "duration": "00:55"
+        },
+        {
+          "event_id": 51360,
+          "title": "Ulrich Wetzel - Das Strafgericht",
+          "date": "61362",
+          "time": "14:55",
+          "duration": "01:05"
+        },
+        {
+          "event_id": 51569,
+          "title": "Ulrich Wetzel - Das Jugendgericht",
+          "date": "61362",
+          "time": "16:00",
+          "duration": "00:30"
+        },
+        {
+          "event_id": 51362,
+          "title": "Unter uns",
+          "date": "61362",
+          "time": "16:30",
+          "duration": "00:30"
+        },
+        {
+          "event_id": 51363,
+          "title": "Explosiv - Das Magazin",
+          "date": "61362",
+          "time": "17:00",
+          "duration": "00:30"
+        },
+        {
+          "event_id": 51364,
+          "title": "Exclusiv - Das Starmagazin",
+          "date": "61362",
+          "time": "17:30",
+          "duration": "00:15"
+        },
+        {
+          "event_id": 51365,
+          "title": "RTL Aktuell",
+          "date": "61362",
+          "time": "17:45",
+          "duration": "00:20"
+        },
+        {
+          "event_id": 51366,
+          "title": "Alles was zählt",
+          "date": "61362",
+          "time": "18:05",
+          "duration": "00:35"
+        },
+        {
+          "event_id": 51367,
+          "title": "Gute Zeiten, schlechte Zeiten",
+          "date": "61362",
+          "time": "18:40",
+          "duration": "00:35"
+        },
+        {
+          "event_id": 51368,
+          "title": "Inside Dr. Oetker - Die Geheimnisse von Pizza, Pudding & Co",
+          "date": "61362",
+          "time": "19:15",
+          "duration": "02:15"
+        },
+        {
+          "event_id": 51369,
+          "title": "stern TV",
+          "date": "61362",
+          "time": "21:30",
+          "duration": "01:30"
+        },
+        {
+          "event_id": 51370,
+          "title": "RTL Nachtjournal",
+          "date": "61362",
+          "time": "23:00",
+          "duration": "00:25"
+        },
+        {
+          "event_id": 51371,
+          "title": "RTL Nachtjournal Spezial: Eine außergewöhnliche Flüchtlingsgeschichte",
+          "date": "61362",
+          "time": "23:25",
+          "duration": "00:20"
+        },
+        {
+          "event_id": 51372,
+          "title": "CSI: Miami",
+          "date": "61362",
+          "time": "23:45",
+          "duration": "00:50"
+        },
+        {
+          "event_id": 51373,
+          "title": "CSI: Miami",
+          "date": "61363",
+          "time": "00:35",
+          "duration": "00:45"
+        },
+        {
+          "event_id": 51374,
+          "title": "CSI: Miami",
+          "date": "61363",
+          "time": "01:20",
+          "duration": "00:45"
+        },
+        {
+          "event_id": 51375,
+          "title": "CSI: Den Tätern auf der Spur",
+          "date": "61363",
+          "time": "02:05",
+          "duration": "00:50"
+        },
+        {
+          "event_id": 51376,
+          "title": "CSI: Den Tätern auf der Spur",
+          "date": "61363",
+          "time": "02:55",
+          "duration": "00:40"
+        },
+        {
+          "event_id": 51377,
+          "title": "CSI: Den Tätern auf der Spur",
+          "date": "61363",
+          "time": "03:35",
+          "duration": "00:45"
+        },
+        {
+          "event_id": 51378,
+          "title": "CSI: Den Tätern auf der Spur",
+          "date": "61363",
+          "time": "04:20",
+          "duration": "00:40"
+        },
+        {
+          "event_id": 51327,
+          "title": "Deutschland am Morgen",
+          "date": "61363",
+          "time": "05:00",
+          "duration": "03:00"
+        },
+        {
+          "event_id": 51328,
+          "title": "Gute Zeiten, schlechte Zeiten",
+          "date": "61363",
+          "time": "08:00",
+          "duration": "00:30"
+        },
+        {
+          "event_id": 51329,
+          "title": "Verklag mich doch!",
+          "date": "61363",
+          "time": "08:30",
+          "duration": "00:30"
+        },
+        {
+          "event_id": 51330,
+          "title": "Ulrich Wetzel - Das Strafgericht",
+          "date": "61363",
+          "time": "09:00",
+          "duration": "01:00"
+        },
+        {
+          "event_id": 51331,
+          "title": "Barbara Salesch - Das Strafgericht",
+          "date": "61363",
+          "time": "10:00",
+          "duration": "01:00"
+        },
+        {
+          "event_id": 51332,
+          "title": "Punkt 12 - Das RTL-Mittagsjournal",
+          "date": "61363",
+          "time": "11:00",
+          "duration": "03:00"
+        },
+        {
+          "event_id": 51333,
+          "title": "Barbara Salesch - Das Strafgericht",
+          "date": "61363",
+          "time": "14:00",
+          "duration": "00:55"
+        },
+        {
+          "event_id": 51334,
+          "title": "Ulrich Wetzel - Das Strafgericht",
+          "date": "61363",
+          "time": "14:55",
+          "duration": "01:05"
+        },
+        {
+          "event_id": 51572,
+          "title": "Ulrich Wetzel - Das Jugendgericht",
+          "date": "61363",
+          "time": "16:00",
+          "duration": "00:30"
+        },
+        {
+          "event_id": 51336,
+          "title": "Unter uns",
+          "date": "61363",
+          "time": "16:30",
+          "duration": "00:30"
+        },
+        {
+          "event_id": 51337,
+          "title": "RTL-Spendenmarathon - Wir helfen Kindern",
+          "date": "61363",
+          "time": "17:00",
+          "duration": "00:30"
+        },
+        {
+          "event_id": 51338,
+          "title": "Exclusiv - Das Starmagazin",
+          "date": "61363",
+          "time": "17:30",
+          "duration": "00:15"
+        },
+        {
+          "event_id": 51339,
+          "title": "RTL Aktuell",
+          "date": "61363",
+          "time": "17:45",
+          "duration": "00:20"
+        },
+        {
+          "event_id": 51340,
+          "title": "RTL-Spendenmarathon - Wir helfen Kindern",
+          "date": "61363",
+          "time": "18:05",
+          "duration": "00:05"
+        },
+        {
+          "event_id": 51341,
+          "title": "Alles was zählt",
+          "date": "61363",
+          "time": "18:10",
+          "duration": "00:30"
+        },
+        {
+          "event_id": 51342,
+          "title": "Gute Zeiten, schlechte Zeiten",
+          "date": "61363",
+          "time": "18:40",
+          "duration": "00:35"
+        },
+        {
+          "event_id": 51343,
+          "title": "Wer wird Millionär?",
+          "date": "61363",
+          "time": "19:15",
+          "duration": "02:05"
+        },
+        {
+          "event_id": 51344,
+          "title": "RTL Spendenmarathon Spezial 2026 - Die Hilfe der Stars - Teil 1",
+          "date": "61363",
+          "time": "21:20",
+          "duration": "00:15"
+        },
+        {
+          "event_id": 51345,
+          "title": "Wer wird Millionär?",
+          "date": "61363",
+          "time": "21:35",
+          "duration": "01:25"
+        },
+        {
+          "event_id": 51346,
+          "title": "RTL Spendenmarathon Spezial 2026 - Die Hilfe der Stars - Teil 2",
+          "date": "61363",
+          "time": "23:00",
+          "duration": "00:30"
+        },
+        {
+          "event_id": 51347,
+          "title": "RTL Nachtjournal",
+          "date": "61363",
+          "time": "23:30",
+          "duration": "00:35"
+        },
+        {
+          "event_id": 51348,
+          "title": "RTL-Spendenmarathon - Wir helfen Kindern",
+          "date": "61364",
+          "time": "00:05",
+          "duration": "00:10"
+        },
+        {
+          "event_id": 51349,
+          "title": "Stars im Einsatz - Die RTL-Spendenmarathon-Reportage",
+          "date": "61364",
+          "time": "00:15",
+          "duration": "00:50"
+        },
+        {
+          "event_id": 51350,
+          "title": "RTL-Spendenmarathon - Wir helfen Kindern",
+          "date": "61364",
+          "time": "01:05",
+          "duration": "00:05"
+        },
+        {
+          "event_id": 51351,
+          "title": "NFL LIVE",
+          "date": "61364",
+          "time": "01:10",
+          "duration": "03:15"
+        },
+        {
+          "event_id": 51352,
+          "title": "RTL-Spendenmarathon - Wir helfen Kindern",
+          "date": "61364",
+          "time": "04:25",
+          "duration": "00:35"
+        },
+        {
+          "event_id": 51297,
+          "title": "Deutschland am Morgen",
+          "date": "61364",
+          "time": "05:00",
+          "duration": "03:00"
+        },
+        {
+          "event_id": 51298,
+          "title": "RTL-Spendenmarathon - Wir helfen Kindern",
+          "date": "61364",
+          "time": "08:00",
+          "duration": "00:05"
+        },
+        {
+          "event_id": 51299,
+          "title": "Gute Zeiten, schlechte Zeiten",
+          "date": "61364",
+          "time": "08:05",
+          "duration": "00:25"
+        },
+        {
+          "event_id": 51300,
+          "title": "Verklag mich doch!",
+          "date": "61364",
+          "time": "08:30",
+          "duration": "00:30"
+        },
+        {
+          "event_id": 51301,
+          "title": "RTL-Spendenmarathon - Wir helfen Kindern",
+          "date": "61364",
+          "time": "09:00",
+          "duration": "00:05"
+        },
+        {
+          "event_id": 51302,
+          "title": "Ulrich Wetzel - Das Strafgericht",
+          "date": "61364",
+          "time": "09:05",
+          "duration": "00:55"
+        },
+        {
+          "event_id": 51303,
+          "title": "RTL-Spendenmarathon - Wir helfen Kindern",
+          "date": "61364",
+          "time": "10:00",
+          "duration": "00:05"
+        },
+        {
+          "event_id": 51304,
+          "title": "Barbara Salesch - Das Strafgericht",
+          "date": "61364",
+          "time": "10:05",
+          "duration": "00:55"
+        },
+        {
+          "event_id": 51305,
+          "title": "Punkt 12 - Das RTL-Mittagsjournal",
+          "date": "61364",
+          "time": "11:00",
+          "duration": "03:00"
+        },
+        {
+          "event_id": 51306,
+          "title": "RTL-Spendenmarathon - Wir helfen Kindern",
+          "date": "61364",
+          "time": "14:00",
+          "duration": "00:05"
+        },
+        {
+          "event_id": 51307,
+          "title": "Barbara Salesch - Das Strafgericht",
+          "date": "61364",
+          "time": "14:05",
+          "duration": "00:55"
+        },
+        {
+          "event_id": 51308,
+          "title": "RTL-Spendenmarathon - Wir helfen Kindern",
+          "date": "61364",
+          "time": "15:00",
+          "duration": "00:05"
+        },
+        {
+          "event_id": 51309,
+          "title": "Ulrich Wetzel - Das Strafgericht",
+          "date": "61364",
+          "time": "15:05",
+          "duration": "00:55"
+        },
+        {
+          "event_id": 51310,
+          "title": "RTL-Spendenmarathon - Wir helfen Kindern",
+          "date": "61364",
+          "time": "16:00",
+          "duration": "00:05"
+        },
+        {
+          "event_id": 51570,
+          "title": "Ulrich Wetzel - Das Jugendgericht",
+          "date": "61364",
+          "time": "16:05",
+          "duration": "00:25"
+        },
+        {
+          "event_id": 51312,
+          "title": "Unter uns",
+          "date": "61364",
+          "time": "16:30",
+          "duration": "00:30"
+        },
+        {
+          "event_id": 51313,
+          "title": "RTL-Spendenmarathon - Wir helfen Kindern",
+          "date": "61364",
+          "time": "17:00",
+          "duration": "00:30"
+        },
+        {
+          "event_id": 51314,
+          "title": "Exclusiv - Das Starmagazin",
+          "date": "61364",
+          "time": "17:30",
+          "duration": "00:15"
+        },
+        {
+          "event_id": 51315,
+          "title": "RTL Aktuell",
+          "date": "61364",
+          "time": "17:45",
+          "duration": "00:20"
+        },
+        {
+          "event_id": 51316,
+          "title": "Alles was zählt",
+          "date": "61364",
+          "time": "18:05",
+          "duration": "00:35"
+        },
+        {
+          "event_id": 51317,
+          "title": "Gute Zeiten, schlechte Zeiten",
+          "date": "61364",
+          "time": "18:40",
+          "duration": "00:35"
+        },
+        {
+          "event_id": 51318,
+          "title": "Ninja Warrior Germany - Die stärkste Show Deutschlands",
+          "date": "61364",
+          "time": "19:15",
+          "duration": "02:50"
+        },
+        {
+          "event_id": 51319,
+          "title": "Ehrlich Brothers live! Dream & Fly",
+          "date": "61364",
+          "time": "22:05",
+          "duration": "00:55"
+        },
+        {
+          "event_id": 51320,
+          "title": "RTL Nachtjournal",
+          "date": "61364",
+          "time": "23:00",
+          "duration": "00:25"
+        },
+        {
+          "event_id": 52210,
+          "title": "RTL Nachtjournal Spezial",
+          "date": "61364",
+          "time": "23:25",
+          "duration": "00:20"
+        },
+        {
+          "event_id": 51321,
+          "title": "CSI: Miami",
+          "date": "61364",
+          "time": "23:45",
+          "duration": "00:50"
+        },
+        {
+          "event_id": 51322,
+          "title": "CSI: Miami",
+          "date": "61365",
+          "time": "00:35",
+          "duration": "00:45"
+        },
+        {
+          "event_id": 51323,
+          "title": "CSI: Miami",
+          "date": "61365",
+          "time": "01:20",
+          "duration": "00:45"
+        },
+        {
+          "event_id": 52211,
+          "title": "Der Blaulicht Report",
+          "date": "61365",
+          "time": "02:05",
+          "duration": "00:40"
+        },
+        {
+          "event_id": 51324,
+          "title": "CSI: Den Tätern auf der Spur",
+          "date": "61365",
+          "time": "02:45",
+          "duration": "00:45"
+        },
+        {
+          "event_id": 51326,
+          "title": "Formel 1: Heineken Grand Prix von Las Vegas 2026 - Qualifying",
+          "date": "61365",
+          "time": "03:30",
+          "duration": "01:45"
+        },
+        {
+          "event_id": 51436,
+          "title": "Der Blaulicht Report",
+          "date": "61365",
+          "time": "05:15",
+          "duration": "01:00"
+        },
+        {
+          "event_id": 51437,
+          "title": "Weihnachten in Blue Ridge Mountain",
+          "date": "61365",
+          "time": "06:15",
+          "duration": "01:45"
+        },
+        {
+          "event_id": 51438,
+          "title": "Unwrapping Christmas - Zwei Weihnachtsdates für Lily",
+          "date": "61365",
+          "time": "08:00",
+          "duration": "01:40"
+        },
+        {
+          "event_id": 51439,
+          "title": "Unwrapping Christmas - Eine Weihnachtsgala für Olivia",
+          "date": "61365",
+          "time": "09:40",
+          "duration": "01:40"
+        },
+        {
+          "event_id": 51440,
+          "title": "Geteilte Weihnacht",
+          "date": "61365",
+          "time": "11:20",
+          "duration": "01:45"
+        },
+        {
+          "event_id": 51441,
+          "title": "Drei Wünsche zum Fest - Zurück ins Weihnachtsglück",
+          "date": "61365",
+          "time": "13:05",
+          "duration": "01:55"
+        },
+        {
+          "event_id": 51442,
+          "title": "Christmas at the Plaza - Verliebt in New York",
+          "date": "61365",
+          "time": "15:00",
+          "duration": "01:45"
+        },
+        {
+          "event_id": 51444,
+          "title": "Exclusiv am Samstag",
+          "date": "61365",
+          "time": "16:45",
+          "duration": "01:00"
+        },
+        {
+          "event_id": 51445,
+          "title": "RTL Aktuell",
+          "date": "61365",
+          "time": "17:45",
+          "duration": "00:20"
+        },
+        {
+          "event_id": 51446,
+          "title": "Life - Menschen, Momente, Geschichten",
+          "date": "61365",
+          "time": "18:05",
+          "duration": "01:10"
+        },
+        {
+          "event_id": 51447,
+          "title": "Harry Potter und der Halbblutprinz",
+          "date": "61365",
+          "time": "19:15",
+          "duration": "03:00"
+        },
+        {
+          "event_id": 51448,
+          "title": "Ehrlich Brothers live! No Limits - Die große Stadionshow",
+          "date": "61365",
+          "time": "22:15",
+          "duration": "01:55"
+        },
+        {
+          "event_id": 51449,
+          "title": "Blade 2",
+          "date": "61366",
+          "time": "00:10",
+          "duration": "02:00"
+        },
+        {
+          "event_id": 51450,
+          "title": "Der Blaulicht Report",
+          "date": "61366",
+          "time": "02:10",
+          "duration": "00:50"
+        },
+        {
+          "event_id": 51451,
+          "title": "Formel 1: Heineken Grand Prix von Las Vegas 2026 - Das Rennen",
+          "date": "61366",
+          "time": "03:00",
+          "duration": "03:15"
+        },
+        {
+          "event_id": 51424,
+          "title": "Der Blaulicht Report",
+          "date": "61366",
+          "time": "06:15",
+          "duration": "00:50"
+        },
+        {
+          "event_id": 51425,
+          "title": "The Christmas Charade - Mission Weihnachtsliebe",
+          "date": "61366",
+          "time": "07:05",
+          "duration": "01:45"
+        },
+        {
+          "event_id": 51426,
+          "title": "A '90s Christmas - Eine weihnachtliche Zeitreise",
+          "date": "61366",
+          "time": "08:50",
+          "duration": "01:35"
+        },
+        {
+          "event_id": 51427,
+          "title": "Joyful Mrs. Miracle - Unser wunderbarer Weihnachtsengel",
+          "date": "61366",
+          "time": "10:25",
+          "duration": "01:40"
+        },
+        {
+          "event_id": 51428,
+          "title": "Take Me Back For Christmas - Ein Weihnachtswunsch wird wahr",
+          "date": "61366",
+          "time": "12:05",
+          "duration": "01:45"
+        },
+        {
+          "event_id": 51429,
+          "title": "Harry Potter und der Halbblutprinz",
+          "date": "61366",
+          "time": "13:50",
+          "duration": "02:55"
+        },
+        {
+          "event_id": 51430,
+          "title": "Exclusiv Weekend",
+          "date": "61366",
+          "time": "16:45",
+          "duration": "01:00"
+        },
+        {
+          "event_id": 51431,
+          "title": "RTL Aktuell",
+          "date": "61366",
+          "time": "17:45",
+          "duration": "00:15"
+        },
+        {
+          "event_id": 51432,
+          "title": "NFL LIVE",
+          "date": "61366",
+          "time": "18:00",
+          "duration": "03:25"
+        },
+        {
+          "event_id": 51433,
+          "title": "NFL LIVE",
+          "date": "61366",
+          "time": "21:25",
+          "duration": "03:35"
+        }
+      ]
+    },
+    {
+      "pat_index": 5,
+      "service_id": 20002,
+      "prog_idx": 1087766750,
+      "name": "ProSieben Austria",
+      "events": []
+    },
+    {
+      "pat_index": 6,
+      "service_id": 20005,
+      "prog_idx": 1087766753,
+      "name": "SAT.1 A",
+      "events": []
+    },
+    {
+      "pat_index": 7,
+      "service_id": 11130,
+      "prog_idx": 1085735056,
+      "name": "zdf_neo HD",
+      "events": [
+        {
+          "event_id": 17155,
+          "title": "Terra X",
+          "date": "61358",
+          "time": "09:30",
+          "duration": "00:40"
+        },
+        {
+          "event_id": 17156,
+          "title": "Terra X",
+          "date": "61358",
+          "time": "10:10",
+          "duration": "00:45"
+        },
+        {
+          "event_id": 17157,
+          "title": "Terra X",
+          "date": "61358",
+          "time": "10:55",
+          "duration": "00:45"
+        },
+        {
+          "event_id": 17158,
+          "title": "Terra X",
+          "date": "61358",
+          "time": "11:40",
+          "duration": "00:45"
+        },
+        {
+          "event_id": 17159,
+          "title": "Terra X",
+          "date": "61358",
+          "time": "12:25",
+          "duration": "00:45"
+        },
+        {
+          "event_id": 17160,
+          "title": "Terra X",
+          "date": "61358",
+          "time": "13:10",
+          "duration": "00:45"
+        },
+        {
+          "event_id": 17161,
+          "title": "Terra X",
+          "date": "61358",
+          "time": "13:55",
+          "duration": "00:45"
+        },
+        {
+          "event_id": 17162,
+          "title": "Terra X",
+          "date": "61358",
+          "time": "14:40",
+          "duration": "00:45"
+        },
+        {
+          "event_id": 17163,
+          "title": "Terra X",
+          "date": "61358",
+          "time": "15:25",
+          "duration": "00:45"
+        },
+        {
+          "event_id": 17164,
+          "title": "Terra X",
+          "date": "61358",
+          "time": "16:10",
+          "duration": "00:45"
+        },
+        {
+          "event_id": 17165,
+          "title": "MAITHINK X - Die Show",
+          "date": "61358",
+          "time": "16:55",
+          "duration": "00:30"
+        },
+        {
+          "event_id": 17166,
+          "title": "Die glorreichen 10",
+          "date": "61358",
+          "time": "17:25",
+          "duration": "00:45"
+        },
+        {
+          "event_id": 17167,
+          "title": "Die glorreichen 10",
+          "date": "61358",
+          "time": "18:10",
+          "duration": "00:40"
+        },
+        {
+          "event_id": 17168,
+          "title": "Sketch History",
+          "date": "61358",
+          "time": "18:50",
+          "duration": "00:25"
+        },
+        {
+          "event_id": 17169,
+          "title": "Lakeview Terrace",
+          "date": "61358",
+          "time": "19:15",
+          "duration": "01:45"
+        },
+        {
+          "event_id": 17170,
+          "title": "Verblendung",
+          "date": "61358",
+          "time": "21:00",
+          "duration": "02:25"
+        },
+        {
+          "event_id": 17171,
+          "title": "Mr. Brooks - Der Mörder in dir",
+          "date": "61358",
+          "time": "23:25",
+          "duration": "01:50"
+        }
+      ]
+    },
+    {
+      "pat_index": 8,
+      "service_id": 20004,
+      "prog_idx": 1087766752,
+      "name": "Kabel 1 Austria",
+      "events": []
+    },
+    {
+      "pat_index": 9,
+      "service_id": 28810,
+      "prog_idx": 1088291090,
+      "name": "RTLZWEI Austria",
+      "events": [
+        {
+          "event_id": 16765,
+          "title": "Planet der Affen - Survival",
+          "date": "61359",
+          "time": "19:15",
+          "duration": "02:45"
+        },
+        {
+          "event_id": 16766,
+          "title": "Godzilla Minus One",
+          "date": "61359",
+          "time": "22:00",
+          "duration": "02:35"
+        },
+        {
+          "event_id": 16624,
+          "title": "Blackout -  Im Netz des Kartells",
+          "date": "61360",
+          "time": "00:35",
+          "duration": "01:30"
+        },
+        {
+          "event_id": 16767,
+          "title": "Planet der Affen - Survival",
+          "date": "61360",
+          "time": "02:05",
+          "duration": "02:05"
+        },
+        {
+          "event_id": 16651,
+          "title": "Der Trödeltrupp - Das Geld liegt im Keller",
+          "date": "61360",
+          "time": "04:10",
+          "duration": "00:50"
+        },
+        {
+          "event_id": 16634,
+          "title": "Der Trödeltrupp - Das Geld liegt im Keller",
+          "date": "61360",
+          "time": "05:00",
+          "duration": "01:00"
+        },
+        {
+          "event_id": 16635,
+          "title": "Der Trödeltrupp - Das Geld liegt im Keller",
+          "date": "61360",
+          "time": "06:00",
+          "duration": "01:00"
+        },
+        {
+          "event_id": 16674,
+          "title": "Der Trödeltrupp - Das Geld liegt im Keller",
+          "date": "61360",
+          "time": "07:00",
+          "duration": "01:00"
+        },
+        {
+          "event_id": 16680,
+          "title": "Der Trödeltrupp - Das Geld liegt im Keller",
+          "date": "61360",
+          "time": "08:00",
+          "duration": "01:00"
+        },
+        {
+          "event_id": 16681,
+          "title": "Der Trödeltrupp - Das Geld liegt im Keller",
+          "date": "61360",
+          "time": "09:00",
+          "duration": "01:00"
+        },
+        {
+          "event_id": 16735,
+          "title": "Der Trödeltrupp - Das Geld liegt im Keller",
+          "date": "61360",
+          "time": "10:00",
+          "duration": "01:55"
+        },
+        {
+          "event_id": 16736,
+          "title": "Der Trödeltrupp - Das Geld liegt im Keller",
+          "date": "61360",
+          "time": "11:55",
+          "duration": "01:00"
+        },
+        {
+          "event_id": 16682,
+          "title": "SOS - Retter im Einsatz",
+          "date": "61360",
+          "time": "12:55",
+          "duration": "01:05"
+        },
+        {
+          "event_id": 16737,
+          "title": "SOS - Retter im Einsatz",
+          "date": "61360",
+          "time": "14:00",
+          "duration": "01:00"
+        },
+        {
+          "event_id": 16636,
+          "title": "RTLZWEI News",
+          "date": "61360",
+          "time": "15:00",
+          "duration": "00:04"
+        },
+        {
+          "event_id": 16738,
+          "title": "RTLZWEI Wetter",
+          "date": "61360",
+          "time": "15:04",
+          "duration": "00:01"
+        },
+        {
+          "event_id": 16683,
+          "title": "Hartz und herzlich - Tag für Tag",
+          "date": "61360",
+          "time": "15:05",
+          "duration": "01:00"
+        },
+        {
+          "event_id": 16684,
+          "title": "Hartz Rot Gold",
+          "date": "61360",
+          "time": "16:05",
+          "duration": "01:00"
+        },
+        {
+          "event_id": 16685,
+          "title": "Hartz und herzlich - Tag für Tag",
+          "date": "61360",
+          "time": "17:05",
+          "duration": "01:00"
+        },
+        {
+          "event_id": 16739,
+          "title": "Berlin - Tag & Nacht",
+          "date": "61360",
+          "time": "18:05",
+          "duration": "01:10"
+        },
+        {
+          "event_id": 16637,
+          "title": "Hartes Deutschland - Leben im Brennpunkt",
+          "date": "61360",
+          "time": "19:15",
+          "duration": "02:05"
+        },
+        {
+          "event_id": 16740,
+          "title": "Hartes Deutschland - Leben im Brennpunkt",
+          "date": "61360",
+          "time": "21:20",
+          "duration": "01:55"
+        },
+        {
+          "event_id": 16675,
+          "title": "Der Promihof",
+          "date": "61360",
+          "time": "23:15",
+          "duration": "01:00"
+        },
+        {
+          "event_id": 16676,
+          "title": "Der Promihof",
+          "date": "61361",
+          "time": "00:15",
+          "duration": "01:00"
+        },
+        {
+          "event_id": 17064,
+          "title": "Hartes Deutschland - Leben im Brennpunkt",
+          "date": "61361",
+          "time": "01:15",
+          "duration": "01:40"
+        },
+        {
+          "event_id": 16741,
+          "title": "EXKLUSIV - DIE REPORTAGE",
+          "date": "61361",
+          "time": "02:55",
+          "duration": "01:15"
+        },
+        {
+          "event_id": 16679,
+          "title": "Der Trödeltrupp - Das Geld liegt im Keller",
+          "date": "61361",
+          "time": "04:10",
+          "duration": "00:50"
+        },
+        {
+          "event_id": 16628,
+          "title": "Der Trödeltrupp - Das Geld liegt im Keller",
+          "date": "61361",
+          "time": "05:00",
+          "duration": "01:00"
+        },
+        {
+          "event_id": 16629,
+          "title": "Der Trödeltrupp - Das Geld liegt im Keller",
+          "date": "61361",
+          "time": "06:00",
+          "duration": "01:00"
+        },
+        {
+          "event_id": 16643,
+          "title": "Der Trödeltrupp - Das Geld liegt im Keller",
+          "date": "61361",
+          "time": "07:00",
+          "duration": "01:00"
+        },
+        {
+          "event_id": 16644,
+          "title": "Der Trödeltrupp - Das Geld liegt im Keller",
+          "date": "61361",
+          "time": "08:00",
+          "duration": "01:00"
+        },
+        {
+          "event_id": 16699,
+          "title": "Der Trödeltrupp - Das Geld liegt im Keller",
+          "date": "61361",
+          "time": "09:00",
+          "duration": "01:00"
+        },
+        {
+          "event_id": 16700,
+          "title": "Der Trödeltrupp - Das Geld liegt im Keller",
+          "date": "61361",
+          "time": "10:00",
+          "duration": "01:55"
+        },
+        {
+          "event_id": 16749,
+          "title": "Der Trödeltrupp - Das Geld liegt im Keller",
+          "date": "61361",
+          "time": "11:55",
+          "duration": "01:00"
+        },
+        {
+          "event_id": 16701,
+          "title": "SOS - Retter im Einsatz",
+          "date": "61361",
+          "time": "12:55",
+          "duration": "01:05"
+        },
+        {
+          "event_id": 16750,
+          "title": "SOS - Retter im Einsatz",
+          "date": "61361",
+          "time": "14:00",
+          "duration": "01:00"
+        },
+        {
+          "event_id": 16630,
+          "title": "RTLZWEI News",
+          "date": "61361",
+          "time": "15:00",
+          "duration": "00:04"
+        },
+        {
+          "event_id": 16751,
+          "title": "RTLZWEI Wetter",
+          "date": "61361",
+          "time": "15:04",
+          "duration": "00:01"
+        },
+        {
+          "event_id": 16702,
+          "title": "Hartz und herzlich - Tag für Tag",
+          "date": "61361",
+          "time": "15:05",
+          "duration": "01:00"
+        },
+        {
+          "event_id": 16703,
+          "title": "Hartz Rot Gold",
+          "date": "61361",
+          "time": "16:05",
+          "duration": "01:00"
+        },
+        {
+          "event_id": 16704,
+          "title": "Hartz und herzlich - Tag für Tag",
+          "date": "61361",
+          "time": "17:05",
+          "duration": "01:00"
+        },
+        {
+          "event_id": 16752,
+          "title": "Berlin - Tag & Nacht",
+          "date": "61361",
+          "time": "18:05",
+          "duration": "01:10"
+        },
+        {
+          "event_id": 16631,
+          "title": "Hartz und herzlich",
+          "date": "61361",
+          "time": "19:15",
+          "duration": "02:00"
+        },
+        {
+          "event_id": 16645,
+          "title": "Hartz und herzlich",
+          "date": "61361",
+          "time": "21:15",
+          "duration": "02:00"
+        },
+        {
+          "event_id": 16753,
+          "title": "Armes Deutschland - Stempeln oder abrackern?",
+          "date": "61361",
+          "time": "23:15",
+          "duration": "01:40"
+        },
+        {
+          "event_id": 16646,
+          "title": "Hartz und herzlich",
+          "date": "61362",
+          "time": "00:55",
+          "duration": "01:45"
+        },
+        {
+          "event_id": 16705,
+          "title": "Hartz Rot Gold",
+          "date": "61362",
+          "time": "02:40",
+          "duration": "01:30"
+        },
+        {
+          "event_id": 16647,
+          "title": "Der Trödeltrupp - Das Geld liegt im Keller",
+          "date": "61362",
+          "time": "04:10",
+          "duration": "00:50"
+        },
+        {
+          "event_id": 16621,
+          "title": "Der Trödeltrupp - Das Geld liegt im Keller",
+          "date": "61362",
+          "time": "05:00",
+          "duration": "01:00"
+        },
+        {
+          "event_id": 16622,
+          "title": "Der Trödeltrupp - Das Geld liegt im Keller",
+          "date": "61362",
+          "time": "06:00",
+          "duration": "01:00"
+        },
+        {
+          "event_id": 16693,
+          "title": "Der Trödeltrupp - Das Geld liegt im Keller",
+          "date": "61362",
+          "time": "07:00",
+          "duration": "01:00"
+        },
+        {
+          "event_id": 16662,
+          "title": "Der Trödeltrupp - Das Geld liegt im Keller",
+          "date": "61362",
+          "time": "08:00",
+          "duration": "01:00"
+        },
+        {
+          "event_id": 16694,
+          "title": "Der Trödeltrupp - Das Geld liegt im Keller",
+          "date": "61362",
+          "time": "09:00",
+          "duration": "01:00"
+        },
+        {
+          "event_id": 16726,
+          "title": "Der Trödeltrupp - Das Geld liegt im Keller",
+          "date": "61362",
+          "time": "10:00",
+          "duration": "00:55"
+        },
+        {
+          "event_id": 16727,
+          "title": "Der Trödeltrupp - Das Geld liegt im Keller",
+          "date": "61362",
+          "time": "10:55",
+          "duration": "01:00"
+        },
+        {
+          "event_id": 16728,
+          "title": "Der Trödeltrupp - Das Geld liegt im Keller",
+          "date": "61362",
+          "time": "11:55",
+          "duration": "01:00"
+        },
+        {
+          "event_id": 16695,
+          "title": "SOS - Retter im Einsatz",
+          "date": "61362",
+          "time": "12:55",
+          "duration": "01:05"
+        },
+        {
+          "event_id": 16729,
+          "title": "SOS - Retter im Einsatz",
+          "date": "61362",
+          "time": "14:00",
+          "duration": "01:00"
+        },
+        {
+          "event_id": 16623,
+          "title": "RTLZWEI News",
+          "date": "61362",
+          "time": "15:00",
+          "duration": "00:04"
+        },
+        {
+          "event_id": 16730,
+          "title": "RTLZWEI Wetter",
+          "date": "61362",
+          "time": "15:04",
+          "duration": "00:01"
+        },
+        {
+          "event_id": 16696,
+          "title": "Hartz und herzlich - Tag für Tag",
+          "date": "61362",
+          "time": "15:05",
+          "duration": "01:00"
+        },
+        {
+          "event_id": 16697,
+          "title": "Hartz Rot Gold",
+          "date": "61362",
+          "time": "16:05",
+          "duration": "01:00"
+        },
+        {
+          "event_id": 16698,
+          "title": "Hartz und herzlich - Tag für Tag",
+          "date": "61362",
+          "time": "17:05",
+          "duration": "01:00"
+        },
+        {
+          "event_id": 16731,
+          "title": "Berlin - Tag & Nacht",
+          "date": "61362",
+          "time": "18:05",
+          "duration": "01:10"
+        },
+        {
+          "event_id": 16732,
+          "title": "Zuhause im Glück - Unser Einzug in ein neues Leben",
+          "date": "61362",
+          "time": "19:15",
+          "duration": "02:00"
+        },
+        {
+          "event_id": 17080,
+          "title": "Naked Attraction - Dating hautnah",
+          "date": "61362",
+          "time": "21:15",
+          "duration": "01:00"
+        },
+        {
+          "event_id": 17081,
+          "title": "Maison Tabou",
+          "date": "61362",
+          "time": "22:15",
+          "duration": "01:00"
+        },
+        {
+          "event_id": 16666,
+          "title": "Der Trödeltrupp - Das Geld liegt im Keller",
+          "date": "61362",
+          "time": "23:15",
+          "duration": "01:40"
+        },
+        {
+          "event_id": 16667,
+          "title": "Der Trödeltrupp - Das Geld liegt im Keller",
+          "date": "61363",
+          "time": "00:55",
+          "duration": "01:40"
+        },
+        {
+          "event_id": 16734,
+          "title": "Der Trödeltrupp - Das Geld liegt im Keller",
+          "date": "61363",
+          "time": "02:35",
+          "duration": "01:35"
+        },
+        {
+          "event_id": 17083,
+          "title": "Der Trödeltrupp - Das Geld liegt im Keller",
+          "date": "61363",
+          "time": "04:10",
+          "duration": "00:50"
+        },
+        {
+          "event_id": 16625,
+          "title": "Der Trödeltrupp - Das Geld liegt im Keller",
+          "date": "61363",
+          "time": "05:00",
+          "duration": "01:00"
+        },
+        {
+          "event_id": 16626,
+          "title": "Der Trödeltrupp - Das Geld liegt im Keller",
+          "date": "61363",
+          "time": "06:00",
+          "duration": "01:00"
+        },
+        {
+          "event_id": 16652,
+          "title": "Der Trödeltrupp - Das Geld liegt im Keller",
+          "date": "61363",
+          "time": "07:00",
+          "duration": "01:00"
+        },
+        {
+          "event_id": 16653,
+          "title": "Der Trödeltrupp - Das Geld liegt im Keller",
+          "date": "61363",
+          "time": "08:00",
+          "duration": "01:00"
+        },
+        {
+          "event_id": 16709,
+          "title": "Der Trödeltrupp - Das Geld liegt im Keller",
+          "date": "61363",
+          "time": "09:00",
+          "duration": "01:00"
+        },
+        {
+          "event_id": 16710,
+          "title": "Der Trödeltrupp - Das Geld liegt im Keller",
+          "date": "61363",
+          "time": "10:00",
+          "duration": "01:55"
+        },
+        {
+          "event_id": 16720,
+          "title": "Der Trödeltrupp - Das Geld liegt im Keller",
+          "date": "61363",
+          "time": "11:55",
+          "duration": "01:00"
+        },
+        {
+          "event_id": 16711,
+          "title": "SOS - Retter im Einsatz",
+          "date": "61363",
+          "time": "12:55",
+          "duration": "01:05"
+        },
+        {
+          "event_id": 16721,
+          "title": "SOS - Retter im Einsatz",
+          "date": "61363",
+          "time": "14:00",
+          "duration": "01:00"
+        },
+        {
+          "event_id": 16627,
+          "title": "RTLZWEI News",
+          "date": "61363",
+          "time": "15:00",
+          "duration": "00:04"
+        },
+        {
+          "event_id": 16722,
+          "title": "RTLZWEI Wetter",
+          "date": "61363",
+          "time": "15:04",
+          "duration": "00:01"
+        },
+        {
+          "event_id": 16712,
+          "title": "Hartz und herzlich - Tag für Tag",
+          "date": "61363",
+          "time": "15:05",
+          "duration": "01:00"
+        },
+        {
+          "event_id": 16713,
+          "title": "Hartz Rot Gold",
+          "date": "61363",
+          "time": "16:05",
+          "duration": "01:00"
+        },
+        {
+          "event_id": 16714,
+          "title": "Hartz und herzlich - Tag für Tag",
+          "date": "61363",
+          "time": "17:05",
+          "duration": "01:00"
+        },
+        {
+          "event_id": 16723,
+          "title": "Berlin - Tag & Nacht",
+          "date": "61363",
+          "time": "18:05",
+          "duration": "01:10"
+        },
+        {
+          "event_id": 16654,
+          "title": "Die Wollnys - Eine schrecklich große Familie",
+          "date": "61363",
+          "time": "19:15",
+          "duration": "01:00"
+        },
+        {
+          "event_id": 16655,
+          "title": "Die Wollnys - Eine schrecklich große Familie",
+          "date": "61363",
+          "time": "20:15",
+          "duration": "01:00"
+        },
+        {
+          "event_id": 16656,
+          "title": "Der Promihof",
+          "date": "61363",
+          "time": "21:15",
+          "duration": "01:10"
+        },
+        {
+          "event_id": 16657,
+          "title": "Der Promihof",
+          "date": "61363",
+          "time": "22:25",
+          "duration": "01:00"
+        },
+        {
+          "event_id": 17066,
+          "title": "Love Island VIP",
+          "date": "61363",
+          "time": "23:25",
+          "duration": "01:05"
+        },
+        {
+          "event_id": 17082,
+          "title": "Love Island VIP",
+          "date": "61364",
+          "time": "00:30",
+          "duration": "01:00"
+        },
+        {
+          "event_id": 16660,
+          "title": "Autopsie - Mysteriöse Todesfälle",
+          "date": "61364",
+          "time": "01:30",
+          "duration": "00:55"
+        },
+        {
+          "event_id": 16661,
+          "title": "Autopsie - Mysteriöse Todesfälle",
+          "date": "61364",
+          "time": "02:25",
+          "duration": "00:45"
+        },
+        {
+          "event_id": 16724,
+          "title": "Autopsie - Mysteriöse Todesfälle",
+          "date": "61364",
+          "time": "03:10",
+          "duration": "01:00"
+        },
+        {
+          "event_id": 16725,
+          "title": "Der Trödeltrupp - Das Geld liegt im Keller",
+          "date": "61364",
+          "time": "04:10",
+          "duration": "00:50"
+        },
+        {
+          "event_id": 16632,
+          "title": "Der Trödeltrupp - Das Geld liegt im Keller",
+          "date": "61364",
+          "time": "05:00",
+          "duration": "01:00"
+        },
+        {
+          "event_id": 16668,
+          "title": "Der Trödeltrupp - Das Geld liegt im Keller",
+          "date": "61364",
+          "time": "06:00",
+          "duration": "01:00"
+        },
+        {
+          "event_id": 16669,
+          "title": "Der Trödeltrupp - Das Geld liegt im Keller",
+          "date": "61364",
+          "time": "07:00",
+          "duration": "01:00"
+        },
+        {
+          "event_id": 16670,
+          "title": "Der Trödeltrupp - Das Geld liegt im Keller",
+          "date": "61364",
+          "time": "08:00",
+          "duration": "01:00"
+        },
+        {
+          "event_id": 16671,
+          "title": "Der Trödeltrupp - Das Geld liegt im Keller",
+          "date": "61364",
+          "time": "09:00",
+          "duration": "01:00"
+        },
+        {
+          "event_id": 16742,
+          "title": "Der Trödeltrupp - Das Geld liegt im Keller",
+          "date": "61364",
+          "time": "10:00",
+          "duration": "00:55"
+        },
+        {
+          "event_id": 16743,
+          "title": "Der Trödeltrupp - Das Geld liegt im Keller",
+          "date": "61364",
+          "time": "10:55",
+          "duration": "01:00"
+        },
+        {
+          "event_id": 16744,
+          "title": "Der Trödeltrupp - Das Geld liegt im Keller",
+          "date": "61364",
+          "time": "11:55",
+          "duration": "01:00"
+        },
+        {
+          "event_id": 16686,
+          "title": "SOS - Retter im Einsatz",
+          "date": "61364",
+          "time": "12:55",
+          "duration": "01:05"
+        },
+        {
+          "event_id": 16745,
+          "title": "SOS - Retter im Einsatz",
+          "date": "61364",
+          "time": "14:00",
+          "duration": "01:00"
+        },
+        {
+          "event_id": 16633,
+          "title": "RTLZWEI News",
+          "date": "61364",
+          "time": "15:00",
+          "duration": "00:04"
+        },
+        {
+          "event_id": 16746,
+          "title": "RTLZWEI Wetter",
+          "date": "61364",
+          "time": "15:04",
+          "duration": "00:01"
+        },
+        {
+          "event_id": 16687,
+          "title": "Hartz und herzlich - Tag für Tag",
+          "date": "61364",
+          "time": "15:05",
+          "duration": "01:00"
+        },
+        {
+          "event_id": 16688,
+          "title": "Hartz Rot Gold",
+          "date": "61364",
+          "time": "16:05",
+          "duration": "01:00"
+        },
+        {
+          "event_id": 16689,
+          "title": "Hartz und herzlich - Tag für Tag",
+          "date": "61364",
+          "time": "17:05",
+          "duration": "01:00"
+        },
+        {
+          "event_id": 16747,
+          "title": "Berlin - Tag & Nacht",
+          "date": "61364",
+          "time": "18:05",
+          "duration": "01:10"
+        },
+        {
+          "event_id": 16690,
+          "title": "Angel Has Fallen",
+          "date": "61364",
+          "time": "19:15",
+          "duration": "02:20"
+        },
+        {
+          "event_id": 16691,
+          "title": "Gesetz der Rache",
+          "date": "61364",
+          "time": "21:35",
+          "duration": "02:05"
+        },
+        {
+          "event_id": 16692,
+          "title": "Dungeons & Dragons 3 - Das Buch der dunklen Schatten",
+          "date": "61364",
+          "time": "23:40",
+          "duration": "01:40"
+        },
+        {
+          "event_id": 16672,
+          "title": "Autopsie - Mysteriöse Todesfälle",
+          "date": "61365",
+          "time": "01:20",
+          "duration": "00:55"
+        },
+        {
+          "event_id": 16673,
+          "title": "Autopsie - Mysteriöse Todesfälle",
+          "date": "61365",
+          "time": "02:15",
+          "duration": "00:50"
+        },
+        {
+          "event_id": 16748,
+          "title": "Autopsie - Mysteriöse Todesfälle",
+          "date": "61365",
+          "time": "03:05",
+          "duration": "01:25"
+        },
+        {
+          "event_id": 17063,
+          "title": "X-Factor: Das Unfassbare",
+          "date": "61365",
+          "time": "04:30",
+          "duration": "00:40"
+        },
+        {
+          "event_id": 16831,
+          "title": "Infomercial",
+          "date": "61365",
+          "time": "05:10",
+          "duration": "01:00"
+        },
+        {
+          "event_id": 16832,
+          "title": "Infomercial",
+          "date": "61365",
+          "time": "06:10",
+          "duration": "01:00"
+        },
+        {
+          "event_id": 16879,
+          "title": "Die Bauretter",
+          "date": "61365",
+          "time": "07:10",
+          "duration": "02:05"
+        },
+        {
+          "event_id": 17065,
+          "title": "Die Bauretter",
+          "date": "61365",
+          "time": "09:15",
+          "duration": "02:00"
+        },
+        {
+          "event_id": 16880,
+          "title": "Zuhause im Glück - Unser Einzug in ein neues Leben",
+          "date": "61365",
+          "time": "11:15",
+          "duration": "02:00"
+        },
+        {
+          "event_id": 16783,
+          "title": "Zuhause im Glück - Unser Einzug in ein neues Leben",
+          "date": "61365",
+          "time": "13:15",
+          "duration": "02:05"
+        },
+        {
+          "event_id": 16881,
+          "title": "Zuhause im Glück - Unser Einzug in ein neues Leben",
+          "date": "61365",
+          "time": "15:20",
+          "duration": "02:00"
+        },
+        {
+          "event_id": 16911,
+          "title": "Zuhause im Glück - Unser Einzug in ein neues Leben",
+          "date": "61365",
+          "time": "17:20",
+          "duration": "01:55"
+        },
+        {
+          "event_id": 16912,
+          "title": "Hot Fuzz - Zwei abgewichste Profis",
+          "date": "61365",
+          "time": "19:15",
+          "duration": "02:15"
+        },
+        {
+          "event_id": 16784,
+          "title": "Tropic Thunder",
+          "date": "61365",
+          "time": "21:30",
+          "duration": "02:05"
+        },
+        {
+          "event_id": 16913,
+          "title": "Babylon A.D.",
+          "date": "61365",
+          "time": "23:35",
+          "duration": "01:50"
+        },
+        {
+          "event_id": 16882,
+          "title": "Gesetz der Rache",
+          "date": "61366",
+          "time": "01:25",
+          "duration": "01:55"
+        },
+        {
+          "event_id": 16785,
+          "title": "Tropic Thunder",
+          "date": "61366",
+          "time": "03:20",
+          "duration": "00:55"
+        },
+        {
+          "event_id": 16914,
+          "title": "X-Factor: Das Unfassbare",
+          "date": "61366",
+          "time": "04:15",
+          "duration": "00:45"
+        },
+        {
+          "event_id": 16833,
+          "title": "Infomercial",
+          "date": "61366",
+          "time": "05:00",
+          "duration": "00:30"
+        },
+        {
+          "event_id": 16834,
+          "title": "Infomercial",
+          "date": "61366",
+          "time": "05:30",
+          "duration": "01:00"
+        },
+        {
+          "event_id": 16838,
+          "title": "Die Fernsehkanzel",
+          "date": "61366",
+          "time": "06:30",
+          "duration": "00:30"
+        },
+        {
+          "event_id": 16835,
+          "title": "Infomercial",
+          "date": "61366",
+          "time": "07:00",
+          "duration": "00:55"
+        },
+        {
+          "event_id": 16901,
+          "title": "X-Factor: Das Unfassbare",
+          "date": "61366",
+          "time": "07:55",
+          "duration": "00:20"
+        },
+        {
+          "event_id": 16902,
+          "title": "X-Factor: Das Unfassbare",
+          "date": "61366",
+          "time": "08:15",
+          "duration": "01:00"
+        },
+        {
+          "event_id": 16903,
+          "title": "X-Factor: Das Unfassbare",
+          "date": "61366",
+          "time": "09:15",
+          "duration": "01:00"
+        },
+        {
+          "event_id": 16904,
+          "title": "X-Factor: Das Unfassbare",
+          "date": "61366",
+          "time": "10:15",
+          "duration": "01:00"
+        },
+        {
+          "event_id": 16905,
+          "title": "X-Factor: Das Unfassbare",
+          "date": "61366",
+          "time": "11:15",
+          "duration": "01:00"
+        },
+        {
+          "event_id": 16836,
+          "title": "Die Schnäppchenhäuser - Der Traum vom Eigenheim",
+          "date": "61366",
+          "time": "12:15",
+          "duration": "01:00"
+        },
+        {
+          "event_id": 16839,
+          "title": "Die Schnäppchenhäuser - Der Traum vom Eigenheim",
+          "date": "61366",
+          "time": "13:15",
+          "duration": "01:00"
+        },
+        {
+          "event_id": 16840,
+          "title": "Die Schnäppchenhäuser - Der Traum vom Eigenheim",
+          "date": "61366",
+          "time": "14:15",
+          "duration": "01:00"
+        },
+        {
+          "event_id": 16841,
+          "title": "Die Schnäppchenhäuser - Der Traum vom Eigenheim",
+          "date": "61366",
+          "time": "15:15",
+          "duration": "01:00"
+        },
+        {
+          "event_id": 16906,
+          "title": "Die Schnäppchenhäuser - Der Traum vom Eigenheim",
+          "date": "61366",
+          "time": "16:15",
+          "duration": "01:00"
+        },
+        {
+          "event_id": 16907,
+          "title": "GRIP - Das Motormagazin",
+          "date": "61366",
+          "time": "17:15",
+          "duration": "02:00"
+        },
+        {
+          "event_id": 16908,
+          "title": "Hangover",
+          "date": "61366",
+          "time": "19:15",
+          "duration": "02:05"
+        },
+        {
+          "event_id": 16842,
+          "title": "Angel Has Fallen",
+          "date": "61366",
+          "time": "21:20",
+          "duration": "02:15"
+        }
+      ]
+    }
+  ]
+}
