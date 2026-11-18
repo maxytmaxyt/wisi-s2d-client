@@ -38,7 +38,49 @@ Nach der Installation ist der Befehl `wisi` verfügbar. Ohne Installation: `pyth
 
 Die Standard-IP in den Beispielen ist `192.168.178.32` – bei Bedarf durch die IP deines Dongles ersetzen.
 
-### 1. Kanalliste anzeigen
+### 1. Web-Benutzeroberfläche (Control Center) & 24/7 Server
+
+Das browserbasierte Control Center vereint alle Funktionen in einer modernen Oberfläche:
+- **📺 Live-TV & Radio:** Integrierter HTML5-Player (`mpegts.js`), der den entschlüsselten MPEG-TS-Stream direkt im Browser wiedergibt.
+- **▶️ VLC & M3U-Export:** Sender direkt in VLC abspielen oder vollständige `wisi_channels.m3u` Playlist für VLC, Kodi, Apple TV etc. herunterladen.
+- **📋 Senderliste:** Suche & Filter nach TV, Radio, FTA (kostenlos) und verschlüsselt.
+- **📅 EPG (Programmführer):** Anzeige aktueller und kommender Sendungen inkl. Detailbeschreibung und 1-Klick-Aufnahme.
+- **⏰ Timer-Aufnahmen (Aufnahme-Scheduler):** Automatische Programmierung von Sendungen über das EPG oder Zeit/Dauer; läuft 24/7 im Hintergrund.
+- **📼 Aufnahmen-Verwaltung & Playback:** Aufnahmen direkt im Browser-Player anschauen, herunterladen oder löschen.
+- **📡 Tuner & Sendersuchlauf:** Transponder-Einstellung, LNB/DiSEqC-Parameter und DVB-S2-Suchlauf mit Live-Fortschritt.
+- **📶 Signalüberwachung:** Live-Pegelanzeige für Signalstärke (AGC), Signalqualität (SNR) und Tuner-Lock.
+- **ℹ️ Hardware-Diagnose & PCAP:** Anzeige von Dongle-Modell, Firmware, MAC-Adresse, Seriennummer, PCAP-Analyse und Opcode-Tester.
+
+```bash
+# Start der Oberfläche im Heimnetzwerk (erreichbar für Handys, Tablets, TVs):
+python -m wisi.ui --host 0.0.0.0 --port 8888
+
+# Oder über wisi.py:
+python src/wisi/wisi.py --ui
+```
+
+---
+
+### 2. Dauerbetrieb (24/7 Server) via USB-C (z. B. Raspberry Pi oder Mini-PC)
+
+Um den Dongle dauerhaft und ruckelfrei ohne alte Wi-Fi 4 Router zu betreiben:
+1. **Verbindung:** Dongle per USB-C Datenkabel an den Server/Raspberry Pi anschließen (und Dongle-12V-Netzteil einstecken).
+2. **Netzwerk:** Der Server ist per LAN oder schnellem Haupt-WLAN (z. B. Wi-Fi 7) mit dem Heimnetzwerk verbunden.
+3. **Automatischer Hintergrund-Dienst:**
+   - **Linux / Raspberry Pi:** 
+     ```bash
+     chmod +x scripts/setup_raspberry_pi.sh
+     ./scripts/setup_raspberry_pi.sh
+     ```
+     Richtet automatisch den `systemd`-Dienst `wisi-server.service` ein, der beim Hochfahren startet.
+   - **Windows:**
+     Doppelklick auf [`scripts/start_windows_service.bat`](scripts/start_windows_service.bat).
+
+Danach ist das Web Control Center im gesamten Heimnetzwerk unter `http://<IP-des-Servers>:8888` erreichbar!
+
+---
+
+### 2. Kanalliste anzeigen (CLI)
 
 ```bash
 python src/wisi/wisi.py --ip 192.168.178.32 --channels
@@ -90,6 +132,7 @@ python src/wisi/wisi.py --pcap "research/assets/PCAPdroid_12_Okt._16_16_04.pcap"
 
 | Option | Beschreibung |
 |---|---|
+| `--ui`, `--web` | Web-Benutzeroberfläche (Control Center auf `http://127.0.0.1:8888`) starten |
 | `--ip IP` | IP-Adresse des Dongles (Standard: `192.168.178.32`) |
 | `--channels` | Kanalliste vom Gerät laden und ausgeben |
 | `--stream` | MPEG-TS-Stream starten |

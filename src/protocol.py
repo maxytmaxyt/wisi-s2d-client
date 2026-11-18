@@ -144,6 +144,8 @@ def cmd_udp_ts_block(first: bool = False) -> bytes:
 
 
 from scan import (  # noqa: E402
+    DVBS2_TUNER_TYPE,
+    DongleInfo,
     SAC_ROOT_SEED,
     SCAN_AUTO,
     SCAN_MANUAL,
@@ -163,6 +165,10 @@ from scan import (  # noqa: E402
     cmd_scan_result_data,
     cmd_scan_result_size,
     cmd_scan_start_stop,
+    fetch_dongle_info,
+    parse_dongle_info_phase1,
+    parse_dongle_info_phase2,
+    parse_dongle_info_phase3,
     parse_tuner_scan_status,
     sac_write_and_read_response,
 )
@@ -170,6 +176,8 @@ from scan import (  # noqa: E402
 __all__ = [
     "CONNECT_TIMEOUT",
     "DEFAULT_IP",
+    "DVBS2_TUNER_TYPE",
+    "DongleInfo",
     "KEEPALIVE_INTVL",
     "MAGIC_TAG",
     "RECV_TIMEOUT",
@@ -220,6 +228,10 @@ __all__ = [
     "cmd_udp_ts_block",
     "connect",
     "disconnect",
+    "fetch_dongle_info",
+    "parse_dongle_info_phase1",
+    "parse_dongle_info_phase2",
+    "parse_dongle_info_phase3",
     "parse_tuner_scan_status",
     "recv_exactly",
     "sac_write_and_read_response",

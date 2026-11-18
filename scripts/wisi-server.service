@@ -1,0 +1,19 @@
+[Unit]
+Description=WISI OR S2D DVB-over-IP 24/7 Web Control Center & Streaming Server
+After=network.target
+
+[Service]
+Type=simple
+User=pi
+WorkingDirectory=/home/pi/wisi-s2d-client
+ExecStart=/usr/bin/python3 -m wisi.ui --host 0.0.0.0 --port 8888 --no-browser
+Restart=always
+RestartSec=5
+StandardOutput=journal
+StandardError=journal
+
+# Umgebungsvariablen für unbuffered Python-Logs
+Environment=PYTHONUNBUFFERED=1
+
+[Install]
+WantedBy=multi-user.target

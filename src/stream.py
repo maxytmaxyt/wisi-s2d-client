@@ -2,14 +2,17 @@
 stream.py – UDP-MPEG-TS-Stream (mit optionaler Entschlüsselung am Ende)
 =======================================================================
 stream             – Tune + UDP-MPEG-TS-Stream (Speicherung der Rohdaten;
-                     bei decrypt_after=True wird die Datei am Ende entschlüsselt)
+                     bei decrypt_after=True wird die Datei am Ende entschlüsselt,
+                     bei live_decrypt=True wird direkt on-the-fly entschlüsselt)
 prepare_channel    – Re-Export aus prepare.py
 descramble_ts_block, decrypt_ts_file, DEFAULT_TS_KEY – Re-Export aus decrypt.py
 """
 from __future__ import annotations
 
+from collections.abc import Callable
 import contextlib
 import logging
+from pathlib import Path
 import socket
 import sys
 import threading
@@ -36,16 +39,22 @@ def stream(
     tcp_sock: socket.socket,
     lock: threading.Lock,
     svc: ServiceEntry,
-    output_path: str,
+    output_path: str = "-",
     duration_s: float = 0.0,
     keepalive_active: bool = False,
     decrypt_after: bool = False,
+    stop_event: threading.Event | None = None,
+    chunk_callback: Callable[[bytes], None] | None = None,
+    status_callback: Callable[[dict[str, object]], None] | None = None,
+    live_decrypt: bool = False,
 ) -> None:
     """
-    Tunet (falls noch nicht via prepare_channel geschehen) auf `svc` und schreibt
-    MPEG-TS-Daten nach `output_path` ('-' = stdout).
+    Tunet (falls noch nicht geschehen) auf `svc` und liest MPEG-TS-Daten per UDP.
+    Schreibt nach `output_path` ('-' = stdout, Pfad = Datei, Leerstring/None = nur Callbacks).
 
-    Wenn `decrypt_after=True` gesetzt ist (CLI `--decrypt`), wird die gespeicherte
+    Wenn `live_decrypt=True` gesetzt ist, werden die TS-Pakete in Echtzeit
+    entschlüsselt (ideal für Browser-Player, VLC-HTTP-Stream und Live-Aufnahmen).
+    Wenn `decrypt_after=True` gesetzt ist (CLI `--decrypt`), wird eine gespeicherte
     `.ts`-Datei direkt nach Abschluss der Aufnahme entschlüsselt.
     """
     stop = threading.Event()
@@ -68,6 +77,8 @@ def stream(
     udp.settimeout(UDP_PULL_INTVL)
 
     ts_bytes = 0
+    cur_strength = 0
+    cur_quality = 0
     try:
         if get_last_prepared_prog_idx() != svc.prog_idx:
             prepare_channel(tcp_sock, lock, svc)
@@ -83,13 +94,16 @@ def stream(
             pass
         udp.settimeout(UDP_PULL_INTVL)
 
-        log.info("Stream → %s  (STRG+C zum Beenden)", output_path)
+        if output_path and output_path != "-":
+            log.info("Stream → %s  (STRG+C zum Beenden)", output_path)
+            Path(output_path).parent.mkdir(parents=True, exist_ok=True)
+            _file_ctx = open(output_path, "wb")  # noqa: SIM115
+        elif output_path == "-":
+            log.info("Stream → stdout  (STRG+C zum Beenden)")
+            _file_ctx = contextlib.nullcontext(sys.stdout.buffer)
+        else:
+            _file_ctx = contextlib.nullcontext(None)
 
-        _file_ctx = (
-            open(output_path, "wb")  # noqa: SIM115
-            if output_path != "-"
-            else contextlib.nullcontext(sys.stdout.buffer)
-        )
         with _file_ctx as out:
             t_start = time.monotonic()
             block_num = 0
@@ -101,7 +115,7 @@ def stream(
             next_signal_at = t_start + SIGNAL_INTVL
 
             try:
-                while not stop.is_set():
+                while not stop.is_set() and not (stop_event and stop_event.is_set()):
                     now = time.monotonic()
                     if duration_s > 0 and now - t_start >= duration_s:
                         log.info("Dauer %.0f s erreicht.", duration_s)
@@ -114,7 +128,12 @@ def stream(
                                     tcp_sock, protocol.cmd_signal(), 17, "0x02 signal"
                                 )
                             if len(sig) >= 5:
-                                log.debug("Signal: Stärke=%d%%  Qualität=%d%%", sig[3], sig[4])
+                                cur_strength = sig[3]
+                                cur_quality = sig[4]
+                                log.debug(
+                                    "Signal: Stärke=%d%%  Qualität=%d%%",
+                                    cur_strength, cur_quality
+                                )
                         except OSError:
                             tcp_sock_dead.set()
                         next_signal_at = time.monotonic() + SIGNAL_INTVL
@@ -192,22 +211,53 @@ def stream(
                     last_packet_at = time.monotonic()
                     next_timeout_warning = last_packet_at + 5.0
 
-                    # Bei stdout ('-') kann nicht nachträglich entschlüsselt werden;
-                    # bei Dateiausgabe schreiben wir zunächst die schnellen Rohblöcke.
-                    chunk_to_write = (
-                        descramble_ts_block(ts_data[:complete_len])
-                        if (decrypt_after and output_path == "-")
-                        else ts_data[:complete_len]
-                    )
-                    out.write(chunk_to_write)
-                    out.flush()
+                    raw_ts_chunk = ts_data[:complete_len]
+                    if live_decrypt or (decrypt_after and output_path == "-"):
+                        processed_chunk = descramble_ts_block(raw_ts_chunk)
+                    else:
+                        processed_chunk = raw_ts_chunk
+
+                    if out is not None:
+                        out.write(processed_chunk)
+                        out.flush()
+
+                    if chunk_callback is not None:
+                        try:
+                            # Sende immer entschlüsselte TS-Pakete an Live-Stream-Clients
+                            cb_chunk = (
+                                processed_chunk
+                                if (live_decrypt or (decrypt_after and output_path == "-"))
+                                else descramble_ts_block(raw_ts_chunk)
+                            )
+                            chunk_callback(cb_chunk)
+                        except Exception as cb_err:
+                            log.debug("chunk_callback Fehler: %s", cb_err)
+
                     block_num += 1
                     ts_bytes += complete_len
                     retry_last = False
 
+                    elapsed = time.monotonic() - t_start
+                    kbps = (ts_bytes / 1024) / max(elapsed, 0.001)
+
+                    if status_callback is not None and (block_num % 10 == 0 or block_num == 1):
+                        try:
+                            status_callback({
+                                "blocks": block_num,
+                                "pulls": pull_count,
+                                "bytes": ts_bytes,
+                                "kbps": round(kbps, 1),
+                                "signal_strength": cur_strength,
+                                "signal_quality": cur_quality,
+                                "elapsed_seconds": round(elapsed, 1),
+                                "channel": svc.name,
+                                "prog_idx": svc.prog_idx,
+                                "service_id": svc.service_id,
+                            })
+                        except Exception:
+                            pass
+
                     if block_num % 50 == 0:
-                        elapsed = time.monotonic() - t_start
-                        kbps = (ts_bytes / 1024) / max(elapsed, 0.001)
                         log.info(
                             "Block %4d | %.1f MiB | %.0f KB/s",
                             block_num, ts_bytes / 1_048_576, kbps,
@@ -237,7 +287,7 @@ def stream(
             ka.join(timeout=4.0)
         udp.close()
 
-    if decrypt_after and output_path != "-" and ts_bytes > 0:
+    if decrypt_after and not live_decrypt and output_path and output_path != "-" and ts_bytes > 0:
         decrypt_ts_file(output_path)
 
 

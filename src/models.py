@@ -62,6 +62,7 @@ class ServiceEntry:
     audio_type:  int = 0x03
     flags:       int = 0x0001
     name:        str = ""
+    channel:     Channel | None = None
 
     @property
     def is_encrypted(self) -> bool:
@@ -100,6 +101,7 @@ def channel_to_service(ch: Channel, idx: int) -> ServiceEntry:
         service_id=ch.service_id,
         flags=flags,
         name=ch.name,
+        channel=ch,
     )
 
 

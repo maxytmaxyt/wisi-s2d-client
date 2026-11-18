@@ -32,6 +32,7 @@ def main(argv: Sequence[str] | None = None) -> int:
     )
     parser.add_argument("--ip", default=DEFAULT_IP, help="IP-Adresse des Dongles")
     actions = parser.add_mutually_exclusive_group()
+    actions.add_argument("--ui", "--web", dest="ui", action="store_true", help="Web-Benutzeroberfläche starten")
     actions.add_argument("--channels", action="store_true", help="Senderliste anzeigen")
     actions.add_argument("--epg", action="store_true", help="EPG aller Sender als JSON laden")
     actions.add_argument("--stream", action="store_true", help="MPEG-TS-Stream starten")
@@ -82,6 +83,11 @@ def main(argv: Sequence[str] | None = None) -> int:
         parser.error("--pat-idx muss zwischen 0 und 65535 liegen.")
 
     try:
+        if args.ui:
+            from wisi.ui import run_ui
+
+            run_ui(dongle_ip=args.ip)
+            return 0
         if args.channels:
             from wisi.channels import run
 

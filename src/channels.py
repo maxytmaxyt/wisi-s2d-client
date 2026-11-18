@@ -9,6 +9,7 @@ fetch_service_db     – deaktivierter Legacy-Stub; F9/0A ist im APK ein Speedte
 """
 from __future__ import annotations
 
+import html
 import logging
 import re
 import struct
@@ -41,6 +42,43 @@ def _cmd_chlist_ack(_size: int = 8) -> bytes:
 # ---------------------------------------------------------------------------
 # XML-Parser
 # ---------------------------------------------------------------------------
+def _parse_prog_idx(val: str | None, default: int = 0) -> int:
+    """Parst prog_idx sowohl aus dezimalen als auch hexadezimalen Repräsentationen."""
+    if not val:
+        return default
+    s = val.strip()
+    if s.startswith(("0x", "0X")):
+        try:
+            return int(s, 16)
+        except ValueError:
+            return default
+    if any(c in "abcdefABCDEF" for c in s):
+        try:
+            return int(s, 16)
+        except ValueError:
+            return default
+    try:
+        return int(s, 10)
+    except ValueError:
+        try:
+            return int(s, 16)
+        except ValueError:
+            return default
+
+
+def _parse_int(val: str | None, default: int = 0) -> int:
+    if not val:
+        return default
+    s = val.strip()
+    try:
+        return int(s, 0)
+    except ValueError:
+        try:
+            return int(s, 10)
+        except ValueError:
+            return default
+
+
 def parse_chlist_xml(xml_bytes: bytes) -> list[Channel]:
     """
     Parst <ch_List> XML in eine Liste von Channel-Objekten.
@@ -48,20 +86,20 @@ def parse_chlist_xml(xml_bytes: bytes) -> list[Channel]:
     """
     text = xml_bytes.decode("utf-8", errors="replace")
     channels: list[Channel] = []
-    for m in re.finditer(r"<ch\s+([^/]+)/>", text):
-        attrs: dict[str, str] = dict(re.findall(r'(\w+)="([^"]*)"', m.group(1)))
+    for m in re.finditer(r"<ch\s+([^>]+?)(?:/>|>)", text):
+        attrs: dict[str, str] = dict(re.findall(r'(\w+)=["\']([^"\']*)["\']', m.group(1)))
         try:
             channels.append(Channel(
-                prog_idx=int(attrs.get("prog_idx", "0")),
-                service_id=int(attrs.get("s_id", "0")),
-                ts_id=int(attrs.get("ts_id", "0")),
-                freq=int(attrs.get("freq", "0")),
-                pol=attrs.get("pol", ""),
-                sym=int(attrs.get("sym", "0")),
-                lcn=int(attrs.get("lcn", "0")),
-                name=attrs.get("s_name", ""),
+                prog_idx=_parse_prog_idx(attrs.get("prog_idx")),
+                service_id=_parse_int(attrs.get("s_id")),
+                ts_id=_parse_int(attrs.get("ts_id")),
+                freq=_parse_int(attrs.get("freq")),
+                pol=attrs.get("pol", "").strip(),
+                sym=_parse_int(attrs.get("sym")),
+                lcn=_parse_int(attrs.get("lcn")),
+                name=html.unescape(attrs.get("s_name", "")).strip(),
                 fta=attrs.get("fta", "1") == "1",
-                ch_type=attrs.get("type", "TV"),
+                ch_type=attrs.get("type", "TV").strip(),
             ))
         except (ValueError, KeyError):
             pass
