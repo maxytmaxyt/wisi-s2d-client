@@ -137,7 +137,7 @@ class StreamEngine:
             with self.stream_clients_lock:
                 for q in list(self.stream_clients):
                     try:
-                        if q.qsize() > 50:
+                        if q.qsize() > 200:
                             try:
                                 q.get_nowait()
                             except queue.Empty:
@@ -180,7 +180,7 @@ class StreamEngine:
             self.stream_stats["is_streaming"] = False
 
     def subscribe_client(self) -> queue.Queue[bytes]:
-        q: queue.Queue[bytes] = queue.Queue(maxsize=100)
+        q: queue.Queue[bytes] = queue.Queue(maxsize=300)
         with self.stream_clients_lock:
             self.stream_clients.append(q)
         return q

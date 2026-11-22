@@ -30,6 +30,8 @@ function playChannel(progIdx, name, fta) {
     }, {
       enableWorker: true,
       lazyLoad: false,
+      enableStashBuffer: true,
+      stashInitialSize: 256 * 1024,        // 256 KB Puffer (~1s) gegen Ruckler
       liveBufferLatencyChasing: false,     // Timeshift: Erlaubt Pausieren & Zurückspulen
       autoCleanupSourceBuffer: false,       // Timeshift: Löscht bisheriges Video nicht
       autoCleanupMaxBackwardDuration: 7200, // Bis zu 2 Stunden Puffer

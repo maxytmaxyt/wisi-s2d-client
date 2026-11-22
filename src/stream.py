@@ -33,7 +33,7 @@ log = logging.getLogger("wisi.stream")
 
 UDP_BLOCK_SIZE: int = protocol.UDP_REQUEST_LEN + 64 + protocol.USBS_LEN  # 48205
 SIGNAL_INTVL: float = protocol.SIGNAL_INTVL
-UDP_PULL_INTVL: float = 0.5
+UDP_PULL_INTVL: float = 0.12
 
 
 def stream(
@@ -123,20 +123,22 @@ def stream(
                         break
 
                     if now >= next_signal_at and not tcp_sock_dead.is_set():
-                        try:
-                            with lock:
+                        if lock.acquire(blocking=False):
+                            try:
                                 sig = protocol.send_recv(
                                     tcp_sock, protocol.cmd_signal(), 17, "0x02 signal"
                                 )
-                            if len(sig) >= 5:
-                                cur_strength = sig[3]
-                                cur_quality = sig[4]
-                                log.debug(
-                                    "Signal: Stärke=%d%%  Qualität=%d%%",
-                                    cur_strength, cur_quality
-                                )
-                        except OSError:
-                            tcp_sock_dead.set()
+                                if len(sig) >= 5:
+                                    cur_strength = sig[3]
+                                    cur_quality = sig[4]
+                                    log.debug(
+                                        "Signal: Stärke=%d%%  Qualität=%d%%",
+                                        cur_strength, cur_quality
+                                    )
+                            except OSError:
+                                tcp_sock_dead.set()
+                            finally:
+                                lock.release()
                         next_signal_at = time.monotonic() + SIGNAL_INTVL
 
                     udp.sendto(
@@ -153,7 +155,6 @@ def stream(
                             break
                     except TimeoutError:
                         retry_last = True
-                        time.sleep(0.01)
                         now = time.monotonic()
                         if now >= next_timeout_warning and now - last_packet_at >= 5.0:
                             log.warning(
@@ -164,7 +165,6 @@ def stream(
 
                     raw_ts_chunk, last_seq, retry_last = align_ts_packets(data, last_seq)
                     if retry_last:
-                        time.sleep(0.01)
                         continue
 
                     last_packet_at = time.monotonic()
