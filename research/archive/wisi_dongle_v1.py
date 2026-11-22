@@ -1,32 +1,8 @@
 """
-WISI / Tivizen / TiViCon DVB-over-IP Client
-============================================
-Protokoll-Grundlage: Reverse-Engineering-Analysen im selben Repository.
-
-Architektur:
-  TCP 8802  – Steuerkanal  (USBC/APIX-Befehle + USBS-Antworten)
-  UDP 8800  – Datenpfad    (MPEG-TS-Blöcke, ausgelöst per APIX 0x01)
-
-USBC-Container (31 Byte):
-  [0..3]  "USBC"          – Signatur
-  [4..7]  Tag             – konstant A0 CB 03 37
-  [8..11] Datenlänge      – Big-Endian
-  [12]    Flags           – 0x80 = Lesezugriff
-  [13]    LUN             – 0x00
-  [14]    CDB-Länge       – 0x10 (16 Byte)
-  [15..30] APIX-Befehl   – 16 Byte, beginnt mit 0xF6 <opcode>
-
-Wichtig (Bug-Fix gegenüber v1):
-  Nach JEDEM gesendeten Befehl schickt der Dongle eine USBS-Antwort
-  (13 Byte) zurück. Wird sie nicht gelesen, füllt sich der TCP-Buffer
-  und der Dongle bricht die Verbindung nach ~30 s ab (WinError 10054).
-  Alle send-Funktionen drainieren daher sofort den Socket.
-
-Ablauf laut PCAP:
-  0,05 s  – TCP-Connect, APIX 0x16 + 0x17 (Init)
-  2,13 s  – EPG-Abfragen (0x30/0x31, 0x35/0x36)  [optional]
-  4,98 s  – APIX 0x02, dann wiederholte APIX 0x0A (Pre-Stream-Loop)
- 30,41 s  – Umschalten auf APIX 0x01 → UDP liefert MPEG-TS
+WISI / Tivizen / TiViCon DVB-over-IP Client (v1 Archiv)
+=======================================================
+Archivierte Originalimplementierung des Reverse-Engineering-Prozesses.
+TCP 8802 (Steuerkanal), UDP 8800 (Datenpfad).
 """
 
 import argparse
@@ -56,126 +32,28 @@ DONGLE_IP   = "192.168.178.32"
 TCP_PORT    = 8802
 UDP_PORT    = 8800
 
-MAGIC_TAG   = b"\xA0\xCB\x03\x37"
-
-TS_PACKETS_PER_BLOCK = 256
-TS_PACKET_SIZE       = 188
-UDP_PAYLOAD_EXPECTED = TS_PACKETS_PER_BLOCK * TS_PACKET_SIZE  # 48 128 Byte
-TS_SYNC_BYTE         = 0x47
-
-# Wie lange APIX 0x0A geloopt wird, bevor auf 0x01 umgeschaltet wird
-PRE_STREAM_LOOP_SECS = 3.0   # im PCAP ~25 s; hier verkürzt für schnelleres Testen
-PRE_STREAM_INTERVAL  = 0.05  # Sekunden zwischen 0x0A-Anfragen
-
-# ---------------------------------------------------------------------------
-# USBC-Befehlsbauer
-# ---------------------------------------------------------------------------
-
-def _make_usbc(data_length: int, flags: int, apix_cmd: bytes) -> bytes:
-    """31-Byte USBC Command Block Wrapper."""
-    if len(apix_cmd) != 16:
-        raise ValueError(f"APIX-Befehl muss 16 Byte lang sein, hat {len(apix_cmd)}")
-    cbw = (
-        b"USBC"
-        + MAGIC_TAG
-        + struct.pack(">I", data_length)
-        + bytes([flags, 0x00, 0x10])
-        + apix_cmd
-    )
-    assert len(cbw) == 31
-    return cbw
+from wisi_dongle_v1_cmds import (
+    MAGIC_TAG,
+    TS_PACKET_SIZE,
+    TS_PACKETS_PER_BLOCK,
+    TS_SYNC_BYTE,
+    UDP_PAYLOAD_EXPECTED,
+    cmd_epg_data,
+    cmd_epg_size,
+    cmd_event_data,
+    cmd_event_size,
+    cmd_init_16,
+    cmd_init_17,
+    cmd_pre_stream_02,
+    cmd_pre_stream_0a,
+    cmd_stream_01,
+    drain,
+    recv_exact,
+    send_cmd,
+)
 
 
-def _apix(opcode: int, payload: bytes = b"") -> bytes:
-    """APIX-CDB: 0xF6 + opcode + payload, auf 16 Byte aufgefüllt."""
-    raw = bytes([0xF6, opcode]) + payload
-    if len(raw) > 16:
-        raise ValueError("APIX-Payload zu lang")
-    return raw.ljust(16, b"\x00")
 
-
-# ---------------------------------------------------------------------------
-# Konkrete Befehle
-# ---------------------------------------------------------------------------
-
-def cmd_init_16()       -> bytes: return _make_usbc(12, 0x80, _apix(0x16))
-def cmd_init_17()       -> bytes: return _make_usbc(4,  0x80, _apix(0x17))
-def cmd_pre_stream_02() -> bytes: return _make_usbc(0,  0x80, _apix(0x02))
-def cmd_pre_stream_0a() -> bytes: return _make_usbc(UDP_PAYLOAD_EXPECTED, 0x80, _apix(0x0A))
-def cmd_stream_01()     -> bytes:
-    return _make_usbc(UDP_PAYLOAD_EXPECTED, 0x80, _apix(0x01, b"APIX"))
-
-def cmd_epg_size(prog_idx: int) -> bytes:
-    return _make_usbc(6, 0x80, _apix(0x30, struct.pack(">I", prog_idx)))
-
-def cmd_epg_data(prog_idx: int, length: int) -> bytes:
-    return _make_usbc(length, 0x80,
-                      _apix(0x31, struct.pack(">I", prog_idx) + struct.pack(">I", length)))
-
-def cmd_event_size(evt_id: int) -> bytes:
-    return _make_usbc(6, 0x80, _apix(0x35, struct.pack(">I", evt_id)))
-
-def cmd_event_data(evt_id: int, length: int) -> bytes:
-    return _make_usbc(length, 0x80,
-                      _apix(0x36, struct.pack(">I", evt_id) + struct.pack(">I", length)))
-
-
-# ---------------------------------------------------------------------------
-# TCP-Helfer: Senden + Antwort drainieren
-# ---------------------------------------------------------------------------
-
-def _recv_exact(sock: socket.socket, n: int, timeout: float = 5.0) -> bytes:
-    """Liest exakt n Byte – TCP ist Bytestrom, nicht Paket-orientiert."""
-    sock.settimeout(timeout)
-    buf = bytearray()
-    try:
-        while len(buf) < n:
-            chunk = sock.recv(n - len(buf))
-            if not chunk:
-                raise OSError("Verbindung unerwartet geschlossen")
-            buf.extend(chunk)
-    finally:
-        sock.settimeout(None)
-    return bytes(buf)
-
-
-def _drain(sock: socket.socket, expected_data_bytes: int = 0,
-           drain_timeout: float = 1.5) -> bytes:
-    """
-    Liest den USBS-Status (13 Byte) + optionale Nutzdaten vom TCP-Socket.
-    Gibt die empfangenen Bytes zurück (für Debugging / EPG-Parsing).
-
-    Der Dongle sendet nach JEDEM Befehl mindestens 13 Byte USBS zurück.
-    Wird das nicht gelesen, läuft der Socket-Buffer voll → Connection reset.
-    """
-    total = expected_data_bytes + 13  # Nutzdaten + USBS-Status-Frame
-    sock.settimeout(drain_timeout)
-    buf = bytearray()
-    try:
-        while len(buf) < total:
-            chunk = sock.recv(min(4096, total - len(buf)))
-            if not chunk:
-                break
-            buf.extend(chunk)
-            # Sobald wir den USBS-Trailer haben, reicht es
-            if len(buf) >= total:
-                break
-    except socket.timeout:
-        pass
-    finally:
-        sock.settimeout(None)
-    return bytes(buf)
-
-
-def send_cmd(sock: socket.socket, cmd: bytes,
-             expected_data: int = 0, label: str = "") -> bytes:
-    """Sendet einen Befehl und liest sofort die Antwort (Drain)."""
-    sock.sendall(cmd)
-    resp = _drain(sock, expected_data)
-    if label:
-        log.debug("%-20s → %d Byte Antwort: %s...", label, len(resp),
-                  resp[:16].hex() if resp else "(leer)")
-    return resp
 
 
 # ---------------------------------------------------------------------------

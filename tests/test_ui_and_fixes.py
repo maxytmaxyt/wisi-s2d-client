@@ -139,6 +139,9 @@ class DongleManagerTests(unittest.TestCase):
         self.assertFalse(dm.is_connected())
         self.assertGreater(len(dm.channels), 0)
         self.assertGreater(len(dm.epg_data), 0)
+        info = dm.get_dongle_info()
+        self.assertIsInstance(info, dict)
+        self.assertEqual(info.get("model_name"), "WISI OR S2D")
 
     def test_generate_m3u(self) -> None:
         dm = DongleManager()
@@ -186,6 +189,13 @@ class DongleManagerTests(unittest.TestCase):
         self.assertTrue(ok)
         self.assertFalse(test_file.is_file())
 
+    def test_stream_engine_subscribe_unsubscribe(self) -> None:
+        dm = DongleManager()
+        q = dm.engine.subscribe_client()
+        self.assertIn(q, dm.engine.stream_clients)
+        dm.engine.unsubscribe_client(q)
+        self.assertNotIn(q, dm.engine.stream_clients)
+
 
 class WebAppStructureTests(unittest.TestCase):
     def test_html_page_contains_ui_components(self) -> None:
@@ -201,7 +211,7 @@ class WebAppStructureTests(unittest.TestCase):
         self.assertIn("timerChannelSelect", _HTML_PAGE)
         self.assertIn("timersList", _HTML_PAGE)
         self.assertIn("tab-info", _HTML_PAGE)
-        self.assertIn("tab-tools", _HTML_PAGE)
+        self.assertNotIn("tab-tools", _HTML_PAGE)
 
     def test_app_routes_registered(self) -> None:
         paths = [route.path for route in app.routes if hasattr(route, "path")]

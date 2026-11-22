@@ -1,0 +1,259 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>WISI OR S2D – DVB-over-IP Control Center</title>
+  <link rel="stylesheet" href="/static/style_base.css">
+  <link rel="stylesheet" href="/static/style_components.css">
+  <script src="/static/mpegts.min.js"></script>
+</head>
+<body>
+  <header>
+    <div class="logo-group">
+      <div class="logo-icon">📡</div>
+      <div class="logo-text">
+        <h1>WISI OR S2D Control Center</h1>
+        <p>DVB-S2 over IP Streaming &amp; Recording Server</p>
+      </div>
+    </div>
+    <div class="header-controls">
+      <div class="ip-box">
+        <input type="text" id="dongleIpInput" value="192.168.178.32" placeholder="Dongle IP">
+      </div>
+      <button class="primary" onclick="connectDongle()">🔗 Verbinden</button>
+      <button class="secondary" onclick="discoverDongle()">🔍 Suchen</button>
+      <div id="connBadge" class="badge disconnected">● Getrennt</div>
+      <div class="signal-gauges">
+        <div class="gauge">
+          <span>Stärke:</span>
+          <div class="gauge-bar-bg"><div id="gaugeAgc" class="gauge-bar-val"></div></div>
+          <strong id="valAgc">0%</strong>
+        </div>
+        <div class="gauge">
+          <span>Qualität:</span>
+          <div class="gauge-bar-bg"><div id="gaugeSnr" class="gauge-bar-val"></div></div>
+          <strong id="valSnr">0%</strong>
+        </div>
+        <div id="gaugeLock" class="badge">❌ Kein Lock</div>
+      </div>
+    </div>
+  </header>
+
+  <nav class="tabs">
+    <button class="tab-btn active" onclick="switchTab('tv')" data-tab="tab-tv">📺 Live TV &amp; Radio</button>
+    <button class="tab-btn" onclick="switchTab('epg')" data-tab="tab-epg">📅 Programmzeitschrift (EPG)</button>
+    <button class="tab-btn" onclick="switchTab('tuner')" data-tab="tab-tuner">📡 Tuner &amp; Suchlauf</button>
+    <button class="tab-btn" onclick="switchTab('recordings')" data-tab="tab-recordings">📼 Aufnahmen &amp; Timer</button>
+    <button class="tab-btn" onclick="switchTab('info')" data-tab="tab-info">ℹ️ Dongle Info</button>
+  </nav>
+
+  <main>
+    <!-- TAB 1: LIVE TV -->
+    <div id="tab-tv" class="tab-pane active">
+      <div class="tv-layout">
+        <div class="player-card">
+          <div class="video-container">
+            <video id="videoElement" controls autoplay muted playsinline></video>
+          </div>
+          <div class="player-info">
+            <div class="player-title">
+              <span id="playerChannelName">Kein Kanal aktiv</span>
+              <span id="playerFtaBadge" class="tag fta">Bereit</span>
+            </div>
+            <div class="stream-metrics">
+              <div>Bitrate: <strong id="metricBitrate">0 KB/s</strong></div>
+              <div>Empfangen: <strong id="metricBytes">0 MB</strong></div>
+              <div>Laufzeit: <strong id="metricDuration">00:00</strong></div>
+            </div>
+            <div class="player-actions">
+              <button class="secondary" onclick="stopStream()">⏹️ Stopp</button>
+              <button id="btnRecPlayer" class="secondary" onclick="toggleRecording()">🔴 Aufnahme</button>
+              <button class="secondary" onclick="copyStreamUrl()">📋 URL kopieren</button>
+              <button class="secondary" onclick="openInVlc()">🎬 In VLC öffnen</button>
+            </div>
+          </div>
+        </div>
+
+        <div class="channels-card">
+          <div class="channels-header">
+            <div class="search-filter-box">
+              <input type="text" id="channelSearch" class="search-input" placeholder="Sender suchen…" oninput="renderChannels()">
+              <div class="filter-pills">
+                <div class="filter-pill active" onclick="setFilter('all', this)">Alle</div>
+                <div class="filter-pill" onclick="setFilter('tv', this)">TV</div>
+                <div class="filter-pill" onclick="setFilter('radio', this)">Radio</div>
+                <div class="filter-pill" onclick="setFilter('fta', this)">Frei (FTA)</div>
+                <div class="filter-pill" onclick="setFilter('enc', this)">Pay-TV</div>
+              </div>
+            </div>
+            <div style="display:flex; gap:8px;">
+              <button class="secondary" onclick="refreshChannels()">🔄 Neu laden</button>
+              <a href="/playlist.m3u" target="_blank" download="wisi_channels.m3u">
+                <button class="secondary">📥 M3U Playlist</button>
+              </a>
+            </div>
+          </div>
+          <div class="channels-table-wrapper">
+            <table>
+              <thead>
+                <tr>
+                  <th style="width:50px;">#</th>
+                  <th>Sender</th>
+                  <th style="width:80px;">Typ</th>
+                  <th style="width:130px;">Frequenz</th>
+                  <th style="width:110px;">Status</th>
+                  <th style="width:90px;">Aktion</th>
+                </tr>
+              </thead>
+              <tbody id="channelsTableBody">
+                <tr><td colspan="6" style="text-align:center; color:var(--text-muted);">Lade Kanäle...</td></tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+    </div>
+    <!-- TAB 2: EPG -->
+    <div id="tab-epg" class="tab-pane">
+      <div class="channels-card">
+        <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:16px;">
+          <h3 style="margin:0;">Elektronischer Programmführer (EPG)</h3>
+          <button class="primary" onclick="refreshEpg()">📡 EPG vom Dongle laden</button>
+        </div>
+        <div id="epgGrid" class="epg-grid">
+          <p style="color:var(--text-muted);">Lade EPG-Daten...</p>
+        </div>
+      </div>
+    </div>
+    <!-- TAB 3: TUNER & SCAN -->
+    <div id="tab-tuner" class="tab-pane">
+      <div class="grid-2">
+        <div class="channels-card">
+          <h3>Transponder manuell einstellen</h3>
+          <div class="form-group">
+            <label>Frequenz (MHz, z. B. 11362 für ZDF HD)</label>
+            <input type="number" id="tuneFreq" value="11362">
+          </div>
+          <div class="form-group">
+            <label>Polarisation</label>
+            <select id="tunePol">
+              <option value="H" selected>Horizontal (18V)</option>
+              <option value="V">Vertikal (13V)</option>
+            </select>
+          </div>
+          <div class="form-group">
+            <label>Symbolrate (kS/s, z. B. 22000)</label>
+            <input type="number" id="tuneSr" value="22000">
+          </div>
+          <div class="form-group">
+            <label>Satellit (Zehntelgrad, z. B. 192 = Astra 19.2°E)</label>
+            <input type="number" id="tuneSat" value="192">
+          </div>
+          <button class="primary" onclick="tuneTransponder()">📡 Transponder einstellen</button>
+        </div>
+
+        <div class="channels-card">
+          <h3>Sendersuchlauf starten</h3>
+          <div class="form-group">
+            <label>Suchmodus</label>
+            <select id="scanMode">
+              <option value="1" selected>Manueller Transponder-Suchlauf</option>
+              <option value="0">Automatischer Blindscan</option>
+              <option value="2">Netzwerksuche (NIT Scan)</option>
+            </select>
+          </div>
+          <div class="form-group">
+            <label>Filter</label>
+            <select id="scanFilter">
+              <option value="0" selected>Alle Sender (FTA &amp; Verschlüsselt)</option>
+              <option value="1">Nur freie Sender (FTA)</option>
+            </select>
+          </div>
+          <div style="display:flex; gap:10px; margin-top:8px;">
+            <button class="primary" onclick="startScan()">🔍 Suchlauf starten</button>
+            <button class="danger" onclick="stopScan()">⏹️ Suchlauf abbrechen</button>
+          </div>
+          <div id="scanBox" class="scan-progress-box" style="display:none;">
+            <div style="display:flex; justify-content:space-between; margin-bottom:8px;">
+              <span>Suchlauf-Fortschritt:</span>
+              <strong id="scanProgressText">0%</strong>
+            </div>
+            <div class="gauge-bar-bg" style="width:100%; height:12px;">
+              <div id="scanProgressBar" class="gauge-bar-val" style="width:0%;"></div>
+            </div>
+            <div style="margin-top:10px; font-size:0.8rem; color:var(--text-muted);">
+              Gefundene Sender: <strong id="scanTvCount" style="color:#fff;">0</strong> TV, <strong id="scanRadioCount" style="color:#fff;">0</strong> Radio
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+    <!-- TAB 4: RECORDINGS & TIMERS -->
+    <div id="tab-recordings" class="tab-pane">
+      <div class="grid-2">
+        <div class="channels-card">
+          <h3>⏰ Aufnahme planen (Timer)</h3>
+          <p style="font-size:0.85rem; color:var(--text-muted); margin-bottom:12px;">
+            Programmiere automatische Aufnahmen. Der Server nimmt den gewählten Sender zur Startzeit im Hintergrund auf.
+          </p>
+          <div class="form-group">
+            <label>Sender auswählen</label>
+            <select id="timerChannelSelect">
+              <option value="">Lade Senderliste...</option>
+            </select>
+          </div>
+          <div class="form-group">
+            <label>Titel der Sendung</label>
+            <input type="text" id="timerTitleInput" placeholder="z. B. Tagesschau, Spielfilm, Doku">
+          </div>
+          <div style="display:flex; gap:10px;">
+            <div class="form-group" style="flex:2;">
+              <label>Startzeit</label>
+              <input type="datetime-local" id="timerStartInput">
+            </div>
+            <div class="form-group" style="flex:1;">
+              <label>Dauer (Minuten)</label>
+              <input type="number" id="timerDurationInput" value="60" min="1" max="600">
+            </div>
+          </div>
+          <button class="primary" onclick="createTimer()">⏰ Aufnahme programmieren</button>
+
+          <h4 style="margin-top:24px; margin-bottom:8px;">Geplante &amp; aktive Timer</h4>
+          <div id="timersList">
+            <p style="color:var(--text-muted); font-size:0.85rem;">Lade Timer...</p>
+          </div>
+        </div>
+
+        <div class="channels-card">
+          <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:8px;">
+            <h3 style="margin:0;">📼 Gespeicherte Aufnahmen</h3>
+            <button class="secondary" style="font-size:0.75rem; padding:4px 8px;" onclick="loadRecordings()">🔄 Aktualisieren</button>
+          </div>
+          <p style="font-size:0.85rem; color:var(--text-muted); margin-bottom:12px;">
+            Alle Aufnahmen liegen als unverschlüsselte MPEG-TS Dateien vor und können direkt im Web-Player abgespielt werden.
+          </p>
+          <div id="recordingsList">
+            <p style="color:var(--text-muted);">Lade Aufnahmen...</p>
+          </div>
+        </div>
+      </div>
+    </div>
+    <!-- TAB 5: DONGLE INFO -->
+    <div id="tab-info" class="tab-pane">
+      <div class="channels-card">
+        <h3>Hardware- &amp; Firmware-Details</h3>
+        <div id="infoTable" style="margin-top:12px;">
+          <p style="color:var(--text-muted);">Lade Hardware-Informationen...</p>
+        </div>
+      </div>
+    </div>
+  </main>
+
+  <div id="toast"></div>
+  <script src="/static/player.js"></script>
+  <script src="/static/timers.js"></script>
+  <script src="/static/tuner.js"></script>
+  <script src="/static/app.js"></script>
+</body>
+</html>

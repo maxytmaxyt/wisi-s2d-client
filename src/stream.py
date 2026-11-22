@@ -27,6 +27,7 @@ from prepare import (
     prepare_channel,
     reset_prepared_prog_idx,
 )
+from ts_sync import align_ts_packets
 
 log = logging.getLogger("wisi.stream")
 
@@ -161,57 +162,13 @@ def stream(
                             next_timeout_warning = now + 5.0
                         continue
 
-                    if len(data) < protocol.TS_PKT_SIZE * 4:
-                        retry_last = True
-                        time.sleep(0.01)
-                        continue
-
-                    if len(data) >= protocol.UDP_REQUEST_LEN + 64:
-                        seq = data[protocol.UDP_REQUEST_LEN + 12]
-                        if last_seq < seq:
-                            last_seq = seq
-                        elif last_seq == 255:
-                            last_seq = 0
-                        elif seq == 0:
-                            last_seq = -1
-                        else:
-                            retry_last = True
-                            time.sleep(0.01)
-                            continue
-                        payload = data[:protocol.UDP_REQUEST_LEN]
-                    elif len(data) > protocol.UDP_REQUEST_LEN:
-                        payload = data[:protocol.UDP_REQUEST_LEN]
-                    else:
-                        payload = data
-
-                    sync_offset = payload.find(bytes([protocol.TS_SYNC]))
-                    while sync_offset >= 0:
-                        if (
-                            sync_offset + 3 * protocol.TS_PKT_SIZE < len(payload)
-                            and all(
-                                payload[sync_offset + i * protocol.TS_PKT_SIZE] == protocol.TS_SYNC
-                                for i in range(4)
-                            )
-                        ):
-                            break
-                        sync_offset = payload.find(bytes([protocol.TS_SYNC]), sync_offset + 1)
-
-                    if sync_offset < 0:
-                        retry_last = True
-                        time.sleep(0.01)
-                        continue
-
-                    ts_data = payload[sync_offset:]
-                    complete_len = len(ts_data) - len(ts_data) % protocol.TS_PKT_SIZE
-                    if complete_len == 0:
-                        retry_last = True
+                    raw_ts_chunk, last_seq, retry_last = align_ts_packets(data, last_seq)
+                    if retry_last:
                         time.sleep(0.01)
                         continue
 
                     last_packet_at = time.monotonic()
                     next_timeout_warning = last_packet_at + 5.0
-
-                    raw_ts_chunk = ts_data[:complete_len]
                     if live_decrypt or (decrypt_after and output_path == "-"):
                         processed_chunk = descramble_ts_block(raw_ts_chunk)
                     else:
@@ -234,7 +191,7 @@ def stream(
                             log.debug("chunk_callback Fehler: %s", cb_err)
 
                     block_num += 1
-                    ts_bytes += complete_len
+                    ts_bytes += len(raw_ts_chunk)
                     retry_last = False
 
                     elapsed = time.monotonic() - t_start

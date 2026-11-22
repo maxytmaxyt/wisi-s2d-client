@@ -1,39 +1,8 @@
 """
-WISI / Tivizen / TiViCon DVB-over-IP Client  –  v4 (PCAP-verified)
-====================================================================
-Protokoll-Grundlage: Direktanalyse des PCAP-Mitschnitts im Repository.
-
-ARCHITEKTUR:
-  TCP 8802  Steuerkanal – Init (0x16/0x17) + EPG (0x30–0x36)
-            CDB-Byte[0] = 0xF6
-
-  UDP 8800  Bidirektional – Befehle + Daten
-            Client → Dongle: USBC-Pakete mit CDB-Byte[0] = 0xF9
-            Dongle → Client: TS-Rohpakete (beginnen mit 0x47)
-                             + USBS-Status (13 Byte)
-                             + 0x0A-"Null"-Antworten (0xF9 0x0A + Nullbytes)
-
-ABLAUF laut PCAP:
-  1. TCP-Connect + Init 0x16/0x17 (+ opt. EPG-Abfragen)
-  2. UDP 0x02 einmalig (Flags=0x00, datalen=0)
-  3. UDP 0x0A in Schleife (~5 s; PCAP: ~19 s)
-     → Dongle antwortet mit Nullpaketen (kein TS-Inhalt)
-  4. UDP 0x01 in Dauerschleife (Median-Intervall laut PCAP: ~93 ms)
-     → Dongle antwortet mit 32 740-Byte-TS-Blöcken (beginnen mit 0x47)
-  5. TCP 0x16 Keep-Alive alle 2,5 s (parallel via Lock)
-
-USBC-Container (31 Byte):
-  [0..3]   "USBC"
-  [4..7]   Tag        A0 CB 03 37
-  [8..11]  Datenlänge Big-Endian  (0xBC00 = 48 128 für TS-Requests)
-  [12]     Flags      0x80 = Lesen / 0x00 = Schreiben
-  [13]     LUN        0x00
-  [14]     CDB-Länge  0x10 (16 Byte)
-  [15..30] CDB        [0xF6|0xF9] + "APIX" + Opcode + Payload
-
-BEKANNTE OPCODES:
-  TCP (0xF6): 0x16 Init/KA, 0x17 Init, 0x30-0x36 EPG
-  UDP (0xF9): 0x02 Pre-Init, 0x0A Vorbereitungsschleife, 0x01 Stream
+WISI / Tivizen / TiViCon DVB-over-IP Client – v4 (PCAP-verified)
+================================================================
+Archivierte Referenzimplementierung des PCAP-Mitschnitts.
+TCP 8802 (Steuerkanal 0xF6), UDP 8800 (Stream 0xF9).
 """
 
 import argparse
@@ -58,40 +27,24 @@ log = logging.getLogger("wisi")
 # ---------------------------------------------------------------------------
 # Konfiguration
 # ---------------------------------------------------------------------------
-DONGLE_IP    = "192.168.178.32"
-TCP_PORT     = 8802
-UDP_PORT     = 8800
-
-MAGIC_TAG    = b"\xA0\xCB\x03\x37"
-
-UDP_PAYLOAD  = 256 * 188   # 48 128 Byte (0xBC00) = 256 MPEG-TS-Pakete
-TS_SYNC      = 0x47
-
-PRE_SECS     = 5.0    # 0x0A-Schleife (PCAP: ~19 s, kürzer = schneller)
-STREAM_MS    = 0.1    # Sekunden zwischen 0x01-Requests (~93 ms Median im PCAP)
-KA_SECS      = 2.5    # TCP 0x16 Keep-Alive-Intervall
-
-# ---------------------------------------------------------------------------
-# USBC-Builder
-# ---------------------------------------------------------------------------
-
-def _usbc(data_len: int, flags: int, prefix: int, opcode: int,
-          payload: bytes = b"") -> bytes:
-    cdb = (bytes([prefix]) + b"APIX" + bytes([opcode]) + payload).ljust(16, b"\x00")
-    return b"USBC" + MAGIC_TAG + struct.pack(">I", data_len) + bytes([flags, 0, 0x10]) + cdb
-
-# TCP-Befehle (prefix = 0xF6)
-def tcp_16()                   -> bytes: return _usbc(12, 0x80, 0xF6, 0x16)
-def tcp_17()                   -> bytes: return _usbc(4,  0x80, 0xF6, 0x17)
-def tcp_epg_size(idx: int)     -> bytes: return _usbc(6,  0x80, 0xF6, 0x30, struct.pack(">I", idx))
-def tcp_epg_data(idx, n)       -> bytes: return _usbc(n,  0x80, 0xF6, 0x31, struct.pack(">II", idx, n))
-def tcp_evt_size(eid: int)     -> bytes: return _usbc(6,  0x80, 0xF6, 0x35, struct.pack(">I", eid))
-def tcp_evt_data(eid, n)       -> bytes: return _usbc(n,  0x80, 0xF6, 0x36, struct.pack(">II", eid, n))
-
-# UDP-Befehle (prefix = 0xF9)
-def udp_02()  -> bytes: return _usbc(0,          0x00, 0xF9, 0x02, b"\x01\x00")
-def udp_0a()  -> bytes: return _usbc(UDP_PAYLOAD, 0x80, 0xF9, 0x0A)
-def udp_01()  -> bytes: return _usbc(UDP_PAYLOAD, 0x80, 0xF9, 0x01)
+from wisi_proto_legacy import (
+    DONGLE_IP,
+    KA_SECS,
+    PRE_SECS,
+    STREAM_MS,
+    TCP_PORT,
+    TS_SYNC,
+    UDP_PORT,
+    tcp_16,
+    tcp_17,
+    tcp_epg_data,
+    tcp_epg_size,
+    tcp_evt_data,
+    tcp_evt_size,
+    udp_01,
+    udp_02,
+    udp_0a,
+)
 
 # ---------------------------------------------------------------------------
 # TCP-Helfer

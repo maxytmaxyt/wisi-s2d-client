@@ -2,6 +2,7 @@
 from __future__ import annotations
 
 import argparse
+import concurrent.futures
 import json
 import logging
 import socket
@@ -20,6 +21,7 @@ sys.path = [p for p in sys.path if Path(p).resolve() != Path(_pkg).resolve()]
 if _src not in sys.path:
     sys.path.insert(0, _src)
 
+import protocol
 from protocol import TCP_PORT
 from wisi.common import DEFAULT_IP
 
@@ -29,6 +31,84 @@ MAGIC = 0x54563253
 VERSION = 0x0100
 DISCOVERY_REQUEST = 0x0001
 APP_ID = "com.tivicon.tv2smart"
+
+
+def probe_dongle_tcp(ip: str, timeout: float = 0.25) -> dict[str, object] | None:
+    """Prüft eine IP auf TCP Port 8802 und verifiziert das APIX 0xF6/0x16 Handshake."""
+    s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+    s.settimeout(timeout)
+    try:
+        s.connect((ip, TCP_PORT))
+        s.sendall(protocol.cmd_16())
+        resp = s.recv(25)
+        s.close()
+        if len(resp) >= 3 and resp[:2] == b"\xf6\x16":
+            return {
+                "ip": ip,
+                "model_name": "WISI OR S2D",
+                "port": TCP_PORT,
+                "status": resp[2],
+            }
+    except Exception:
+        pass
+    finally:
+        try:
+            s.close()
+        except Exception:
+            pass
+    return None
+
+
+def discover_dongles(current_ip: str | None = None, timeout: float = 1.5) -> list[dict[str, object]]:
+    """
+    Sucht den WISI Dongle zuverlässig und bestätigt über TCP Port 8802 (APIX 0xF6/0x16).
+    1. Sofortige Prüfung der aktuellen und bekannten Standard-IPs (Dauer: ~100 ms).
+    2. Paralleler Subnetz-Scan lokaler Schnittstellen (Dauer: < 1 s).
+    """
+    prio_ips = [current_ip, DEFAULT_IP, "10.20.0.1", "192.168.2.80", "192.168.1.32", "192.168.0.32"]
+    checked: set[str] = set()
+    found: list[dict[str, object]] = []
+
+    for ip in prio_ips:
+        if ip and ip not in checked:
+            checked.add(ip)
+            res = probe_dongle_tcp(ip, timeout=0.3)
+            if res:
+                found.append(res)
+
+    if found:
+        return found
+
+    candidates: list[str] = []
+    try:
+        host_ips = socket.gethostbyname_ex(socket.gethostname())[2]
+    except Exception:
+        host_ips = []
+
+    subnets: set[str] = {"192.168.178"}
+    for hip in host_ips:
+        if not (hip.startswith("127.") or hip.startswith("169.254.")):
+            parts = hip.split(".")
+            if len(parts) == 4:
+                subnets.add(".".join(parts[:3]))
+
+    for subnet in subnets:
+        for i in range(1, 255):
+            candidate = f"{subnet}.{i}"
+            if candidate not in checked:
+                candidates.append(candidate)
+
+    with concurrent.futures.ThreadPoolExecutor(max_workers=64) as executor:
+        futures = {executor.submit(probe_dongle_tcp, ip, 0.25): ip for ip in candidates}
+        for fut in concurrent.futures.as_completed(futures):
+            try:
+                res = fut.result()
+                if res and res not in found:
+                    found.append(res)
+            except Exception:
+                pass
+
+    return found
 
 
 def build_request(sequence_id: int) -> bytes:
@@ -55,36 +135,14 @@ def parse_response(data: bytes) -> dict[str, object] | None:
     return result
 
 
-def run(ip: str, timeout: float) -> int:
-    sequence_id = int(time.time()) & 0xFFFFFFFF
-    request = build_request(sequence_id)
-    with socket.socket(socket.AF_INET, socket.SOCK_DGRAM) as udp:
-        udp.setsockopt(socket.SOL_SOCKET, socket.SO_BROADCAST, 1)
-        udp.settimeout(timeout)
-        udp.sendto(request, ("255.255.255.255", TCP_PORT))
-        udp.sendto(request, (ip, TCP_PORT))
-        seen: set[tuple[str, str]] = set()
-        deadline = time.monotonic() + timeout
-        while time.monotonic() < deadline:
-            try:
-                data, address = udp.recvfrom(65535)
-            except TimeoutError:
-                break
-            result = parse_response(data)
-            if result is None:
-                continue
-            key = (address[0], json.dumps(result, sort_keys=True))
-            if key in seen:
-                continue
-            seen.add(key)
-            print(json.dumps({"ip": address[0], **result}, ensure_ascii=False, indent=2))
-    if not seen:
-        log.warning(
-            "Keine TV2S-Discovery-Antwort empfangen. Dieses Format ist in den "
-            "Projektmitschnitten nicht bestätigt; nutze bei Bedarf --ip direkt."
-        )
-        return 1
-    return 0
+def run(ip: str, timeout: float = 2.0) -> int:
+    devices = discover_dongles(current_ip=ip, timeout=timeout)
+    if devices:
+        for dev in devices:
+            print(json.dumps(dev, ensure_ascii=False, indent=2))
+        return 0
+    log.warning("Kein WISI Dongle gefunden (geprüft auf Port %d).", TCP_PORT)
+    return 1
 
 
 def main(argv: Sequence[str] | None = None) -> int:

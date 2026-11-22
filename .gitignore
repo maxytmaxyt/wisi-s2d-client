@@ -26,3 +26,5 @@ Thumbs.db
 # Projektspezifisch
 *.ts
 *.pcap.extracted/
+ffmpeg.exe
+
