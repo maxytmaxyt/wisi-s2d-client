@@ -65,9 +65,11 @@ async function pollStatus() {
 
     // Streaming metrics
     if (data.streaming && data.streaming.is_streaming) {
-      document.getElementById('metricBitrate').innerText = data.streaming.kbps + ' KB/s';
+      const kb = Math.round(data.streaming.kbps || 0);
+      const mbit = (kb * 8 / 1024).toFixed(1);
+      document.getElementById('metricBitrate').innerText = kb + ' KB/s (' + mbit + ' Mbit/s)';
       document.getElementById('metricBytes').innerText = (data.streaming.bytes / 1048576).toFixed(1) + ' MB';
-      const dur = Math.round(data.streaming.elapsed || 0);
+      const dur = Math.round(data.streaming.elapsed || data.streaming.elapsed_seconds || 0);
       const m = String(Math.floor(dur / 60)).padStart(2, '0');
       const s = String(dur % 60).padStart(2, '0');
       document.getElementById('metricDuration').innerText = m + ':' + s;

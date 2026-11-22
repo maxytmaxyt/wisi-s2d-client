@@ -123,6 +123,8 @@ class StreamEngine:
 
         def on_status(stats: dict[str, object]) -> None:
             self.stream_stats.update(stats)
+            if "elapsed_seconds" in stats:
+                self.stream_stats["elapsed"] = stats["elapsed_seconds"]
             self.stream_stats["is_streaming"] = True
 
         try:

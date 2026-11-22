@@ -4,17 +4,20 @@ api_record.py – REST-Endpunkte für Aufnahmen, Timer-Planer und Tuner-Suchlauf
 from __future__ import annotations
 
 import asyncio
+from collections.abc import AsyncIterator
 import os
 from pathlib import Path
+import subprocess
 import time
 
 from starlette.requests import Request
-from starlette.responses import FileResponse, JSONResponse, Response
+from starlette.responses import FileResponse, JSONResponse, Response, StreamingResponse
 
 from decrypt import decrypt_ts_file
 from scan import SCAN_AUTO, SCAN_MANUAL, SCAN_NETWORK
 from ui.state import manager
 from ui.streamer import RECORDINGS_DIR
+from ui.transcoder import find_ffmpeg
 
 
 async def api_record_start(request: Request) -> JSONResponse:
@@ -48,11 +51,145 @@ async def api_recording_file(request: Request) -> Response:
     path = RECORDINGS_DIR / safe_name
     if not path.is_file():
         return Response("Datei nicht gefunden", status_code=404)
+    media_type = "video/mp4" if safe_name.lower().endswith(".mp4") else "video/mp2t"
     return FileResponse(
         str(path),
-        media_type="video/mp2t",
+        media_type=media_type,
         filename=safe_name,
     )
+
+
+async def api_recording_stream(request: Request) -> Response:
+    """Streamt eine Aufnahme als HTML5-kompatibles Fragmented-MP4 (H.264+AAC)."""
+    filename = request.path_params.get("filename", "")
+    safe_name = os.path.basename(filename)
+    path = RECORDINGS_DIR / safe_name
+    if not path.is_file():
+        return Response("Datei nicht gefunden", status_code=404)
+
+    if safe_name.lower().endswith(".mp4"):
+        return FileResponse(str(path), media_type="video/mp4")
+
+    ffmpeg_bin = find_ffmpeg()
+    if not ffmpeg_bin:
+        return FileResponse(str(path), media_type="video/mp2t")
+
+    probe = await asyncio.to_thread(
+        subprocess.run,
+        [ffmpeg_bin, "-i", str(path)],
+        stderr=subprocess.PIPE,
+        text=True,
+    )
+    is_mpeg2 = "mpeg2video" in probe.stderr.lower()
+
+    cmd = [
+        ffmpeg_bin,
+        "-hide_banner",
+        "-loglevel", "error",
+        "-i", str(path),
+    ]
+    if is_mpeg2:
+        cmd.extend(["-c:v", "libx264", "-preset", "ultrafast", "-tune", "zerolatency", "-crf", "23"])
+    else:
+        cmd.extend(["-c:v", "copy"])
+    cmd.extend([
+        "-c:a", "aac",
+        "-b:a", "128k",
+        "-f", "mp4",
+        "-movflags", "frag_keyframe+empty_moov+default_base_moof",
+        "pipe:1",
+    ])
+
+    creationflags = subprocess.CREATE_NO_WINDOW if os.name == "nt" else 0
+    proc = subprocess.Popen(
+        cmd,
+        stdout=subprocess.PIPE,
+        stderr=subprocess.DEVNULL,
+        creationflags=creationflags,
+    )
+
+    async def stream_mp4() -> AsyncIterator[bytes]:
+        try:
+            while True:
+                if await request.is_disconnected():
+                    break
+                chunk = await asyncio.to_thread(proc.stdout.read, 32768)
+                if not chunk:
+                    break
+                yield chunk
+        finally:
+            try:
+                proc.terminate()
+                proc.wait(timeout=1.0)
+            except Exception:
+                pass
+
+    return StreamingResponse(
+        stream_mp4(),
+        media_type="video/mp4",
+        headers={
+            "Cache-Control": "no-cache",
+            "Accept-Ranges": "none",
+        },
+    )
+
+
+async def api_recordings_convert(request: Request) -> JSONResponse:
+    """Wandelt eine .ts-Aufnahme in ein standardisiertes .mp4 um."""
+    try:
+        body = await request.json()
+        filename = body.get("filename", "")
+    except Exception:
+        filename = ""
+
+    safe_name = os.path.basename(filename)
+    path = RECORDINGS_DIR / safe_name
+    if not path.is_file():
+        return JSONResponse({"success": False, "message": "Datei nicht gefunden"}, status_code=404)
+
+    ffmpeg_bin = find_ffmpeg()
+    if not ffmpeg_bin:
+        return JSONResponse({"success": False, "message": "FFmpeg nicht verfügbar"}, status_code=500)
+
+    out_name = f"{path.stem}.mp4"
+    out_path = RECORDINGS_DIR / out_name
+
+    def _convert() -> tuple[bool, str]:
+        cmd = [
+            ffmpeg_bin,
+            "-y",
+            "-i", str(path),
+            "-c:v", "copy",
+            "-c:a", "aac",
+            "-b:a", "128k",
+            "-movflags", "+faststart",
+            str(out_path),
+        ]
+        res = subprocess.run(cmd, stderr=subprocess.PIPE, text=True)
+        if res.returncode != 0:
+            cmd_reencode = [
+                ffmpeg_bin,
+                "-y",
+                "-i", str(path),
+                "-c:v", "libx264",
+                "-preset", "fast",
+                "-crf", "22",
+                "-c:a", "aac",
+                "-b:a", "128k",
+                "-movflags", "+faststart",
+                str(out_path),
+            ]
+            res = subprocess.run(cmd_reencode, stderr=subprocess.PIPE, text=True)
+        return (res.returncode == 0, out_name)
+
+    ok, res_name = await asyncio.to_thread(_convert)
+    if ok:
+        return JSONResponse({
+            "success": True,
+            "message": f"Aufnahme erfolgreich als MP4 gespeichert: {res_name}",
+            "filename": res_name,
+        })
+    return JSONResponse({"success": False, "message": "Konvertierung fehlgeschlagen"}, status_code=500)
 
 
 async def api_recording_delete(request: Request) -> JSONResponse:

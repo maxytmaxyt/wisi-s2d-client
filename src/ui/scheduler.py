@@ -212,10 +212,12 @@ class RecordingScheduler:
     def list_recordings(self) -> list[dict[str, Any]]:
         RECORDINGS_DIR.mkdir(parents=True, exist_ok=True)
         files = []
-        for p in RECORDINGS_DIR.glob("*.ts"):
+        all_recs = list(RECORDINGS_DIR.glob("*.ts")) + list(RECORDINGS_DIR.glob("*.mp4"))
+        for p in all_recs:
             stat = p.stat()
             files.append({
                 "filename": p.name,
+                "is_mp4": p.suffix.lower() == ".mp4",
                 "size_mb": round(stat.st_size / 1_048_576, 2),
                 "created": time.strftime("%Y-%m-%d %H:%M:%S", time.localtime(stat.st_mtime)),
                 "path": str(p.resolve()),

@@ -112,24 +112,36 @@ function playRecordedFile(filename) {
   ftaBadge.innerText = 'Aufnahme';
 
   const videoElement = document.getElementById('videoElement');
-  const fileUrl = window.location.origin + '/api/recordings/' + encodeURIComponent(filename);
+  const isMp4 = filename.toLowerCase().endsWith('.mp4');
+  const playUrl = isMp4
+    ? window.location.origin + '/api/recordings/' + encodeURIComponent(filename)
+    : window.location.origin + '/api/recordings/stream/' + encodeURIComponent(filename);
 
-  if (typeof mpegts !== 'undefined' && mpegts.isSupported()) {
-    player = mpegts.createPlayer({
-      type: 'mse',
-      isLive: false,
-      url: fileUrl
-    }, {
-      enableWorker: true,
-      lazyLoad: false
-    });
-    player.attachMediaElement(videoElement);
-    player.load();
-    player.play().catch(e => console.log('Wiedergabe:', e));
-  } else {
-    videoElement.src = fileUrl;
-    videoElement.play().catch(e => console.log('Wiedergabe:', e));
-  }
+  videoElement.src = playUrl;
+  videoElement.controls = true;
+  videoElement.play().catch(e => console.log('Wiedergabe:', e));
+
   switchTab('tv');
   showToast('Spiele Aufnahme: ' + filename);
 }
+
+document.addEventListener('DOMContentLoaded', () => {
+  const videoElement = document.getElementById('videoElement');
+  if (videoElement) {
+    videoElement.addEventListener('timeupdate', () => {
+      if (activeProgIdx === 0 && !isNaN(videoElement.currentTime)) {
+        const cur = Math.round(videoElement.currentTime);
+        const m = String(Math.floor(cur / 60)).padStart(2, '0');
+        const s = String(cur % 60).padStart(2, '0');
+        if (!isNaN(videoElement.duration) && isFinite(videoElement.duration) && videoElement.duration > 0) {
+          const tot = Math.round(videoElement.duration);
+          const tm = String(Math.floor(tot / 60)).padStart(2, '0');
+          const ts = String(tot % 60).padStart(2, '0');
+          document.getElementById('metricDuration').innerText = `${m}:${s} / ${tm}:${ts}`;
+        } else {
+          document.getElementById('metricDuration').innerText = `${m}:${s}`;
+        }
+      }
+    });
+  }
+});

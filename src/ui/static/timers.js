@@ -14,11 +14,14 @@ async function loadRecordings() {
   div.innerHTML = data.recordings.map(r => `
     <div style="background:#1e293b; padding:12px; border-radius:8px; margin-bottom:8px; display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:8px;">
       <div>
-        <div style="font-weight:600; color:#fff;">${r.filename}</div>
+        <div style="font-weight:600; color:#fff;">
+          ${r.is_mp4 ? '🎬 <span class="tag fta" style="font-size:0.7rem; padding:2px 6px;">MP4</span>' : '📼 <span class="tag" style="background:#64748b; font-size:0.7rem; padding:2px 6px;">TS</span>'} ${r.filename}
+        </div>
         <div style="font-size:0.75rem; color:var(--text-muted);">${r.size_mb} MB • ${r.created}</div>
       </div>
       <div style="display:flex; gap:6px; flex-wrap:wrap;">
         <button class="primary" style="font-size:0.75rem; padding:4px 8px;" onclick="playRecordedFile('${r.filename.replace(/'/g, "\\'")}')">▶️ Abspielen</button>
+        ${!r.is_mp4 ? `<button class="secondary" style="font-size:0.75rem; padding:4px 8px;" onclick="convertRecordingToMp4('${r.filename.replace(/'/g, "\\'")}')">⚡ In MP4 wandeln</button>` : ''}
         <a href="/api/recordings/${encodeURIComponent(r.filename)}" download>
           <button class="secondary" style="font-size:0.75rem; padding:4px 8px;">📥 Download</button>
         </a>
@@ -26,6 +29,22 @@ async function loadRecordings() {
       </div>
     </div>
   `).join('');
+}
+
+async function convertRecordingToMp4(filename) {
+  showToast('Konvertiere ' + filename + ' nach MP4…');
+  try {
+    const res = await fetch('/api/recordings/convert', {
+      method: 'POST',
+      headers: {'Content-Type': 'application/json'},
+      body: JSON.stringify({ filename: filename })
+    });
+    const data = await res.json();
+    showToast(data.message);
+    loadRecordings();
+  } catch (e) {
+    showToast('Fehler bei Konvertierung: ' + e);
+  }
 }
 
 async function deleteRecording(filename) {
