@@ -7,8 +7,11 @@ gepuffert an aktive HTTP-Clients und leitet Chunks an die Aufnahme weiter.
 from __future__ import annotations
 
 import logging
+from pathlib import Path
 import queue
+import shutil
 import threading
+import time
 from typing import TYPE_CHECKING, Any
 
 from models import ServiceEntry
@@ -39,6 +42,9 @@ class StreamEngine:
             "blocks": 0,
             "elapsed": 0.0,
         }
+        self.timeshift_file: Any = None
+        self.timeshift_path = Path("recordings/_timeshift.ts")
+        self.timeshift_lock = threading.Lock()
 
     def start_stream(self, prog_idx: int) -> bool:
         if not self.manager.tcp_sock:
@@ -64,6 +70,19 @@ class StreamEngine:
             return True
 
         self.stop_stream()
+
+        with self.timeshift_lock:
+            if self.timeshift_file:
+                try:
+                    self.timeshift_file.close()
+                except Exception:
+                    pass
+            try:
+                self.timeshift_path.parent.mkdir(parents=True, exist_ok=True)
+                self.timeshift_file = open(self.timeshift_path, "wb")
+            except Exception as e:
+                log.warning("Konnte Timeshift-Puffer nicht öffnen: %s", e)
+                self.timeshift_file = None
 
         self.active_service = svc
         self.stream_stop_event.clear()
@@ -97,6 +116,14 @@ class StreamEngine:
         if self.manager.recording_active:
             self.manager.stop_recording()
 
+        with self.timeshift_lock:
+            if self.timeshift_file:
+                try:
+                    self.timeshift_file.close()
+                except Exception:
+                    pass
+                self.timeshift_file = None
+
         with self.stream_clients_lock:
             for q in self.stream_clients:
                 try:
@@ -120,6 +147,12 @@ class StreamEngine:
                         pass
 
             self.manager.scheduler.write_chunk(chunk)
+            with self.timeshift_lock:
+                if self.timeshift_file:
+                    try:
+                        self.timeshift_file.write(chunk)
+                    except Exception:
+                        pass
 
         def on_status(stats: dict[str, object]) -> None:
             self.stream_stats.update(stats)
@@ -156,3 +189,26 @@ class StreamEngine:
         with self.stream_clients_lock:
             if q in self.stream_clients:
                 self.stream_clients.remove(q)
+
+    def save_timeshift_as_recording(self) -> tuple[bool, str]:
+        """Sichert den aktuellen Timeshift-Puffer als eigenständige Aufnahme."""
+        with self.timeshift_lock:
+            if self.timeshift_file:
+                try:
+                    self.timeshift_file.flush()
+                except Exception:
+                    pass
+        if not self.timeshift_path.is_file() or self.timeshift_path.stat().st_size == 0:
+            return False, "Kein aktiver Timeshift-Puffer vorhanden"
+
+        svc_name = self.active_service.name if self.active_service else "Timeshift"
+        safe_name = "".join(c if c.isalnum() or c in " -_" else "_" for c in svc_name)
+        timestamp = time.strftime("%Y%m%d_%H%M%S")
+        target_ts = self.timeshift_path.parent / f"{safe_name}_Timeshift_{timestamp}.ts"
+
+        try:
+            shutil.copyfile(self.timeshift_path, target_ts)
+            log.info("Timeshift gespeichert: %s", target_ts)
+            return True, f"Timeshift als Aufnahme gespeichert: {target_ts.name}"
+        except Exception as e:
+            return False, f"Konnte Timeshift nicht sichern: {e}"

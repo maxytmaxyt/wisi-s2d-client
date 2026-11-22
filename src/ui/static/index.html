@@ -66,6 +66,31 @@
               <div>Empfangen: <strong id="metricBytes">0 MB</strong></div>
               <div>Laufzeit: <strong id="metricDuration">00:00</strong></div>
             </div>
+
+            <!-- TIMESHIFT CONTROL (Pause & Zurückspulen wie bei modernem Fernseher) -->
+            <div class="timeshift-bar" style="background:#0f172a; padding:10px 14px; border-radius:8px; margin:10px 0; border:1px solid #334155;">
+              <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:8px;">
+                <div style="display:flex; align-items:center; gap:8px;">
+                  <span id="timeshiftBadge" class="tag fta">🔴 LIVE</span>
+                  <span id="timeshiftDelayText" style="font-size:0.75rem; color:var(--text-muted);">Live</span>
+                </div>
+                <button class="secondary" style="font-size:0.75rem; padding:3px 8px;" onclick="saveTimeshiftRecording()">💾 Als Aufnahme sichern</button>
+              </div>
+              <div style="display:flex; align-items:center; gap:8px; margin-bottom:8px;">
+                <span style="font-size:0.7rem; color:var(--text-muted);">Start</span>
+                <input type="range" id="timeshiftSlider" min="0" max="100" value="100" style="flex:1; cursor:pointer;" oninput="onTimeshiftSliderChange(this.value)">
+                <button class="primary" style="font-size:0.75rem; padding:2px 8px; border-radius:4px;" onclick="timeshiftJumpToLive()">🔴 LIVE</button>
+              </div>
+              <div style="display:flex; justify-content:center; gap:6px; flex-wrap:wrap;">
+                <button class="secondary" style="font-size:0.75rem; padding:4px 10px;" onclick="timeshiftSeek(-60)">⏪ -60s</button>
+                <button class="secondary" style="font-size:0.75rem; padding:4px 10px;" onclick="timeshiftSeek(-30)">⏪ -30s</button>
+                <button class="secondary" style="font-size:0.75rem; padding:4px 10px;" onclick="timeshiftSeek(-10)">⏪ -10s</button>
+                <button id="btnTimeshiftPause" class="primary" style="font-size:0.75rem; padding:4px 14px;" onclick="timeshiftTogglePause()">⏸️ Pause</button>
+                <button class="secondary" style="font-size:0.75rem; padding:4px 10px;" onclick="timeshiftSeek(10)">⏩ +10s</button>
+                <button class="secondary" style="font-size:0.75rem; padding:4px 10px;" onclick="timeshiftSeek(30)">⏩ +30s</button>
+                <button class="secondary" style="font-size:0.75rem; padding:4px 10px;" onclick="timeshiftSeek(60)">⏩ +60s</button>
+              </div>
+            </div>
             <div class="player-actions">
               <button class="secondary" onclick="stopStream()">⏹️ Stopp</button>
               <button id="btnRecPlayer" class="secondary" onclick="toggleRecording()">🔴 Aufnahme</button>

@@ -35,6 +35,7 @@ from ui.api_record import (
     api_timers_create,
     api_timers_delete,
     api_timers_list,
+    api_timeshift_save,
     api_tuner_scan_start,
     api_tuner_scan_stop,
     api_tuner_tune,
@@ -67,8 +68,18 @@ else:
 
 
 async def index(request: Request) -> HTMLResponse:
-    """Liefert die Hauptseite der Benutzeroberfläche aus."""
-    return HTMLResponse(_HTML_PAGE)
+    """Liefert die Benutzeroberfläche aus mit automatischem Cache-Busting."""
+    raw = INDEX_HTML_PATH.read_text(encoding="utf-8") if INDEX_HTML_PATH.is_file() else _HTML_PAGE
+    v_param = f"?v={int(time.time())}"
+    raw = raw.replace(".js\"", f".js{v_param}\"").replace(".css\"", f".css{v_param}\"")
+    return HTMLResponse(
+        raw,
+        headers={
+            "Cache-Control": "no-cache, no-store, must-revalidate",
+            "Pragma": "no-cache",
+            "Expires": "0",
+        },
+    )
 
 
 # ---------------------------------------------------------------------------
@@ -90,6 +101,7 @@ routes = [
     Route("/api/stream/stop", endpoint=api_stream_stop, methods=["POST"]),
     Route("/api/record/start", endpoint=api_record_start, methods=["POST"]),
     Route("/api/record/stop", endpoint=api_record_stop, methods=["POST"]),
+    Route("/api/timeshift/save", endpoint=api_timeshift_save, methods=["POST"]),
     Route("/api/recordings", endpoint=api_recordings_list, methods=["GET"]),
     Route("/api/recordings/stream/{filename:path}", endpoint=api_recording_stream, methods=["GET"]),
     Route("/api/recordings/convert", endpoint=api_recordings_convert, methods=["POST"]),

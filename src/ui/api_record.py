@@ -38,6 +38,12 @@ async def api_record_stop(request: Request) -> JSONResponse:
     return JSONResponse({"success": ok, "message": msg})
 
 
+async def api_timeshift_save(request: Request) -> JSONResponse:
+    """Sichert den aktuellen Timeshift-Puffer als eigenständige Aufnahme."""
+    ok, msg = await asyncio.to_thread(manager.engine.save_timeshift_as_recording)
+    return JSONResponse({"success": ok, "message": msg})
+
+
 async def api_recordings_list(request: Request) -> JSONResponse:
     """Listet alle vorhandenen Aufnahmen auf."""
     recs = await asyncio.to_thread(manager.list_recordings)
@@ -111,8 +117,11 @@ async def api_recording_stream(request: Request) -> Response:
     async def stream_mp4() -> AsyncIterator[bytes]:
         try:
             while True:
-                if await request.is_disconnected():
-                    break
+                try:
+                    if await request.is_disconnected():
+                        break
+                except Exception:
+                    pass
                 chunk = await asyncio.to_thread(proc.stdout.read, 32768)
                 if not chunk:
                     break

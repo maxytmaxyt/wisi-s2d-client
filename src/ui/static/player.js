@@ -30,12 +30,10 @@ function playChannel(progIdx, name, fta) {
     }, {
       enableWorker: true,
       lazyLoad: false,
-      liveBufferLatencyChasing: true,
-      liveBufferLatencyMaxLatency: 2.5,
-      liveBufferLatencyMinRemain: 0.8,
-      autoCleanupSourceBuffer: true,
-      autoCleanupMaxBackwardDuration: 30,
-      autoCleanupMinBackwardDuration: 10,
+      liveBufferLatencyChasing: false,     // Timeshift: Erlaubt Pausieren & Zurückspulen
+      autoCleanupSourceBuffer: false,       // Timeshift: Löscht bisheriges Video nicht
+      autoCleanupMaxBackwardDuration: 7200, // Bis zu 2 Stunden Puffer
+      autoCleanupMinBackwardDuration: 3600,
     });
 
     player.on(mpegts.Events.ERROR, (type, detail, info) => {
@@ -125,6 +123,110 @@ function playRecordedFile(filename) {
   showToast('Spiele Aufnahme: ' + filename);
 }
 
+function timeshiftSeek(secondsDelta) {
+  const videoElement = document.getElementById('videoElement');
+  if (!videoElement || videoElement.buffered.length === 0) return;
+  const bufStart = videoElement.buffered.start(0);
+  const bufEnd = videoElement.buffered.end(videoElement.buffered.length - 1);
+  let target = videoElement.currentTime + secondsDelta;
+  if (target < bufStart) target = bufStart;
+  if (target > bufEnd) target = bufEnd;
+  videoElement.currentTime = target;
+  updateTimeshiftUI();
+}
+
+function timeshiftTogglePause() {
+  const videoElement = document.getElementById('videoElement');
+  if (!videoElement) return;
+  if (videoElement.paused) {
+    videoElement.play();
+  } else {
+    videoElement.pause();
+  }
+  updateTimeshiftUI();
+}
+
+function timeshiftJumpToLive() {
+  const videoElement = document.getElementById('videoElement');
+  if (!videoElement || videoElement.buffered.length === 0) return;
+  const liveEdge = videoElement.buffered.end(videoElement.buffered.length - 1);
+  videoElement.currentTime = Math.max(0, liveEdge - 0.5);
+  if (videoElement.paused) {
+    videoElement.play();
+  }
+  updateTimeshiftUI();
+  showToast('🔴 Zurück auf Live-Signal');
+}
+
+function onTimeshiftSliderChange(val) {
+  const videoElement = document.getElementById('videoElement');
+  if (!videoElement || videoElement.buffered.length === 0) return;
+  const bufStart = videoElement.buffered.start(0);
+  const bufEnd = videoElement.buffered.end(videoElement.buffered.length - 1);
+  const duration = bufEnd - bufStart;
+  if (duration <= 0) return;
+  const target = bufStart + (duration * (val / 100));
+  videoElement.currentTime = target;
+  updateTimeshiftUI();
+}
+
+function updateTimeshiftUI() {
+  const videoElement = document.getElementById('videoElement');
+  const badge = document.getElementById('timeshiftBadge');
+  const slider = document.getElementById('timeshiftSlider');
+  const delayText = document.getElementById('timeshiftDelayText');
+  const btnPause = document.getElementById('btnTimeshiftPause');
+
+  if (!videoElement || !badge) return;
+
+  if (btnPause) {
+    btnPause.innerText = videoElement.paused ? '▶️ Weiter' : '⏸️ Pause';
+  }
+
+  if (videoElement.buffered.length === 0) {
+    badge.innerText = '🔴 LIVE';
+    badge.className = 'tag fta';
+    if (delayText) delayText.innerText = 'Live';
+    return;
+  }
+
+  const bufStart = videoElement.buffered.start(0);
+  const bufEnd = videoElement.buffered.end(videoElement.buffered.length - 1);
+  const cur = videoElement.currentTime;
+  const delay = Math.max(0, bufEnd - cur);
+
+  if (slider && !slider.matches(':active')) {
+    const total = bufEnd - bufStart;
+    if (total > 0) {
+      slider.value = Math.min(100, Math.max(0, Math.round(((cur - bufStart) / total) * 100)));
+    }
+  }
+
+  if (delay <= 3.0) {
+    badge.innerText = '🔴 LIVE';
+    badge.className = 'tag fta';
+    if (delayText) delayText.innerText = 'Live';
+  } else {
+    const m = String(Math.floor(delay / 60)).padStart(2, '0');
+    const s = String(Math.floor(delay % 60)).padStart(2, '0');
+    badge.innerText = `⏳ TIMESHIFT (-${m}:${s})`;
+    badge.className = 'tag enc';
+    if (delayText) delayText.innerText = `-${m}:${s} Min`;
+  }
+}
+
+async function saveTimeshiftRecording() {
+  showToast('💾 Speichere Timeshift als Aufnahme…');
+  try {
+    const res = await fetch('/api/timeshift/save', { method: 'POST' });
+    const data = await res.json();
+    showToast(data.message);
+    if (typeof loadRecordings === 'function') loadRecordings();
+  } catch (e) {
+    showToast('Fehler beim Speichern: ' + e);
+  }
+}
+
 document.addEventListener('DOMContentLoaded', () => {
   const videoElement = document.getElementById('videoElement');
   if (videoElement) {
@@ -141,6 +243,8 @@ document.addEventListener('DOMContentLoaded', () => {
         } else {
           document.getElementById('metricDuration').innerText = `${m}:${s}`;
         }
+      } else if (activeProgIdx && activeProgIdx > 0) {
+        updateTimeshiftUI();
       }
     });
   }
