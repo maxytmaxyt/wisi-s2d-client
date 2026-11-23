@@ -1,193 +1,243 @@
 # WISI OR S2D – DVB-over-IP Client
 
-Python-Client für den **WISI OR S2D** (DVB-S2-Satelliten-Dongle, baugleich mit TiViCon OR S2D / Schwaiger DSRD0100). Basiert auf PCAP-Mitschnitten, der dekompilierten TV2Smart-App und Live-Verifikation gegen den echten Dongle.
+Python-Client und Web-Oberfläche für den **WISI OR S2D** DVB-S2-Satelliten-Dongle (baugleich mit TiViCon OR S2D / Schwaiger DSRD0100). Entstanden durch PCAP-Analyse, dekompilierten APK-Quellcode und Live-Tests gegen die echte Hardware.
 
-> Details zu Protokoll, Forschungsstand und Streaming-Ablauf: [research/DETAILS.md](research/DETAILS.md) & [research/stream.md](research/stream.md)
-
-## Protokoll-Entschlüsselungsstatus (100 % aller 5 APIX-Klassen)
-
-Alle fünf im Hersteller-SDK (`com.crenova.tv.dongle.dvb.sdk.messages.*`) vorhandenen APIX-Befehlsklassen sind vollständig reverse-engineert, dokumentiert und im Client hinterlegt:
-
-| APIX-Klasse | Funktionsbereich | Status |
-|---|---|---|
-| **`0xF6`** | Tuner, DVB-S2 LNB/DiSEqC/Satellit (`0x07..0x09`), Sendersuchlauf (`0x01, 0x02, 0x10..0x12`), Kanalwechsel (`0x03`), Kanalliste (`0x20..0x22`), Bouquets (`0x22..0x2B`), EPG (`0x30..0x38`), Keep-Alive (`0x16/0x17`), Reset (`0x00/0x40`) | **100 % entschlüsselt** (`protocol.py`, `channels.py`, `prepare.py`, `epg.py`, `scan.py`) |
-| **`0xF8`** | CAS / Smartcard-MMI (`0x00..0x06`, `0x10..0x17`) & Stream-Stop / Sleep-Mode (`0x07`) | **100 % entschlüsselt** (`protocol.py`, `stream.py`) |
-| **`0xF9`** | UDP-MPEG-TS-Streaming (`0x01, 0x02`), Stream-Status (`0x00`), IPTV-Injektion (`0x03, 0x04, 0x08, 0x0B`), Loopback (`0x05, 0x06`), Speedtest (`0x0A`) + AES-128-ECB Link-Crypto | **100 % entschlüsselt** (`stream.py`, `decrypt.py`) |
-| **`0xFA`** | 3-stufige Hardware-/Session-Info (`0x00, 0x07, 0x08`), CI+/SAC-Handshake (`0x01..0x03`, Root-Seed `LukeRanDolphCI+1`), Firmware-Flash (`0x04..0x06`), OTA-Update (`0x0A..0x19`) | **100 % entschlüsselt** (`scan.py`, `research/DETAILS.md`) |
-| **`0xFB`** | Werks-/Produktionsmodus (`0x01..0x03`) | **100 % entschlüsselt** (`research/DETAILS.md`) |
+> **Protokoll vollständig reverse-engineert** – alle 5 APIX-Befehlsklassen (`0xF6`–`0xFB`) sind dokumentiert und implementiert.
 
 ---
 
-## Voraussetzungen
+## Inhaltsverzeichnis
 
-- Python **3.10 oder neuer**
-- Paket [`cryptography`](https://pypi.org/project/cryptography/) (für die AES-128-ECB-Entschlüsselung der vom Dongle link-verschlüsselten MPEG-TS-Pakete)
+- [Features](#features)
+- [Voraussetzungen & Installation](#voraussetzungen--installation)
+- [Schnellstart](#schnellstart)
+- [Web-Oberfläche](#web-oberfläche)
+- [CLI-Nutzung](#cli-nutzung)
+- [24/7-Betrieb](#247-betrieb)
+- [Projektstruktur](#projektstruktur)
+- [Tests](#tests)
+- [Dokumentation](#dokumentation)
+
+---
+
+## Features
+
+- **Live-TV & Radio** direkt im Browser (HTML5-Player via `mpegts.js`)
+- **VLC-Streaming** per HTTP und M3U-Playlist-Export
+- **Aufnahmen** mit Timer-Scheduler und Timeshift-Puffer
+- **EPG** (Programmführer) mit 1-Klick-Aufnahme
+- **Sendersuchlauf** (manuell / automatisch / Netzwerk) mit Live-Fortschritt
+- **Signalüberwachung** (AGC-Stärke, SNR-Qualität, Tuner-Lock)
+- **AES-128-ECB Entschlüsselung** – der Dongle verschlüsselt alle TS-Pakete (auch FTA) auf der Netzwerkstrecke; der Client entschlüsselt automatisch
+- **Hardware-Diagnose** (Firmware-Version, MAC, Chip-ID, Seriennummer)
+- **PCAP-Analyse** für Protokoll-Debugging
+
+---
+
+## Voraussetzungen & Installation
+
+- Python **3.10+**
+- Paket [`cryptography`](https://pypi.org/project/cryptography/) (für AES-128-ECB)
 
 ```bash
 python -m venv .venv
 source .venv/bin/activate        # Linux/macOS
 # .\.venv\Scripts\Activate.ps1  # Windows PowerShell
+
 pip install -e .
 ```
 
-Nach der Installation ist der Befehl `wisi` verfügbar. Ohne Installation: `python src/wisi/wisi.py`.
+Nach der Installation ist der Befehl `wisi` verfügbar. Ohne Installation geht auch `python src/wisi/wisi.py`.
 
 ---
 
-## Ausführen
-
-Die Standard-IP in den Beispielen ist `192.168.178.32` – bei Bedarf durch die IP deines Dongles ersetzen.
-
-### 1. Web-Benutzeroberfläche (Control Center) & 24/7 Server
-
-Das browserbasierte Control Center vereint alle Funktionen in einer modernen Oberfläche:
-- **📺 Live-TV & Radio:** Integrierter HTML5-Player (`mpegts.js`), der den entschlüsselten MPEG-TS-Stream direkt im Browser wiedergibt.
-- **▶️ VLC & M3U-Export:** Sender direkt in VLC abspielen oder vollständige `wisi_channels.m3u` Playlist für VLC, Kodi, Apple TV etc. herunterladen.
-- **📋 Senderliste:** Suche & Filter nach TV, Radio, FTA (kostenlos) und verschlüsselt.
-- **📅 EPG (Programmführer):** Anzeige aktueller und kommender Sendungen inkl. Detailbeschreibung und 1-Klick-Aufnahme.
-- **⏰ Timer-Aufnahmen (Aufnahme-Scheduler):** Automatische Programmierung von Sendungen über das EPG oder Zeit/Dauer; läuft 24/7 im Hintergrund.
-- **📼 Aufnahmen-Verwaltung & Playback:** Aufnahmen direkt im Browser-Player anschauen, herunterladen oder löschen.
-- **📡 Tuner & Sendersuchlauf:** Transponder-Einstellung, LNB/DiSEqC-Parameter und DVB-S2-Suchlauf mit Live-Fortschritt.
-- **📶 Signalüberwachung:** Live-Pegelanzeige für Signalstärke (AGC), Signalqualität (SNR) und Tuner-Lock.
-- **ℹ️ Hardware-Diagnose & PCAP:** Anzeige von Dongle-Modell, Firmware, MAC-Adresse, Seriennummer, PCAP-Analyse und Opcode-Tester.
+## Schnellstart
 
 ```bash
-# Start der Oberfläche im Heimnetzwerk (erreichbar für Handys, Tablets, TVs):
-python -m wisi.ui --host 0.0.0.0 --port 8888
+# Web-Oberfläche starten (Browser öffnet sich automatisch)
+wisi --ui
 
-# Oder über wisi.py:
-python src/wisi/wisi.py --ui
+# Kanalliste anzeigen
+wisi --ip 192.168.178.32 --channels
+
+# 60 Sekunden aufnehmen und direkt entschlüsseln
+wisi --ip 192.168.178.32 --stream --pat-idx 4 --duration 60 --output aufnahme.ts --decrypt
 ```
+
+Die Standard-IP `192.168.178.32` kann mit `--ip` überschrieben werden.
 
 ---
 
-### 2. Dauerbetrieb (24/7 Server) via USB-C (z. B. Raspberry Pi oder Mini-PC)
+## Web-Oberfläche
 
-Um den Dongle dauerhaft und ruckelfrei ohne alte Wi-Fi 4 Router zu betreiben:
-1. **Verbindung:** Dongle per USB-C Datenkabel an den Server/Raspberry Pi anschließen (und Dongle-12V-Netzteil einstecken).
-2. **Netzwerk:** Der Server ist per LAN oder schnellem Haupt-WLAN (z. B. Wi-Fi 7) mit dem Heimnetzwerk verbunden.
-3. **Automatischer Hintergrund-Dienst:**
-   - **Linux / Raspberry Pi:** 
-     ```bash
-     chmod +x scripts/setup_raspberry_pi.sh
-     ./scripts/setup_raspberry_pi.sh
-     ```
-     Richtet automatisch den `systemd`-Dienst `wisi-server.service` ein, der beim Hochfahren startet.
-   - **Windows:**
-     Doppelklick auf [`scripts/start_windows_service.bat`](scripts/start_windows_service.bat).
+```bash
+wisi --ui
+# oder direkt mit IP:
+wisi --ui --ip 192.168.178.32
+```
 
-Danach ist das Web Control Center im gesamten Heimnetzwerk unter `http://<IP-des-Servers>:8888` erreichbar!
+Erreichbar unter **http://localhost:8888** – und im gesamten Heimnetz unter `http://<Server-IP>:8888`.
+
+| Bereich | Funktion |
+|---------|----------|
+| **Live-TV** | HTML5-Player, VLC-Link, M3U-Export |
+| **Senderliste** | Suche, Filter (TV / Radio / FTA / Verschlüsselt) |
+| **EPG** | Aktuelle und nächste Sendung, 1-Klick-Aufnahme |
+| **Aufnahmen** | Starten, stoppen, herunterladen, löschen, im Browser abspielen |
+| **Timer** | Sendungen nach Uhrzeit und Dauer programmieren |
+| **Tuner** | Transponder einstellen, DVB-S2-Suchlauf |
+| **Signal** | Live AGC / SNR / Lock-Anzeige |
+| **Diagnose** | Dongle-Info, PCAP-Analyse, Opcode-Tester |
 
 ---
 
-### 2. Kanalliste anzeigen (CLI)
+## CLI-Nutzung
+
+### Kanalliste
 
 ```bash
-python src/wisi/wisi.py --ip 192.168.178.32 --channels
+wisi --channels
 ```
 
-### 2. Stream aufzeichnen & entschlüsseln
-
-Der Dongle verschlüsselt alle Elementarstream-TS-Pakete (auch bei FTA-Sendern) auf der Netzwerkstrecke mit AES-128-ECB. Mit `--decrypt` wird die gespeicherte `.ts`-Datei direkt am Ende der Aufnahme entschlüsselt:
+### Stream aufnehmen
 
 ```bash
-python src/wisi/wisi.py --ip 192.168.178.32 --stream --pat-idx 4 --duration 60 --output stream.ts --decrypt
+# Aufnahme mit automatischer Entschlüsselung am Ende:
+wisi --stream --pat-idx 4 --duration 60 --output aufnahme.ts --decrypt
+
+# Unbegrenzt aufnehmen (STRG+C zum Beenden):
+wisi --stream --pat-idx 4 --output live.ts --decrypt
+
+# Direkt nach stdout (für VLC-Pipe):
+wisi --stream --pat-idx 4 --output - | vlc -
 ```
 
-- `--duration 0` = unbegrenzt (Beenden mit `STRG+C`; auch dann wird bei `--decrypt` am Ende entschlüsselt).
-- `--pat-idx 4` wählt den Kanal mit Index `4` aus der Senderliste (`--channels` zeigt alle Indizes).
+`--pat-idx` ist der Kanalindex aus `--channels`. `--duration 0` = unbegrenzt.
+
+### Gespeicherte Datei entschlüsseln
 
 ```bash
-vlc stream.ts   # Aufzeichnung in VLC abspielen
+# In-place (überschreibt die Originaldatei):
+wisi --decrypt-ts aufnahme.ts
+
+# In neue Datei:
+wisi --decrypt-ts aufnahme.ts --output aufnahme_klar.ts
 ```
 
-### 3. Gespeicherte `.ts`-Datei nachträglich entschlüsseln
-
-Falls ein Stream ohne `--decrypt` aufgenommen wurde, kann die Datei jederzeit nachträglich entschlüsselt werden:
+### EPG exportieren
 
 ```bash
-# Eigenständiges Skript (überschreibt stream.ts in-place):
-python src/wisi/decrypt.py stream.ts
-
-# Oder in eine neue Zieldatei schreiben:
-python src/wisi/decrypt.py stream.ts --output stream_clear.ts
-
-# Alternativ über wisi.py:
-python src/wisi/wisi.py --decrypt-ts stream.ts
+wisi --epg --epg-limit 20 --epg-output epg.json
 ```
 
-### 4. EPG laden
+### PCAP analysieren
 
 ```bash
-python src/wisi/wisi.py --ip 192.168.178.32 --epg --epg-limit 10 --epg-output epg.json
+wisi --pcap capture.pcap
 ```
 
-### 5. PCAP analysieren
-
-```bash
-python src/wisi/wisi.py --pcap "research/assets/PCAPdroid_12_Okt._16_16_04.pcap"
-```
-
-### Alle Optionen (`wisi.py`)
+### Alle CLI-Optionen
 
 | Option | Beschreibung |
-|---|---|
-| `--ui`, `--web` | Web-Benutzeroberfläche (Control Center auf `http://127.0.0.1:8888`) starten |
+|--------|-------------|
+| `--ui`, `--web` | Web-Oberfläche starten |
 | `--ip IP` | IP-Adresse des Dongles (Standard: `192.168.178.32`) |
-| `--channels` | Kanalliste vom Gerät laden und ausgeben |
+| `--channels` | Kanalliste anzeigen |
 | `--stream` | MPEG-TS-Stream starten |
-| `--decrypt` | Bei `--stream`: gespeicherte `.ts`-Datei am Ende automatisch entschlüsseln |
-| `--decrypt-ts DATEI` | Gespeicherte `.ts`-Datei nachträglich entschlüsseln |
-| `--pat-idx N` | Interner Kanalindex des Dongles für `--stream` (Standard: 4) |
-| `--output DATEI` | Ausgabedatei oder `-` für stdout (Standard: `stream.ts`) |
-| `--duration SEK` | Streamdauer in Sekunden (0 = unbegrenzt) |
-| `--epg` | EPG der Sender als JSON laden |
-| `--epg-output DATEI` | EPG-Ausgabedatei (Standard: `epg.json`) |
-| `--epg-limit N`, `--limit N` | EPG nur für die ersten N Sender laden |
+| `--pat-idx N` | Kanalindex für `--stream` (Standard: `4`) |
+| `--output DATEI` | Ausgabedatei oder `-` für stdout |
+| `--duration SEK` | Aufnahmedauer in Sekunden (`0` = unbegrenzt) |
+| `--decrypt` | Stream nach Aufnahme automatisch entschlüsseln |
+| `--decrypt-ts DATEI` | Gespeicherte `.ts`-Datei entschlüsseln |
+| `--epg` | EPG als JSON exportieren |
+| `--epg-output DATEI` | EPG-Zieldatei (Standard: `epg.json`) |
+| `--epg-limit N` | Nur die ersten N Sender abfragen |
 | `--pcap DATEI` | PCAP-Datei auf APIX-Befehle analysieren |
-| `--pcap-extract DATEI` | Größte `0xF9/0x0A`-Speedtest-Geräteantwort aus PCAP extrahieren |
-| `--decode-service-db DATEI` | Veraltete Option; wird abgelehnt, da `F9/0A` ein Speedtest ist |
-| `--discover` | Experimentelle UDP-Gerätesuche |
-| `--probe-opcode 0xNN` | Einzelnen unbekannten Opcode testen |
+| `--discover` | Dongle im Netzwerk suchen |
+| `--probe-opcode 0xNN` | Einzelnen Opcode testen |
 | `--debug` | Debug-Logs aktivieren |
+
+---
+
+## 24/7-Betrieb
+
+Für Dauerbetrieb (z. B. Raspberry Pi oder Mini-PC) als `systemd`-Dienst einrichten:
+
+```bash
+# Raspberry Pi / Linux:
+chmod +x scripts/setup_raspberry_pi.sh
+./scripts/setup_raspberry_pi.sh
+```
+
+Danach läuft der Dienst automatisch beim Hochfahren. Alternativ unter Windows: [`scripts/start_windows_service.bat`](scripts/start_windows_service.bat) ausführen.
+
+**Empfehlung:** Dongle per USB-C Datenkabel direkt an den Server anschließen (zusätzlich zum 12V-Netzteil). Der Server verbindet sich per LAN oder schnellem WLAN mit dem Heimnetz – so entfällt der ältere Wi-Fi-4-Chip des Dongles.
+
+---
+
+## Projektstruktur
+
+```
+src/
+├── protocol.py        # USBC-Builder und Protokoll-Konstanten
+├── connection.py      # TCP-Verbindung, Handshake, send_recv
+├── models.py          # Channel, ServiceEntry, Datenmodelle
+├── channels.py        # Kanalliste laden & parsen (0xF6/0x20+0x21)
+├── scan.py            # DVB-S2 Tuner, LNB, Suchlauf, Dongle-Info
+├── prepare.py         # Kanalwechsel und Signal-Check
+├── decrypt.py         # AES-128-ECB TS-Entschlüsselung
+├── stream.py          # UDP-MPEG-TS-Pull-Schleife
+├── keepalive.py       # Keep-Alive-Thread
+├── ts_sync.py         # TS-Paket-Synchronisation
+├── dongle_info.py     # 3-stufige Hardware-Abfrage (0xFA)
+├── sac.py             # CI+/SAC-Handshake (0xFA/0x01–0x03)
+├── wisi/              # CLI-Einstiegspunkte
+│   ├── wisi.py        # Haupt-CLI
+│   ├── client.py      # Stream-Client
+│   ├── epg.py         # EPG-Export
+│   ├── discovery.py   # Gerätesuche
+│   ├── pcap.py        # PCAP-CLI
+│   └── probe.py       # Opcode-Tester
+├── ui/                # Web-Oberfläche
+│   ├── app.py         # Starlette-Anwendung & Routing
+│   ├── streamer.py    # DongleManager (zentrale Steuerklasse)
+│   ├── stream_engine.py # Live-Streaming & Client-Verteilung
+│   ├── scheduler.py   # Aufnahme- & Timer-Verwaltung
+│   ├── channels_mgr.py # Kanalliste & EPG-Cache
+│   ├── scanner.py     # Transponder-Tuning & Suchlauf
+│   ├── playlist.py    # M3U-Generator
+│   ├── transcoder.py  # FFmpeg-Echtzeit-Transkodierung
+│   └── static/        # HTML/CSS/JS-Frontend
+└── tools/
+    ├── menu.py        # Interaktives Konsolenmenü
+    └── pcap_parser.py # PCAP-Parsing & APIX-Analyse
+
+research/              # Reverse-Engineering-Dokumentation
+├── DETAILS.md         # Technische Gesamtreferenz
+├── PROTOCOL.md        # APIX-Befehlsreferenz (alle Opcodes)
+├── stream.md          # Streaming-Ablauf im Detail
+├── pcap_analysis.md   # PCAP-Analyse-Ergebnisse
+└── ...                # APK-Analyse-Skripte
+
+tests/                 # Unit-Tests (28 Tests)
+scripts/               # Setup-Skripte (Raspberry Pi, Windows)
+```
 
 ---
 
 ## Tests
 
 ```bash
-python -m unittest discover -s tests -v
+python -m pytest tests/ -v
 ```
 
 ---
 
-## Projektstruktur
+## Dokumentation
 
-```text
-src/
-├── protocol.py        # USBC-Builder, Protokoll-Konstanten und Befehlspakete
-├── scan.py            # DVB-S2 LNB/DiSEqC/Satellit/Suchlauf (0xF6/0x01..0x12) & Dongle-Info/SAC (0xFA)
-├── connection.py      # TCP-Transporthelfer (send_recv) und Handshake (connect/disconnect)
-├── models.py          # Channel, ServiceEntry, FALLBACK_SERVICE (0x40=TV, 0x48=Radio)
-├── channels.py        # Kanalliste laden & XML parsen (0xF6/0x20+0x21+0x22)
-├── keepalive.py       # Keep-Alive-Thread (0xF6/0x16-Ping)
-├── prepare.py         # Kanalwechsel (0xF6/0x03), Kanal-Info (0x32/0x33) & Signal-Check (0x02)
-├── decrypt.py         # AES-128-ECB MPEG-TS-Entschlüsselung (Block & Datei)
-├── stream.py          # UDP-MPEG-TS-Pull-Schleife (0xF9/0x01) + Stream-Teardown (0xF8/0x07)
-├── wisi/              # CLI-Einstiegspunkte und Subkommandos
-│   ├── wisi.py        # Haupt-CLI (Einstieg)
-│   ├── client.py      # Stream-Client + Re-Exporte
-│   ├── channels.py    # Kanalliste ausgeben (--channels)
-│   ├── decrypt.py     # Gespeicherte .ts-Dateien entschlüsseln (--decrypt-ts)
-│   ├── common.py      # load_services()-Helfer
-│   ├── discovery.py   # Experimentelle Gerätesuche (--discover)
-│   ├── epg.py         # EPG-Export (--epg)
-│   ├── menu.py        # Kompatibilitäts-Wrapper für das Konsolenmenü
-│   ├── pcap.py        # PCAP-CLI (--pcap)
-│   └── probe.py       # Opcode-Tester (--probe-opcode)
-└── tools/             # Hilfswerkzeuge
-    ├── menu.py        # Interaktives Konsolenmenü
-    └── pcap_parser.py # PCAP-Parsing und APIX-Analyse
-research/              # Technische Dokumentation, Mitschnitte und APK-Analysen
-tests/                 # Unit-Tests
-```
+| Datei | Inhalt |
+|-------|--------|
+| [`research/PROTOCOL.md`](research/PROTOCOL.md) | Vollständige APIX-Befehlsreferenz mit allen Opcodes und Paketstrukturen |
+| [`research/DETAILS.md`](research/DETAILS.md) | Technische Gesamtreferenz: Hardware, Protokoll-Architektur, CI+/SAC |
+| [`research/stream.md`](research/stream.md) | UDP-Streaming-Ablauf, Timing, Sequenznummern |
+| [`research/pcap_analysis.md`](research/pcap_analysis.md) | Ergebnisse der PCAP-Mitschnitt-Analyse |
