@@ -8,17 +8,17 @@ import unittest
 
 sys.path.insert(0, str(Path(__file__).resolve().parents[1] / "src"))
 
-import channels as wisi_channels
-from decrypt import DEFAULT_TS_KEY, decrypt_ts_file, descramble_ts_block
-from models import Channel, channel_to_service
-import protocol as wisi_protocol
-from scan import (
+from wisi_s2d.core import channels as wisi_channels
+from wisi_s2d.core.decrypt import DEFAULT_TS_KEY, decrypt_ts_file, descramble_ts_block
+from wisi_s2d.core.models import Channel, channel_to_service
+from wisi_s2d.protocol import protocol as wisi_protocol
+from wisi_s2d.core.scan import (
     parse_dongle_info_phase1,
     parse_dongle_info_phase2,
     parse_dongle_info_phase3,
 )
-from ui.app import _HTML_PAGE, app
-from ui.streamer import DongleManager
+from wisi_s2d.web.app import _HTML_PAGE, app
+from wisi_s2d.web.streamer import DongleManager
 
 
 class ChannelParsingFixTests(unittest.TestCase):
@@ -179,7 +179,7 @@ class DongleManagerTests(unittest.TestCase):
 
     def test_delete_recording(self) -> None:
         dm = DongleManager()
-        from ui.streamer import RECORDINGS_DIR
+        from wisi_s2d.web.streamer import RECORDINGS_DIR
         RECORDINGS_DIR.mkdir(parents=True, exist_ok=True)
         test_file = RECORDINGS_DIR / "test_temp_recording.ts"
         test_file.write_bytes(b"\x47" * 188)

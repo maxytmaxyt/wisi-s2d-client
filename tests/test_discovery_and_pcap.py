@@ -11,10 +11,10 @@ sys.path.insert(0, str(Path(__file__).resolve().parents[1] / "src"))
 
 from unittest.mock import MagicMock, patch
 
-from wisi.discovery import DISCOVERY_REQUEST, MAGIC, VERSION, build_request, parse_response
-from wisi.pcap import analyze, run_service_db
-import wisi.client as wisi_client
-import wisi.common as wisi_common
+from wisi_s2d.cli.discovery import DISCOVERY_REQUEST, MAGIC, VERSION, build_request, parse_response
+from wisi_s2d.cli.pcap import analyze, run_service_db
+import wisi_s2d.cli.client as wisi_client
+import wisi_s2d.cli.common as wisi_common
 
 
 def _f9_0a_reply() -> bytes:

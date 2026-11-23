@@ -10,11 +10,11 @@ from unittest.mock import patch
 
 sys.path.insert(0, str(Path(__file__).resolve().parents[1] / "src"))
 
-import channels as wisi_channels_mod
-import protocol as wisi_protocol
-import stream as wisi_stream
-import wisi.client as wisi_client
-import wisi.epg as wisi_epg
+from wisi_s2d.core import channels as wisi_channels_mod
+from wisi_s2d.protocol import protocol as wisi_protocol
+from wisi_s2d.core import stream as wisi_stream
+import wisi_s2d.cli.client as wisi_client
+import wisi_s2d.cli.epg as wisi_epg
 
 
 class ProtocolFrameTests(unittest.TestCase):
@@ -144,7 +144,7 @@ class ProtocolFrameTests(unittest.TestCase):
             self.assertEqual(ts_path.read_bytes(), (b"\x47\x40\xC9\x10" + clear_payload) * 2)
 
     def test_0x48_radio_channels_are_not_misclassified_as_encrypted(self) -> None:
-        from models import Channel, channel_to_service
+        from wisi_s2d.core.models import Channel, channel_to_service
 
         fta_radio = Channel(
             prog_idx=0x48C000A5,

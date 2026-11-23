@@ -14,27 +14,20 @@ requires = ["setuptools>=61"]
 build-backend = "setuptools.build_meta"
 
 [project.scripts]
-wisi = "wisi.wisi:main"
-wisi-ui = "wisi.ui:main"
+wisi = "wisi_s2d.cli.main:main"
+wisi-ui = "wisi_s2d.cli.ui:main"
 
 [tool.setuptools]
 package-dir = {"" = "src"}
 packages = [
-    "wisi",
-    "tools",
-    "ui",
+    "wisi_s2d",
+    "wisi_s2d.protocol",
+    "wisi_s2d.core",
+    "wisi_s2d.cli",
+    "wisi_s2d.web",
+    "wisi_s2d.tools",
 ]
-package-data = {ui = ["static/*"]}
-py-modules = [
-    "protocol",
-    "connection",
-    "models",
-    "channels",
-    "keepalive",
-    "prepare",
-    "decrypt",
-    "stream",
-]
+package-data = {wisi_s2d = ["web/static/*"]}
 
 [tool.ruff]
 line-length = 100
