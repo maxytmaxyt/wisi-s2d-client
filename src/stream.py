@@ -180,12 +180,12 @@ def stream(
 
                     if chunk_callback is not None:
                         try:
-                            # Sende immer entschlüsselte TS-Pakete an Live-Stream-Clients
-                            cb_chunk = (
-                                processed_chunk
-                                if (live_decrypt or (decrypt_after and output_path == "-"))
-                                else descramble_ts_block(raw_ts_chunk)
-                            )
+                            # processed_chunk ist bereits entschlüsselt wenn live_decrypt
+                            # oder decrypt_after+stdout aktiv – kein nochmaliges Descrambling.
+                            if live_decrypt or (decrypt_after and output_path == "-"):
+                                cb_chunk = processed_chunk
+                            else:
+                                cb_chunk = descramble_ts_block(raw_ts_chunk)
                             chunk_callback(cb_chunk)
                         except Exception as cb_err:
                             log.debug("chunk_callback Fehler: %s", cb_err)

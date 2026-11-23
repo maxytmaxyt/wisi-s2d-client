@@ -151,6 +151,7 @@ class StreamEngine:
                 if self.timeshift_file:
                     try:
                         self.timeshift_file.write(chunk)
+                        self.timeshift_file.flush()
                     except Exception:
                         pass
 
