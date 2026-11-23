@@ -1,6 +1,6 @@
 # src/tools/ – Hilfswerkzeuge
 
-Interne Hilfswerkzeuge, die von `src/wisi/` importiert werden.
+Interne Hilfswerkzeuge, die von `src/wisi/` und `src/ui/` importiert werden.
 
 ## Dateien
 
@@ -15,3 +15,8 @@ Interne Hilfswerkzeuge, die von `src/wisi/` importiert werden.
 from tools.menu import main_menu
 from tools.pcap_parser import analyze, packets
 ```
+
+## Hinweise
+
+- `pcap_parser.analyze()` wird von der Web-UI (`/api/pcap/analyze`) und der CLI (`--pcap`) genutzt.
+- Die PCAP-Dateien liegen typischerweise unter `research/assets/` (siehe `research/README.md`).

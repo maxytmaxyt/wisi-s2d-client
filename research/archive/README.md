@@ -12,9 +12,11 @@ Dieser Ordner enthält ältere Analysen und frühe Implementierungsversuche, die
 | [`or_s2d_firmware_update.md`](or_s2d_firmware_update.md) | Firmware-Update-Wege laut WISI-Datenblatt | ✅ noch gültig, aber nicht aktiv relevant |
 | [`protocol_spec_or_s2d.md`](protocol_spec_or_s2d.md) | Breite Systemhypothesen; HTTP/REST/USB-Details nicht bestätigt | ⚠️ Ideenquelle, kein Implementierungsbeleg |
 | [`apk-report-com.tivicon.tv2smart.mobile.txt`](apk-report-com.tivicon.tv2smart.mobile.txt) | Roher APK-Analysebericht | ⚠️ Rohdaten – Auswertung in `research/apk_reverse_engineering.md` |
-| [`wisi_dongle_client.py`](wisi_dongle_client.py) | Erster Prototyp-Client | ⚠️ Legacy – durch `src/` ersetzt |
-| [`wisi_dongle_simple.py`](wisi_dongle_simple.py) | Vereinfachter Prototyp | ⚠️ Legacy – durch `src/` ersetzt |
-| [`wisi_dongle_v1.py`](wisi_dongle_v1.py) | Version 1 des Clients | ⚠️ Legacy – durch `src/` ersetzt |
+| `wisi_dongle_client.py` | Erster Prototyp-Client | ⚠️ Legacy – durch `src/` ersetzt |
+| `wisi_dongle_simple.py` | Vereinfachter Prototyp | ⚠️ Legacy – durch `src/` ersetzt |
+| `wisi_dongle_v1.py` | Version 1 des Clients | ⚠️ Legacy – durch `src/` ersetzt |
+| `wisi_dongle_v1_cmds.py` | Befehls-Prototyp (v1) | ⚠️ Legacy |
+| `wisi_proto_legacy.py` | Legacy-Protokoll-Prototyp | ⚠️ Legacy |
 
 ## Aktuelle Referenzen
 
@@ -22,4 +24,6 @@ Für aktuelle und verifizierte Informationen:
 
 - **[`../DETAILS.md`](../DETAILS.md)** – technische Referenz
 - **[`../stream.md`](../stream.md)** – Streaming-Ablauf
+- **[`../PROTOCOL.md`](../PROTOCOL.md)** – APIX-Befehlsreferenz
 - **[`../../src/`](../../src/)** – aktueller Quellcode
+- **[`../../tests/`](../../tests/)** – Test-Suite
