@@ -34,8 +34,11 @@ def main() -> None:
     if not found:
         print("\n[2] Führe UDP Broadcast-Discovery auf Port 8802 durch...")
         try:
-            from wisi import discovery
-            import protocol
+            from pathlib import Path
+            src_dir = str(Path(__file__).resolve().parents[1] / "src")
+            if src_dir not in sys.path:
+                sys.path.insert(0, src_dir)
+            from wisi_s2d.cli import discovery
             seq_id = int(time.time()) & 0xFFFFFFFF
             req = discovery.build_request(seq_id)
             with socket.socket(socket.AF_INET, socket.SOCK_DGRAM) as udp:
@@ -50,7 +53,7 @@ def main() -> None:
                         if parsed:
                             print(f"  ✅ Gefunden via UDP Broadcast: {addr[0]} ({parsed.get('model_name', 'WISI OR S2D')})")
                             found = True
-                    except socket.timeout:
+                    except TimeoutError:
                         break
         except Exception as e:
             print(f"  Broadcast-Suche Fehler: {e}")
@@ -58,7 +61,7 @@ def main() -> None:
     print("\nErgebnis:")
     if found:
         print("  🎉 Dongle wurde erfolgreich erkannt!")
-        print("  Du kannst den Server starten mit: python -m wisi.ui")
+        print("  Du kannst den Server starten mit: python start_ui.py  (oder: wisi-ui)")
     else:
         print("  ℹ️ Kein Dongle gefunden. Stelle sicher, dass:")
         print("     1. Der Dongle mit 12V Netzteil versorgt ist (rote/blaue LED leuchtet).")

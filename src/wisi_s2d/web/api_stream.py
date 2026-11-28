@@ -12,12 +12,12 @@ import time
 from starlette.requests import Request
 from starlette.responses import JSONResponse, Response, StreamingResponse
 
+from ..cli import discovery
 from ..core.models import Channel
 from ..protocol import protocol
 from ..tools.pcap_parser import analyze as pcap_analyze
 from .state import manager
 from .transcoder import find_ffmpeg, transcoded_stream_generator
-from ..cli import discovery as discovery
 
 
 async def api_status(request: Request) -> JSONResponse:
@@ -25,19 +25,20 @@ async def api_status(request: Request) -> JSONResponse:
     return JSONResponse({
         "connected": manager.is_connected(),
         "ip": manager.ip,
+        "ffmpeg_available": find_ffmpeg() is not None,
         "signal": {
             "locked": manager.signal_locked,
             "strength": manager.signal_strength,
             "quality": manager.signal_quality,
         },
-        "streaming": manager.stream_stats,
+        "streaming": dict(manager.stream_stats),
         "recording": {
             "active": manager.recording_active,
             "path": str(manager.recording_path.name) if manager.recording_path else "",
             "bytes": manager.recording_bytes,
             "seconds": round(time.time() - manager.recording_start_time, 1) if manager.recording_active else 0,
         },
-        "scan": manager.scan_status,
+        "scan": dict(manager.scan_status),
         "channels_count": len(manager.channels),
         "epg_count": len(manager.epg_data),
     })

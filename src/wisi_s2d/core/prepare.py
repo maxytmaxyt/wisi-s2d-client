@@ -32,7 +32,7 @@ def reset_prepared_prog_idx() -> None:
 
 def prepare_channel(
     sock: socket.socket,
-    lock: threading.Lock,
+    lock: threading.Lock | threading.RLock,
     svc: ServiceEntry,
 ) -> None:
     """0xF6/0x03 Kanalwechsel (mit Lock-Retry) → 0x32/0x33 ch_Info → 0x02 Signal-Poll."""

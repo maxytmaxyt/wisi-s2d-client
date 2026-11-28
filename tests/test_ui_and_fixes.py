@@ -226,5 +226,182 @@ class WebAppStructureTests(unittest.TestCase):
         self.assertIn("/api/tuner/scan/start", paths)
 
 
+class BugfixRegressionTests(unittest.TestCase):
+    def test_ts_sync_wraparound_and_duplicate_seq_zero(self) -> None:
+        from wisi_s2d.core.ts_sync import align_ts_packets
+        from wisi_s2d.protocol import protocol
+
+        ts_block = (b"\x47" + bytes(187)) * 256
+        assert len(ts_block) == protocol.UDP_REQUEST_LEN
+
+        def make_udp_pkt(seq: int) -> bytes:
+            extra = bytearray(64)
+            extra[12] = seq
+            return ts_block + bytes(extra) + (b"USBS" + bytes(9))
+
+        chunk1, seq1, retry1 = align_ts_packets(make_udp_pkt(255), 254)
+        self.assertFalse(retry1)
+        self.assertEqual(seq1, 255)
+        self.assertEqual(len(chunk1), protocol.UDP_REQUEST_LEN)
+
+        # Normal wraparound 255 -> 0
+        chunk2, seq2, retry2 = align_ts_packets(make_udp_pkt(0), seq1)
+        self.assertFalse(retry2)
+        self.assertEqual(seq2, 0)
+
+        # Duplicate seq=0 must be rejected
+        chunk_dup, seq_dup, retry_dup = align_ts_packets(make_udp_pkt(0), seq2)
+        self.assertTrue(retry_dup)
+        self.assertEqual(seq_dup, 0)
+        self.assertEqual(chunk_dup, b"")
+
+        # Backward out-of-order seq=255 after seq=1 must be rejected
+        chunk_old, seq_old, retry_old = align_ts_packets(make_udp_pkt(255), 1)
+        self.assertTrue(retry_old)
+        self.assertEqual(seq_old, 1)
+        self.assertEqual(chunk_old, b"")
+
+    def test_epg_mjd_date_normalization(self) -> None:
+        from wisi_s2d.cli.epg import normalize_epg_date
+
+        self.assertEqual(normalize_epg_date("61358"), "2026-11-14")
+        self.assertEqual(normalize_epg_date("2026-11-14"), "2026-11-14")
+        self.assertEqual(normalize_epg_date("12/10/2026"), "12/10/2026")
+
+    def test_connection_connect_resolves_protocol_import(self) -> None:
+        from unittest.mock import MagicMock, patch
+        from wisi_s2d.protocol import connection
+
+        fake_sock = MagicMock()
+        fake_sock.recv.side_effect = [
+            b"\xF6\x16\x01\xAA\xBB\xCC\xDD\xEE" + bytes(4) + b"USBS" + bytes(9),
+            b"\xF6\x17\x01\x00" + b"USBS" + bytes(9),
+        ]
+        with patch.object(connection.socket, "socket", return_value=fake_sock):
+            sock = connection.connect("192.168.178.32")
+        self.assertIs(sock, fake_sock)
+
+    def test_find_ffmpeg_does_not_return_windows_exe_on_posix(self) -> None:
+        import os
+        from wisi_s2d.web.transcoder import find_ffmpeg
+
+        if os.name != "nt":
+            found = find_ffmpeg()
+            if found is not None:
+                self.assertFalse(found.lower().endswith(".exe"))
+
+    def test_scheduler_excludes_timeshift_from_list_recordings(self) -> None:
+        from wisi_s2d.web.scheduler import RECORDINGS_DIR
+        dm = DongleManager()
+        RECORDINGS_DIR.mkdir(parents=True, exist_ok=True)
+        ts_buf = RECORDINGS_DIR / "_timeshift.ts"
+        ts_buf.write_bytes(b"\x47" * 188)
+        try:
+            recs = dm.list_recordings()
+            self.assertFalse(any(r["filename"] == "_timeshift.ts" for r in recs))
+        finally:
+            if ts_buf.exists():
+                ts_buf.unlink()
+
+    def test_web_api_endpoints_and_scan_params(self) -> None:
+        import asyncio
+        from unittest.mock import patch
+        from starlette.requests import Request
+        from wisi_s2d.web import api_record, api_stream, state
+        from wisi_s2d.web.app import index as web_index
+
+        def make_request(method: str = "GET", path: str = "/", body: bytes = b"") -> Request:
+            scope = {
+                "type": "http",
+                "method": method,
+                "path": path,
+                "headers": [(b"content-type", b"application/json")],
+                "query_string": b"",
+            }
+
+            async def receive() -> dict[str, object]:
+                return {"type": "http.request", "body": body, "more_body": False}
+
+            return Request(scope, receive)
+
+        res_root = asyncio.run(web_index(make_request()))
+        self.assertEqual(res_root.status_code, 200)
+        self.assertIn("WISI OR S2D", res_root.body.decode("utf-8"))
+
+        res_status = asyncio.run(api_stream.api_status(make_request(path="/api/status")))
+        self.assertEqual(res_status.status_code, 200)
+        status_json = json.loads(res_status.body.decode("utf-8"))
+        self.assertIn("ffmpeg_available", status_json)
+        self.assertIn("signal", status_json)
+
+        with patch.object(state.manager, "start_scan", return_value=(True, "OK")) as mock_scan:
+            res_scan = asyncio.run(
+                api_record.api_tuner_scan_start(
+                    make_request(
+                        method="POST",
+                        path="/api/tuner/scan/start",
+                        body=json.dumps({"scan_type": 2, "search_range": 1, "network_scan": True}).encode(),
+                    )
+                )
+            )
+            self.assertEqual(res_scan.status_code, 200)
+            mock_scan.assert_called_once_with(scan_type=2, network_scan=True, search_range=1)
+
+        res_dec = asyncio.run(
+            api_record.api_recordings_decrypt(
+                make_request(
+                    method="POST",
+                    path="/api/recordings/decrypt",
+                    body=json.dumps({"path": "/etc/passwd"}).encode(),
+                )
+            )
+        )
+        self.assertEqual(res_dec.status_code, 404)
+
+    def test_discovery_dhcp_leases_and_auto_connect_flag(self) -> None:
+        import tempfile
+        from unittest.mock import patch
+        from wisi_s2d.cli import discovery, ui
+
+        with tempfile.TemporaryDirectory() as tmp:
+            lease_file = Path(tmp) / "dnsmasq-enp1s0.leases"
+            lease_file.write_text("1732700000 00:11:22:33:44:55 10.42.0.55 wisi-dongle *\n", encoding="utf-8")
+            with patch.object(discovery, "Path", side_effect=lambda p: Path(tmp) if p == "/var/lib/NetworkManager" else Path(p)):
+                ips = discovery._get_dhcp_lease_ips()
+            self.assertIn("10.42.0.55", ips)
+
+        with patch.object(ui, "run_ui") as mock_run_ui:
+            rc = ui.main(["--no-browser", "--auto-connect", "--port", "8899"])
+            self.assertEqual(rc, 0)
+            mock_run_ui.assert_called_once_with(
+                host="0.0.0.0",
+                port=8899,
+                dongle_ip="192.168.178.32",
+                open_browser=False,
+                auto_connect=True,
+            )
+
+    def test_transcoder_vaapi_and_cpu_fallback(self) -> None:
+        from unittest.mock import patch
+        from wisi_s2d.web import transcoder
+
+        with (
+            patch.object(transcoder, "find_vaapi_device", return_value="/dev/dri/renderD128"),
+            patch.object(transcoder.subprocess, "Popen") as mock_popen,
+        ):
+            transcoder.start_ffmpeg_process("/usr/bin/ffmpeg")
+            cmd = mock_popen.call_args[0][0]
+            self.assertIn("h264_vaapi", cmd)
+            self.assertIn("/dev/dri/renderD128", cmd)
+
+        with (
+            patch.object(transcoder, "find_vaapi_device", return_value=None),
+            patch.object(transcoder.subprocess, "Popen") as mock_popen,
+        ):
+            transcoder.start_ffmpeg_process("/usr/bin/ffmpeg")
+            cmd = mock_popen.call_args[0][0]
+            self.assertIn("libx264", cmd)
+
+
 if __name__ == "__main__":
     unittest.main()

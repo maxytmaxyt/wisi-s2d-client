@@ -21,7 +21,7 @@ from ..core.scan import (
 )
 
 if TYPE_CHECKING:
-    from ui.streamer import DongleManager
+    from .streamer import DongleManager
 
 log = logging.getLogger("wisi.ui.scanner")
 

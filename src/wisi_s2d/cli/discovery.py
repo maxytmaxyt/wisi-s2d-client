@@ -20,6 +20,8 @@ _pkg = str(Path(__file__).resolve().parent)
 sys.path = [p for p in sys.path if Path(p).resolve() != Path(_pkg).resolve()]
 if _src not in sys.path:
     sys.path.insert(0, _src)
+if not __package__:
+    __package__ = "wisi_s2d.cli"
 
 from ..protocol import protocol
 from ..protocol.protocol import TCP_PORT
@@ -59,13 +61,71 @@ def probe_dongle_tcp(ip: str, timeout: float = 0.25) -> dict[str, object] | None
     return None
 
 
+def _get_dhcp_lease_ips() -> list[str]:
+    """Liest bekannte DHCP-Lease-IPs aus NetworkManager/dnsmasq-Lease-Dateien."""
+    ips: list[str] = []
+    lease_dirs = [Path("/var/lib/NetworkManager"), Path("/var/lib/misc")]
+    for d in lease_dirs:
+        if not d.is_dir():
+            continue
+        try:
+            for p in d.glob("*.leases"):
+                for line in p.read_text(encoding="utf-8", errors="ignore").splitlines():
+                    parts = line.split()
+                    if len(parts) >= 3 and parts[2].count(".") == 3:
+                        ips.append(parts[2])
+        except OSError:
+            pass
+    return ips
+
+
+def _get_local_ipv4_addresses() -> list[str]:
+    """Ermittelt alle lokalen IPv4-Schnittstellenadressen (inkl. 10.42.0.x / LAN-DHCP)."""
+    ips: set[str] = set()
+    try:
+        import subprocess
+        res = subprocess.run(
+            ["ip", "-4", "-o", "addr", "show"],
+            capture_output=True,
+            text=True,
+            timeout=2.0,
+            check=False,
+        )
+        if res.returncode == 0:
+            for line in res.stdout.splitlines():
+                tokens = line.split()
+                if "inet" in tokens:
+                    idx = tokens.index("inet")
+                    if idx + 1 < len(tokens):
+                        ip_part = tokens[idx + 1].split("/")[0]
+                        ips.add(ip_part)
+    except Exception:
+        pass
+
+    try:
+        for hip in socket.gethostbyname_ex(socket.gethostname())[2]:
+            ips.add(hip)
+    except Exception:
+        pass
+
+    return list(ips)
+
+
 def discover_dongles(current_ip: str | None = None, timeout: float = 1.5) -> list[dict[str, object]]:
     """
     Sucht den WISI Dongle zuverlässig und bestätigt über TCP Port 8802 (APIX 0xF6/0x16).
-    1. Sofortige Prüfung der aktuellen und bekannten Standard-IPs (Dauer: ~100 ms).
-    2. Paralleler Subnetz-Scan lokaler Schnittstellen (Dauer: < 1 s).
+    1. Sofortige Prüfung der aktuellen IP, DHCP-Leases und bekannter Standard-IPs (~100 ms).
+    2. Paralleler Subnetz-Scan aller lokalen Schnittstellen (< 1 s).
     """
-    prio_ips = [current_ip, DEFAULT_IP, "10.20.0.1", "192.168.2.80", "192.168.1.32", "192.168.0.32"]
+    prio_ips = [
+        current_ip,
+        *_get_dhcp_lease_ips(),
+        DEFAULT_IP,
+        "10.20.0.1",
+        "192.168.2.80",
+        "192.168.1.32",
+        "192.168.0.32",
+    ]
     checked: set[str] = set()
     found: list[dict[str, object]] = []
 
@@ -80,10 +140,7 @@ def discover_dongles(current_ip: str | None = None, timeout: float = 1.5) -> lis
         return found
 
     candidates: list[str] = []
-    try:
-        host_ips = socket.gethostbyname_ex(socket.gethostname())[2]
-    except Exception:
-        host_ips = []
+    host_ips = _get_local_ipv4_addresses()
 
     subnets: set[str] = {"192.168.178"}
     for hip in host_ips:

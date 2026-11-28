@@ -145,10 +145,11 @@ def main_menu(sock: socket.socket, ip: str) -> None:
             keepalive.join(timeout=4.0)
             protocol.disconnect(sock)
             time.sleep(0.5)
-            sock = protocol.connect(ip)
-            if sock is None:
+            new_sock = protocol.connect(ip)
+            if new_sock is None:
                 log.error("Verbindung fehlgeschlagen.")
                 return
+            sock = new_sock
             lock = threading.Lock()
             keepalive_stop = threading.Event()
             keepalive = threading.Thread(

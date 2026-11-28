@@ -1,6 +1,6 @@
 # Research-Zusammenfassung – WISI OR S2D / Schwaiger DSRD0100
 
-> **Stand: 18. November 2026 – Protokoll & Architektur vollständig entschlüsselt.** Alle 5 APIX-Befehlsklassen (`0xF6`, `0xF8`, `0xF9`, `0xFA`, `0xFB`), die nativen Module (`libsecure_module.so`), die TiViCon Cloud-Update-Schnittstelle sowie die Web Control Center UI sind verifiziert und betriebsbereit.
+> **Stand: 28. November 2026 – Protokoll, Cloud-Update-Infrastruktur & Firmware-Beschaffung vollständig dokumentiert.** Alle 5 APIX-Befehlsklassen (`0xF6`, `0xF8`, `0xF9`, `0xFA`, `0xFB`), die nativen Module (`libsecure_module.so`), die TiViCon Cloud-Schnittstellen (`wms`/`hwms`/`cdms`/`hdms`) sowie die Web Control Center UI sind verifiziert.
 
 ---
 
@@ -47,11 +47,14 @@
 ## 4. Firmware- & Cloud-Infrastruktur
 
 - **Format:** ALi All-in-One Binary (`.abs`), gegliedert in 256 KB Bootloader (`0x000000`) und Chunks (`0x040000`: Maincode, Radiomenu, Default DB `ddf`, User DB `udf`).
-- **Cloud Update Server:** `https://wms.tiviconsolutions.com/api/updater/updates/upd` (API-Key `NG6kM6XVM8YAQWHq2DRXsA2fNntMDdE64SgAy41KmfZXYlkQzAJwivR6K9PB`). Liefert für alle OEM-Kunden-IDs (`6174`, `7`, `24`, `48`, `220`) `{"status": "NO_UPDATE"}`.
+- **Cloud Update Server (`wms` / `hwms` / `cdms` / `hdms`):**
+  - `POST https://wms.tiviconsolutions.com/api/updater/updates/upd` (und `hwms.tiviconsolutions.com`) akzeptieren ausschließlich `updateType` `"release"` oder `"debug"`. Über **267 CIDs (`0–260`, `6174`)**, `debug`-Modus sowie alte Versionsstände (`0`, `1`, `255`) liefern sie ausschließlich `{"status": "NO_UPDATE"}`.
+  - `cdms` und `hdms` besitzen `/api/updater/updates/fw`, weisen beide App-API-Keys (`NG6k...`, `QhC6...`) aber mit `401 Unauthorized action` bzw. `404` ab.
+  - Öffentliche Web-Archive (WISI, Schwaiger `download.schwaiger.de`, Wayback Machine, `Rikku2000/soralink`) enthalten keine `.abs`-Firmwaredateien.
 - **Flash-Readout Status:**
   - Über TCP Port 8802 nicht möglich (nur Schreib-/Flash-Befehle `0xFA/0x04..0x06`).
-  - Über USB-C: Dongle unterstützt direkten PC-Anschluss / Android-TV-Upgrade (ALi USB Bootloader/DFU).
-  - Physisch: Direktes Auslesen des 8-Pin Winbond SPI-Flashs über SOIC-8 Prüfclip und CH341A-Programmer / ESP32.
+  - Über USB-C: Dongle unterstützt direkten PC-Anschluss / Android-TV-Upgrade (ALi USB Bootloader/DFU, VID/PID am PC noch ungetestet).
+  - Physisch: Direktes Auslesen des 8-Pin SPI-Flashs über SOIC-8 Prüfclip und CH341A-Programmer (empfohlen) oder ESP32 NodeMCU-32S via VSPI (`GPIO 5/18/19/23`, nach vorheriger 3,3-V-Typprüfung und doppeltem SHA256-Abgleich).
 
 ---
 

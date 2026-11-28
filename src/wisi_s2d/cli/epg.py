@@ -9,23 +9,33 @@ import sys
 import threading
 import xml.etree.ElementTree as ET
 from collections.abc import Sequence
+from datetime import date, timedelta
 from pathlib import Path
 
-# Allow `python src/wisi/epg.py` without installing the package:
+# Allow `python src/wisi_s2d/cli/epg.py` without installing the package:
 _src = str(Path(__file__).resolve().parents[2])
 _pkg = str(Path(__file__).resolve().parent)
-# Remove the package directory from sys.path so 'wisi' resolves as a
-# package rooted at src/, not as the script's own directory.
 sys.path = [p for p in sys.path if Path(p).resolve() != Path(_pkg).resolve()]
 if _src not in sys.path:
     sys.path.insert(0, _src)
+if not __package__:
+    __package__ = "wisi_s2d.cli"
 
+from ..core.models import ServiceEntry
 from ..protocol import protocol
 from ..protocol.keepalive import _keepalive_worker
-from ..core.models import ServiceEntry
 from .common import DEFAULT_IP, load_services
 
 log = logging.getLogger("wisi.epg")
+_MJD_EPOCH = date(1858, 11, 17)
+
+
+def normalize_epg_date(raw_date: str) -> str:
+    """Konvertiert DVB Modified Julian Date (z. B. '61358') nach ISO YYYY-MM-DD."""
+    s = raw_date.strip()
+    if s.isdigit() and 40000 <= int(s) <= 99999:
+        return (_MJD_EPOCH + timedelta(days=int(s))).isoformat()
+    return s
 
 
 # ---------------------------------------------------------------------------
@@ -33,7 +43,7 @@ log = logging.getLogger("wisi.epg")
 # ---------------------------------------------------------------------------
 def _fetch_epg_for_service(
     sock,
-    lock: threading.Lock,
+    lock: threading.Lock | threading.RLock,
     svc: ServiceEntry,
 ) -> list[dict]:
     """Lädt EPG-XML für einen Dienst. Gibt Liste von Event-Dicts zurück."""
@@ -65,7 +75,7 @@ def _fetch_epg_for_service(
             events.append({
                 "event_id": int(evt_el.get("id", 0)),
                 "title": evt_el.get("des", ""),
-                "date": evt_el.get("date", ""),
+                "date": normalize_epg_date(evt_el.get("date", "")),
                 "time": evt_el.get("time", ""),
                 "duration": evt_el.get("dur", ""),
             })
@@ -74,7 +84,7 @@ def _fetch_epg_for_service(
 
 def enrich_with_epg(
     sock,
-    lock: threading.Lock,
+    lock: threading.Lock | threading.RLock,
     services: list[ServiceEntry],
     stop_event: threading.Event,
 ) -> dict[int, list[dict]]:

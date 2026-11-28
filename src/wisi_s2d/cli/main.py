@@ -17,6 +17,8 @@ _pkg = str(Path(__file__).resolve().parent)
 sys.path = [p for p in sys.path if Path(p).resolve() != Path(_pkg).resolve()]
 if _src not in sys.path:
     sys.path.insert(0, _src)
+if not __package__:
+    __package__ = "wisi_s2d.cli"
 
 # DEFAULT_IP is re-exported here from protocol so callers don't need to
 # import protocol directly; we read it lazily to avoid a circular-import
@@ -89,18 +91,18 @@ def main(argv: Sequence[str] | None = None) -> int:
             run_ui(dongle_ip=args.ip)
             return 0
         if args.channels:
-            from .channels import run
+            from .channels import run as run_channels
 
-            return run(args.ip)
+            return run_channels(args.ip)
         if args.epg:
-            from .epg import run
+            from .epg import run as run_epg
 
             epg_out = (
                 args.output
                 if args.epg_output == "epg.json" and args.output != "stream.ts"
                 else args.epg_output
             )
-            return run(args.ip, epg_out, args.epg_limit)
+            return run_epg(args.ip, epg_out, args.epg_limit)
         if args.decrypt_ts:
             from .decrypt import run as decrypt_run
 
@@ -123,17 +125,17 @@ def main(argv: Sequence[str] | None = None) -> int:
                 sys.argv = original_argv
             return 0
         if args.discover:
-            from .discovery import run
+            from .discovery import run as run_discovery
 
-            return run(args.ip, 2.0)
+            return run_discovery(args.ip, 2.0)
         if args.probe_opcode is not None:
-            from .probe import run
+            from .probe import run as run_probe
 
-            return run(args.ip, args.probe_opcode)
+            return run_probe(args.ip, args.probe_opcode)
         if args.pcap:
-            from .pcap import run
+            from .pcap import run as run_pcap
 
-            return run(args.pcap, args.pcap_extract)
+            return run_pcap(args.pcap, args.pcap_extract)
         if args.decode_service_db:
             from .pcap import run_service_db
 

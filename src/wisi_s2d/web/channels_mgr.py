@@ -12,12 +12,12 @@ from pathlib import Path
 import threading
 from typing import TYPE_CHECKING
 
+from ..cli import epg as epg_module
 from ..core.channels import channels_to_services, fetch_channel_list
 from ..core.models import FALLBACK_SERVICE, Channel, ServiceEntry
-from ..cli import epg as epg_module
 
 if TYPE_CHECKING:
-    from ui.streamer import DongleManager
+    from .streamer import DongleManager
 
 log = logging.getLogger("wisi.ui.channels")
 
@@ -42,7 +42,13 @@ class ChannelManager:
                 sid = ch.get("service_id")
                 events = ch.get("events", [])
                 if sid is not None and events:
-                    self.epg_data[sid] = events
+                    normalized_events = []
+                    for ev in events:
+                        ev_copy = dict(ev)
+                        if "date" in ev_copy:
+                            ev_copy["date"] = epg_module.normalize_epg_date(str(ev_copy["date"]))
+                        normalized_events.append(ev_copy)
+                    self.epg_data[sid] = normalized_events
             if not self.channels:
                 cached_channels: list[Channel] = []
                 for ch in data.get("channels", []):

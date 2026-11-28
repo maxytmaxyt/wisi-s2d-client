@@ -7,7 +7,6 @@ gepuffert an aktive HTTP-Clients und leitet Chunks an die Aufnahme weiter.
 from __future__ import annotations
 
 import logging
-from pathlib import Path
 import queue
 import shutil
 import threading
@@ -16,9 +15,10 @@ from typing import TYPE_CHECKING, Any
 
 from ..core.models import ServiceEntry
 from ..core.stream import stream
+from .scheduler import RECORDINGS_DIR
 
 if TYPE_CHECKING:
-    from ui.streamer import DongleManager
+    from .streamer import DongleManager
 
 log = logging.getLogger("wisi.ui.stream_engine")
 
@@ -43,7 +43,7 @@ class StreamEngine:
             "elapsed": 0.0,
         }
         self.timeshift_file: Any = None
-        self.timeshift_path = Path("recordings/_timeshift.ts")
+        self.timeshift_path = RECORDINGS_DIR / "_timeshift.ts"
         self.timeshift_lock = threading.Lock()
 
     def start_stream(self, prog_idx: int) -> bool:
@@ -79,7 +79,7 @@ class StreamEngine:
                     pass
             try:
                 self.timeshift_path.parent.mkdir(parents=True, exist_ok=True)
-                self.timeshift_file = open(self.timeshift_path, "wb")
+                self.timeshift_file = open(self.timeshift_path, "wb")  # noqa: SIM115
             except Exception as e:
                 log.warning("Konnte Timeshift-Puffer nicht öffnen: %s", e)
                 self.timeshift_file = None
@@ -106,8 +106,9 @@ class StreamEngine:
 
     def stop_stream(self) -> None:
         self.stream_stop_event.set()
-        if self.stream_thread and self.stream_thread.is_alive():
-            self.stream_thread.join(timeout=3.0)
+        if self.stream_thread:
+            if self.stream_thread.is_alive():
+                self.stream_thread.join(timeout=3.0)
             self.stream_thread = None
 
         self.active_service = None
@@ -161,9 +162,14 @@ class StreamEngine:
                 self.stream_stats["elapsed"] = stats["elapsed_seconds"]
             self.stream_stats["is_streaming"] = True
 
+        sock = self.manager.tcp_sock
+        if sock is None:
+            self.stream_stats["is_streaming"] = False
+            return
+
         try:
             stream(
-                tcp_sock=self.manager.tcp_sock,
+                tcp_sock=sock,
                 lock=self.manager.lock,
                 svc=svc,
                 output_path="",

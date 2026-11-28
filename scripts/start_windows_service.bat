@@ -9,7 +9,8 @@ cd /d "%~dp0\.."
 
 :: Starte den Server auf 0.0.0.0 Port 8888 ohne autom. Browser-Pop-up
 echo Starte Server im Hintergrund...
-python -m wisi.ui --host 0.0.0.0 --port 8888 --no-browser
+set PYTHONPATH=%~dp0..\src
+python -m wisi_s2d.cli.ui --host 0.0.0.0 --port 8888 --no-browser
 
 if %ERRORLEVEL% NEQ 0 (
     echo.

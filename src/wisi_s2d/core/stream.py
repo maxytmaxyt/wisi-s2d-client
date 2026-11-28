@@ -17,10 +17,11 @@ import socket
 import sys
 import threading
 import time
+from typing import Any
 
 from ..protocol import protocol
-from .decrypt import DEFAULT_TS_KEY, decrypt_ts_file, descramble_ts_block
 from ..protocol.keepalive import _keepalive_worker
+from .decrypt import DEFAULT_TS_KEY, decrypt_ts_file, descramble_ts_block
 from .models import ServiceEntry
 from .prepare import (
     get_last_prepared_prog_idx,
@@ -38,7 +39,7 @@ UDP_PULL_INTVL: float = 0.12
 
 def stream(
     tcp_sock: socket.socket,
-    lock: threading.Lock,
+    lock: threading.Lock | threading.RLock,
     svc: ServiceEntry,
     output_path: str = "-",
     duration_s: float = 0.0,
@@ -95,6 +96,7 @@ def stream(
             pass
         udp.settimeout(UDP_PULL_INTVL)
 
+        _file_ctx: contextlib.AbstractContextManager[Any]
         if output_path and output_path != "-":
             log.info("Stream → %s  (STRG+C zum Beenden)", output_path)
             Path(output_path).parent.mkdir(parents=True, exist_ok=True)

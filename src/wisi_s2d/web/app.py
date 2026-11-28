@@ -10,7 +10,6 @@ Modularer Aufbau (< 300 Zeilen):
 from __future__ import annotations
 
 import logging
-from pathlib import Path
 import threading
 import time
 import webbrowser
@@ -105,9 +104,9 @@ routes = [
     Route("/api/recordings", endpoint=api_recordings_list, methods=["GET"]),
     Route("/api/recordings/stream/{filename:path}", endpoint=api_recording_stream, methods=["GET"]),
     Route("/api/recordings/convert", endpoint=api_recordings_convert, methods=["POST"]),
+    Route("/api/recordings/decrypt", endpoint=api_recordings_decrypt, methods=["POST"]),
     Route("/api/recordings/{filename}", endpoint=api_recording_file, methods=["GET"]),
     Route("/api/recordings/{filename}", endpoint=api_recording_delete, methods=["DELETE"]),
-    Route("/api/recordings/decrypt", endpoint=api_recordings_decrypt, methods=["POST"]),
     Route("/api/timers", endpoint=api_timers_list, methods=["GET"]),
     Route("/api/timers", endpoint=api_timers_create, methods=["POST"]),
     Route("/api/timers/{timer_id}", endpoint=api_timers_delete, methods=["DELETE"]),
@@ -131,11 +130,33 @@ middleware = [
 app = Starlette(routes=routes, middleware=middleware)
 
 
+def _auto_connect_worker() -> None:
+    """Sucht beim Serverstart automatisch nach dem Dongle und verbindet sich."""
+    from ..cli import discovery
+
+    time.sleep(1.0)
+    for attempt in range(12):
+        if manager.is_connected():
+            return
+        try:
+            devices = discovery.discover_dongles(current_ip=manager.ip)
+            if devices:
+                found_ip = str(devices[0]["ip"])
+                ok, msg = manager.connect(found_ip)
+                if ok:
+                    log.info("Auto-Connect erfolgreich (%s): %s", found_ip, msg)
+                    return
+        except Exception as exc:
+            log.debug("Auto-Connect Versuch %d fehlgeschlagen: %s", attempt + 1, exc)
+        time.sleep(5.0)
+
+
 def run_ui(
     host: str = "0.0.0.0",
     port: int = 8888,
     dongle_ip: str | None = None,
     open_browser: bool = True,
+    auto_connect: bool = False,
 ) -> None:
     """Startet den Webserver und öffnet optional die Benutzeroberfläche im Browser."""
     import uvicorn
@@ -151,6 +172,9 @@ def run_ui(
     print(f"  Netzwerk-Bind:     http://{host}:{port}")
     print(f"  Dongle Standard-IP: {manager.ip}")
     print("=" * 64 + "\n")
+
+    if auto_connect:
+        threading.Thread(target=_auto_connect_worker, daemon=True).start()
 
     if open_browser:
         def _open():

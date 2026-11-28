@@ -32,11 +32,22 @@
 
 ## 2. TiViCon Cloud- & Update-Infrastruktur
 
-### 2.1 Server-Endpunkte & URLs
-* **WMS Basis-URL:** `https://wms.tiviconsolutions.com/api/`
-* **CDMS Basis-URL:** `https://cdms.tiviconsolutions.com/api/`
-* **Firmware-Speicherpfad:** `https://wms.tiviconsolutions.com/storage/uploads/fw_updates/`
-* **Kanalisten-Speicherpfad:** `https://wms.tiviconsolutions.com/storage/uploads/upd_updates/`
+### 2.1 Server-Endpunkte & Subdomains (Live & Wayback CDX verifiziert)
+
+* **Aktive Produktiv-/Backend-Hosts (`*.tiviconsolutions.com`):**
+  * **WMS Basis-URL:** `https://wms.tiviconsolutions.com/api/`
+  * **Hospitality WMS (HWMS):** `https://hwms.tiviconsolutions.com/api/` *(teilt dasselbe Laravel-API-Schema für `updater/updates/upd`)*
+  * **CDMS Basis-URL:** `https://cdms.tiviconsolutions.com/api/`
+  * **Hospitality DMS (HDMS):** `https://hdms.tiviconsolutions.com/api/`
+  * **Operator-/OTT-Portale (Filament/Laravel Login):** `https://rcn.tiviconsolutions.com/`, `https://ott.tiviconsolutions.com/` *(API-Endpunkte liefern `401 {"message":"Unauthenticated."}`)*
+  * **Offizielle App-Verteilungsseite:** `https://tiviconsolutions.com/getapp` *(verlinkt `TiViCon Hospitality`, `TV2Smart (TV)`, `TV2Smart (Mobile)`, iOS `id1669440789` sowie Amazon Appstore `B0BXQHQSG9` / `B0BYSWPWD4`)*
+* **Historische/nicht mehr auflösbare Subdomains (aus Wayback-CDX-Index):**
+  `cdn.tiviconsolutions.com`, `cwms.tiviconsolutions.com`, `tros.tiviconsolutions.com`, `rds.tiviconsolutions.com`, `hwms-test.tiviconsolutions.com`, `jsdoc.tiviconsolutions.com` *(aktuell DNS `NXDOMAIN`)*
+* **Firmware-/Update-Speicherpfade (aktuell HTTP `404`):**
+  * `https://wms.tiviconsolutions.com/storage/uploads/fw_updates/`
+  * `https://wms.tiviconsolutions.com/storage/uploads/upd_updates/`
+  * `https://cdms.tiviconsolutions.com/storage/uploads/fw_updates/`
+  * `https://cdms.tiviconsolutions.com/storage/uploads/upd_updates/`
 * **Entwickler-Testserver (aus APK):** `http://192.168.2.80:8080/update.ini`
 
 ### 2.2 Geheime API-Schlüssel (Hardcoded im SDK)
@@ -45,11 +56,17 @@
 * **Sekundärer API-Key:**
   `QhC6rpwfYIe7TlMTNDnoArEkWy3vXlGRvjnoGjXiy7RIWBQBwpj4t9yGlPZ8`
 
-### 2.3 Update-Prüfung (`POST updater/updates/upd`)
+### 2.3 Update-Prüfung & Validierungsschema (`POST updater/updates/upd` auf `wms` & `hwms`)
 * **Header:**
   * `Content-Type: application/json`
   * `Accept: application/json`
   * `X-Api-Key: NG6kM6XVM8YAQWHq2DRXsA2fNntMDdE64SgAy41KmfZXYlkQzAJwivR6K9PB`
+* **Pflichtfelder (bei leerem Body HTTP `422`):**
+  * `dongle_customer_id`, `dongle_sw_version`, `dongle_hw_type`
+* **Erlaubte `updateType`-Werte (camelCase, Laravel-Validierung):**
+  * Ausschließlich **`"release"`** und **`"debug"`** werden serverseitig akzeptiert.
+  * Andere Werte (`"beta"`, `"dev"`, `"test"`, `"ota"`, `"alpha"`, `"staging"`, `"factory"`, `"internal"`, `"0"`, `"1"`, …) werden mit HTTP `422` (`{"message":"The selected update type is invalid."}`) abgelehnt.
+* **Rate-Limiting:** Bei zu hoher Parallelität (z. B. 25 gleichzeitige Worker) greift HTTP `429 {"message":"Too Many Attempts."}`; gedrosselte Anfragen (~0,2 s Abstand) laufen fehlerfrei durch.
 * **Payload:**
   ```json
   {
@@ -60,7 +77,7 @@
     "updateType": "release"
   }
   ```
-* **Antwort des Servers bei aktuellem Stand (Live getestet):**
+* **Antwort des Servers (Live getestet über 267 CIDs `0–260`, `6174`, `debug` & alte Versionen):**
   ```json
   {
     "status": "NO_UPDATE",
@@ -70,6 +87,18 @@
     "change_log": null
   }
   ```
+
+### 2.4 Weitere Cloud-Endpunkte (Live-Verifikation November 2026)
+
+| Host | Methode & Pfad | Beobachtete Antwort / Verhalten |
+|---|---|---|
+| `wms` / `hwms` | `POST /api/updater/updates/fw` *(und `bin`, `abs`, `ota`, `dongle`, `app`, `stb`, `cha`, `sw`, `updater/updates`, `updater/fw`)* | HTTP `404` (`route could not be found`) |
+| `cdms` | `POST /api/updater/updates/fw` & `/upd` | Route existiert (`GET` → `405`, fehlender/Bearer-Key → `404 "Api key you've provided is not valid"`). Beide SDK-Keys via `X-Api-Key` → HTTP `401 {"message":"Unauthorized action"}` |
+| `hdms` | `POST /api/updater/updates/fw` & `/upd` | Route existiert; bei leerem Body `422` (`api_key`, `si_id` required). Mit `NG6k...` → `401 {"message":"Unauthorized action"}`; mit `QhC6...` → `404 "Api key you've provided is not valid"` |
+| `wms` | `GET /api/channel-manager/version` | Ohne Parameter `"You must provide a dongle chip id for this operation"`; mit `?dongle_chip_id=9000000035a2a52b` → `{"status":"error","message":"Dongle not found."}` |
+| `wms` | `GET /api/bouquets/version`, `POST /api/dongles/check-dongle`, `POST /api/dongles/listen` | HTTP `200 {"status":"error","message":"Dongle not found."}` |
+| `wms` | `POST /api/dongles/register` | HTTP `422` (`dongle_info`, `device_info` required) |
+| `wms` | `POST /api/binary-channel-list/cha` | HTTP `422` (`binary_channel_list_version` required); mit `version=1` → HTTP `500 Server Error` |
 
 ---
 

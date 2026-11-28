@@ -37,7 +37,10 @@ except ImportError:
     class _BCryptDecryptor:
         def __init__(self, key: bytes):
             self.key = key
-            self.bcrypt = ctypes.windll.bcrypt
+            windll = getattr(ctypes, "windll", None)
+            if windll is None:
+                raise RuntimeError("Windows BCrypt ist auf dieser Plattform nicht verfügbar.")
+            self.bcrypt = windll.bcrypt
             self.hAlg = wintypes.HANDLE()
             status = self.bcrypt.BCryptOpenAlgorithmProvider(
                 ctypes.byref(self.hAlg), ctypes.c_wchar_p("AES"), None, 0
@@ -118,8 +121,11 @@ def descramble_ts_block(block: bytes, key: bytes | None = None) -> bytes:
     """
     buf = bytearray(block)
     n_pkts = len(buf) // protocol.TS_PKT_SIZE
-    active_key = DEFAULT_TS_KEY if key is None else key
-    decryptor = _get_decryptor(active_key)
+    if key is None and _TS_CIPHER is not None:
+        decryptor = _TS_CIPHER.decryptor()
+    else:
+        active_key = DEFAULT_TS_KEY if key is None else key
+        decryptor = _get_decryptor(active_key)
 
     for i in range(n_pkts):
         off = i * protocol.TS_PKT_SIZE

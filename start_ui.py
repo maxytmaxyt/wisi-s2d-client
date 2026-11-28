@@ -1,7 +1,6 @@
 """
 start_ui.py – Einfacher Starter für das WISI OR S2D Web Control Center
 """
-import os
 import sys
 from pathlib import Path
 

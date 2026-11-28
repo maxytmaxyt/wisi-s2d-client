@@ -68,7 +68,7 @@ def connect(
     Baut TCP-Verbindung auf und führt APIX-Init (0x16 + 0x17) durch.
     Gibt Socket zurück oder None bei Fehler.
     """
-    import protocol
+    from . import protocol
 
     log.info("Verbinde %s:%d …", ip, tcp_port)
     sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)

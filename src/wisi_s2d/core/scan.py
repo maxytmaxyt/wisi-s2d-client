@@ -12,7 +12,6 @@ from __future__ import annotations
 from dataclasses import dataclass
 import struct
 
-from ..protocol.connection import recv_exactly
 from ..protocol import protocol
 
 # ── Konstanten für DVB-S2 Polarisation & 22-kHz-Ton (Byte 21 / Byte 23) ─────
@@ -32,9 +31,6 @@ SCAN_MANUAL = 0
 SCAN_AUTO = 1
 SCAN_NETWORK = 2
 SCAN_STOP = 3
-
-# ── CI+ / SAC Root-Seed aus libsecure_module.so (SecEngInit / setSystemId) ───
-SAC_ROOT_SEED = b"LukeRanDolphCI+1"
 
 
 def _encode_dvbs2_mode_byte(pol: str = "AUTO", khz_22: str = "AUTO") -> int:

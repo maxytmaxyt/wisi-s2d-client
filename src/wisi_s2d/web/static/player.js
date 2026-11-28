@@ -1,28 +1,79 @@
 /**
- * player.js – Video Player & Streaming-Steuerung (mpegts.js)
+ * player.js – Video Player & Streaming-Steuerung (mpegts.js + Timeshift)
  */
 let activeProgIdx = null;
+let activeChannelName = '';
+let activeChannelFta = true;
 let player = null;
 
-function playChannel(progIdx, name, fta) {
-  activeProgIdx = progIdx;
-  document.getElementById('playerChannelName').innerText = name;
-  const ftaBadge = document.getElementById('playerFtaBadge');
-  ftaBadge.className = 'tag ' + (fta ? 'fta' : 'enc');
-  ftaBadge.innerText = fta ? 'FTA' : '🔒 Pay-TV';
+function setStandbyVisible(visible) {
+  const standby = document.getElementById('videoStandby');
+  if (standby) {
+    standby.classList.toggle('hidden', !visible);
+  }
+}
 
-  const videoElement = document.getElementById('videoElement');
-  const streamUrl = window.location.origin + '/api/stream/' + progIdx;
+function setTimeshiftEnabled(enabled) {
+  const bar = document.getElementById('timeshiftBar');
+  if (bar) {
+    bar.classList.toggle('disabled-bar', !enabled);
+  }
+}
 
-  if (typeof mpegts !== 'undefined' && mpegts.getFeatureList().mseLivePlayback) {
-    if (player) {
+function destroyMpegtsPlayer() {
+  if (player) {
+    try {
       player.pause();
       player.unload();
       player.detachMediaElement();
       player.destroy();
-      player = null;
+    } catch (e) {
+      console.debug('[Player] cleanup:', e);
     }
+    player = null;
+  }
+}
 
+function buildStreamUrl(progIdx) {
+  const mode = document.getElementById('streamModeSelect')?.value || 'auto';
+  const base = `${window.location.origin}/api/stream/${progIdx}`;
+  if (mode === 'raw') return `${base}?raw=1`;
+  if (mode === '1') return `${base}?transcode=1`;
+  return base;
+}
+
+function playChannel(progIdx, name, fta) {
+  activeProgIdx = progIdx;
+  activeChannelName = name;
+  activeChannelFta = Boolean(fta);
+
+  document.getElementById('playerChannelName').textContent = name;
+  const ftaBadge = document.getElementById('playerFtaBadge');
+  ftaBadge.className = 'tag ' + (fta ? 'fta' : 'enc');
+  ftaBadge.textContent = fta ? 'FTA' : 'Pay-TV';
+
+  const ch = currentChannels.find(c => c.prog_idx === progIdx);
+  const nowEl = document.getElementById('playerNowPlaying');
+  if (nowEl) {
+    nowEl.textContent = ch && ch.current_show
+      ? `Aktuell: ${ch.current_show}${ch.current_time ? ' · ' + ch.current_time : ''}`
+      : 'Live-Signal wird geladen…';
+  }
+
+  const videoElement = document.getElementById('videoElement');
+  const streamUrl = buildStreamUrl(progIdx);
+
+  destroyMpegtsPlayer();
+  if (videoElement) {
+    videoElement.removeAttribute('src');
+    videoElement.load();
+  }
+
+  setStandbyVisible(false);
+  setTimeshiftEnabled(true);
+  renderChannels();
+
+  if (typeof mpegts !== 'undefined' && mpegts.getFeatureList().mseLivePlayback) {
     player = mpegts.createPlayer({
       type: 'mse',
       isLive: true,
@@ -31,17 +82,17 @@ function playChannel(progIdx, name, fta) {
       enableWorker: true,
       lazyLoad: false,
       enableStashBuffer: true,
-      stashInitialSize: 256 * 1024,        // 256 KB Puffer (~1s) gegen Ruckler
-      liveBufferLatencyChasing: false,     // Timeshift: Erlaubt Pausieren & Zurückspulen
-      autoCleanupSourceBuffer: false,       // Timeshift: Löscht bisheriges Video nicht
-      autoCleanupMaxBackwardDuration: 7200, // Bis zu 2 Stunden Puffer
+      stashInitialSize: 256 * 1024,
+      liveBufferLatencyChasing: false,
+      autoCleanupSourceBuffer: false,
+      autoCleanupMaxBackwardDuration: 7200,
       autoCleanupMinBackwardDuration: 3600,
     });
 
     player.on(mpegts.Events.ERROR, (type, detail, info) => {
       console.warn('[Player] mpegts error:', type, detail, info);
-      if (type === mpegts.ErrorTypes.MEDIA_ERROR || (detail && detail.includes('codec'))) {
-        showToast('ℹ️ SD-Sender (MPEG-2): Klicke auf "🎬 In VLC öffnen" oder teste einen HD-Sender (z. B. ZDF HD).');
+      if (type === mpegts.ErrorTypes.MEDIA_ERROR || (detail && String(detail).includes('codec'))) {
+        showToast('Codec-Hinweis: Teste "Transcode (H.264)" im Modus-Menü oder "In VLC öffnen".', 'error');
       }
     });
 
@@ -55,72 +106,132 @@ function playChannel(progIdx, name, fta) {
   showToast('Kanal gewählt: ' + name);
 }
 
-async function stopStream() {
-  if (player) {
-    player.pause();
-    player.unload();
+function onStreamModeChange() {
+  if (activeProgIdx && activeProgIdx > 0) {
+    playChannel(activeProgIdx, activeChannelName, activeChannelFta);
   }
-  await fetch('/api/stream/stop', { method: 'POST' });
-  document.getElementById('playerChannelName').innerText = 'Kein Kanal aktiv';
+}
+
+async function stopStream() {
+  destroyMpegtsPlayer();
+  const videoElement = document.getElementById('videoElement');
+  if (videoElement) {
+    videoElement.pause();
+    videoElement.removeAttribute('src');
+    videoElement.load();
+  }
+  activeProgIdx = null;
+  activeChannelName = '';
+
+  try {
+    await fetch('/api/stream/stop', { method: 'POST' });
+  } catch (e) {}
+
+  document.getElementById('playerChannelName').textContent = 'Kein Kanal aktiv';
+  const ftaBadge = document.getElementById('playerFtaBadge');
+  ftaBadge.className = 'tag neutral';
+  ftaBadge.textContent = 'Bereit';
+  const nowEl = document.getElementById('playerNowPlaying');
+  if (nowEl) nowEl.textContent = 'Kein aktiver Stream';
+
+  document.getElementById('metricBitrate').textContent = '0 KB/s';
+  document.getElementById('metricBytes').textContent = '0.0 MB';
+  document.getElementById('metricDuration').textContent = '00:00';
+
+  setStandbyVisible(true);
+  setTimeshiftEnabled(false);
+  updateTimeshiftUI();
+  renderChannels();
   showToast('Stream gestoppt.');
 }
 
-function copyStreamUrl() {
-  if (!activeProgIdx) { showToast('Erst Kanal auswählen.'); return; }
-  const url = window.location.origin + '/api/stream/' + activeProgIdx;
-  navigator.clipboard.writeText(url);
-  showToast('Stream-URL in Zwischenablage kopiert: ' + url);
+async function copyStreamUrl() {
+  if (!activeProgIdx || activeProgIdx <= 0) {
+    showToast('Erst Live-Kanal auswählen.', 'error');
+    return;
+  }
+  const url = buildStreamUrl(activeProgIdx);
+  try {
+    if (navigator.clipboard && window.isSecureContext) {
+      await navigator.clipboard.writeText(url);
+    } else {
+      const ta = document.createElement('textarea');
+      ta.value = url;
+      ta.style.position = 'fixed';
+      ta.style.left = '-9999px';
+      document.body.appendChild(ta);
+      ta.select();
+      document.execCommand('copy');
+      document.body.removeChild(ta);
+    }
+    showToast('Stream-URL kopiert: ' + url, 'success');
+  } catch (err) {
+    showToast('Stream-URL: ' + url);
+  }
 }
 
 function openInVlc() {
-  if (!activeProgIdx) { showToast('Erst Kanal auswählen.'); return; }
-  const url = window.location.origin + '/api/stream/' + activeProgIdx + '?raw=1';
+  if (!activeProgIdx || activeProgIdx <= 0) {
+    showToast('Erst Live-Kanal auswählen.', 'error');
+    return;
+  }
+  const url = `${window.location.origin}/api/stream/${activeProgIdx}?raw=1`;
   window.location.href = 'vlc://' + url;
   showToast('Öffne VLC mit: ' + url);
 }
 
 async function toggleRecording() {
-  const res = await fetch('/api/status');
-  const st = await res.json();
-  if (st.recording && st.recording.active) {
-    const r = await fetch('/api/record/stop', { method: 'POST' });
-    const d = await r.json();
-    showToast(d.message);
-  } else {
-    const r = await fetch('/api/record/start', {
-      method: 'POST',
-      headers: {'Content-Type': 'application/json'},
-      body: JSON.stringify({ prog_idx: activeProgIdx })
-    });
-    const d = await r.json();
-    showToast(d.message);
+  try {
+    const res = await fetch('/api/status');
+    const st = await res.json();
+    if (st.recording && st.recording.active) {
+      const r = await fetch('/api/record/stop', { method: 'POST' });
+      const d = await r.json();
+      showToast(d.message, d.success ? 'success' : 'error');
+      if (typeof loadRecordings === 'function') loadRecordings();
+    } else {
+      if (!activeProgIdx || activeProgIdx <= 0) {
+        showToast('Bitte erst einen Live-Kanal auswählen.', 'error');
+        return;
+      }
+      const r = await fetch('/api/record/start', {
+        method: 'POST',
+        headers: {'Content-Type': 'application/json'},
+        body: JSON.stringify({ prog_idx: activeProgIdx })
+      });
+      const d = await r.json();
+      showToast(d.message, d.success ? 'success' : 'error');
+    }
+    if (typeof pollStatus === 'function') pollStatus();
+  } catch (err) {
+    showToast('Aufnahme-Fehler: ' + err, 'error');
   }
 }
 
 function playRecordedFile(filename) {
-  if (player) {
-    player.pause();
-    player.unload();
-    player.detachMediaElement();
-    player.destroy();
-    player = null;
-  }
+  destroyMpegtsPlayer();
   activeProgIdx = 0;
-  document.getElementById('playerChannelName').innerText = '📼 Aufnahme: ' + filename;
+  activeChannelName = filename;
+  document.getElementById('playerChannelName').textContent = 'Aufnahme: ' + filename;
   const ftaBadge = document.getElementById('playerFtaBadge');
   ftaBadge.className = 'tag fta';
-  ftaBadge.innerText = 'Aufnahme';
+  ftaBadge.textContent = 'Aufnahme';
+  const nowEl = document.getElementById('playerNowPlaying');
+  if (nowEl) nowEl.textContent = 'Wiedergabe einer gespeicherten Aufnahme';
 
   const videoElement = document.getElementById('videoElement');
   const isMp4 = filename.toLowerCase().endsWith('.mp4');
   const playUrl = isMp4
-    ? window.location.origin + '/api/recordings/' + encodeURIComponent(filename)
-    : window.location.origin + '/api/recordings/stream/' + encodeURIComponent(filename);
+    ? `${window.location.origin}/api/recordings/${encodeURIComponent(filename)}`
+    : `${window.location.origin}/api/recordings/stream/${encodeURIComponent(filename)}`;
 
+  setStandbyVisible(false);
+  setTimeshiftEnabled(false);
   videoElement.src = playUrl;
   videoElement.controls = true;
   videoElement.play().catch(e => console.log('Wiedergabe:', e));
 
+  renderChannels();
   switchTab('tv');
   showToast('Spiele Aufnahme: ' + filename);
 }
@@ -139,9 +250,9 @@ function timeshiftSeek(secondsDelta) {
 
 function timeshiftTogglePause() {
   const videoElement = document.getElementById('videoElement');
-  if (!videoElement) return;
+  if (!videoElement || !activeProgIdx) return;
   if (videoElement.paused) {
-    videoElement.play();
+    videoElement.play().catch(() => {});
   } else {
     videoElement.pause();
   }
@@ -151,13 +262,14 @@ function timeshiftTogglePause() {
 function timeshiftJumpToLive() {
   const videoElement = document.getElementById('videoElement');
   if (!videoElement || videoElement.buffered.length === 0) return;
+  const bufStart = videoElement.buffered.start(0);
   const liveEdge = videoElement.buffered.end(videoElement.buffered.length - 1);
-  videoElement.currentTime = Math.max(0, liveEdge - 0.5);
+  videoElement.currentTime = Math.max(bufStart, liveEdge - 0.5);
   if (videoElement.paused) {
-    videoElement.play();
+    videoElement.play().catch(() => {});
   }
   updateTimeshiftUI();
-  showToast('🔴 Zurück auf Live-Signal');
+  showToast('Zurück auf Live-Signal');
 }
 
 function onTimeshiftSliderChange(val) {
@@ -167,8 +279,7 @@ function onTimeshiftSliderChange(val) {
   const bufEnd = videoElement.buffered.end(videoElement.buffered.length - 1);
   const duration = bufEnd - bufStart;
   if (duration <= 0) return;
-  const target = bufStart + (duration * (val / 100));
-  videoElement.currentTime = target;
+  videoElement.currentTime = bufStart + (duration * (val / 100));
   updateTimeshiftUI();
 }
 
@@ -182,13 +293,21 @@ function updateTimeshiftUI() {
   if (!videoElement || !badge) return;
 
   if (btnPause) {
-    btnPause.innerText = videoElement.paused ? '▶️ Weiter' : '⏸️ Pause';
+    btnPause.textContent = videoElement.paused ? 'Weiter' : 'Pause';
   }
 
-  if (videoElement.buffered.length === 0) {
-    badge.innerText = '🔴 LIVE';
+  if (activeProgIdx === 0) {
+    badge.textContent = 'WIEDERGABE';
+    badge.className = 'tag tv';
+    if (delayText) delayText.textContent = 'Aufnahme';
+    return;
+  }
+
+  if (!activeProgIdx || videoElement.buffered.length === 0) {
+    badge.textContent = 'LIVE';
     badge.className = 'tag fta';
-    if (delayText) delayText.innerText = 'Live';
+    if (delayText) delayText.textContent = activeProgIdx ? 'Live' : 'Bereit';
+    if (slider) slider.value = 100;
     return;
   }
 
@@ -205,27 +324,27 @@ function updateTimeshiftUI() {
   }
 
   if (delay <= 3.0) {
-    badge.innerText = '🔴 LIVE';
+    badge.textContent = 'LIVE';
     badge.className = 'tag fta';
-    if (delayText) delayText.innerText = 'Live';
+    if (delayText) delayText.textContent = 'Live';
   } else {
     const m = String(Math.floor(delay / 60)).padStart(2, '0');
     const s = String(Math.floor(delay % 60)).padStart(2, '0');
-    badge.innerText = `⏳ TIMESHIFT (-${m}:${s})`;
+    badge.textContent = `TIMESHIFT (-${m}:${s})`;
     badge.className = 'tag enc';
-    if (delayText) delayText.innerText = `-${m}:${s} Min`;
+    if (delayText) delayText.textContent = `-${m}:${s} Min`;
   }
 }
 
 async function saveTimeshiftRecording() {
-  showToast('💾 Speichere Timeshift als Aufnahme…');
+  showToast('Speichere Timeshift als Aufnahme…');
   try {
     const res = await fetch('/api/timeshift/save', { method: 'POST' });
     const data = await res.json();
-    showToast(data.message);
+    showToast(data.message, data.success ? 'success' : 'error');
     if (typeof loadRecordings === 'function') loadRecordings();
   } catch (e) {
-    showToast('Fehler beim Speichern: ' + e);
+    showToast('Fehler beim Speichern: ' + e, 'error');
   }
 }
 
@@ -241,9 +360,9 @@ document.addEventListener('DOMContentLoaded', () => {
           const tot = Math.round(videoElement.duration);
           const tm = String(Math.floor(tot / 60)).padStart(2, '0');
           const ts = String(tot % 60).padStart(2, '0');
-          document.getElementById('metricDuration').innerText = `${m}:${s} / ${tm}:${ts}`;
+          document.getElementById('metricDuration').textContent = `${m}:${s} / ${tm}:${ts}`;
         } else {
-          document.getElementById('metricDuration').innerText = `${m}:${s}`;
+          document.getElementById('metricDuration').textContent = `${m}:${s}`;
         }
       } else if (activeProgIdx && activeProgIdx > 0) {
         updateTimeshiftUI();

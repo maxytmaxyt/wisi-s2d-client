@@ -6,14 +6,15 @@ After=network.target
 Type=simple
 User=pi
 WorkingDirectory=/home/pi/wisi-s2d-client
-ExecStart=/usr/bin/python3 -m wisi.ui --host 0.0.0.0 --port 8888 --no-browser
+ExecStart=/usr/bin/python3 -m wisi_s2d.cli.ui --host 0.0.0.0 --port 8888 --no-browser --auto-connect
 Restart=always
 RestartSec=5
 StandardOutput=journal
 StandardError=journal
 
-# Umgebungsvariablen für unbuffered Python-Logs
+# Umgebungsvariablen für unbuffered Python-Logs und Paketpfad
 Environment=PYTHONUNBUFFERED=1
+Environment=PYTHONPATH=/home/pi/wisi-s2d-client/src
 
 [Install]
 WantedBy=multi-user.target

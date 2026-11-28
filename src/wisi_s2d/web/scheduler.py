@@ -17,12 +17,13 @@ from typing import TYPE_CHECKING, Any
 import uuid
 
 if TYPE_CHECKING:
-    from ui.streamer import DongleManager
+    from .streamer import DongleManager
 
 log = logging.getLogger("wisi.ui.scheduler")
 
 RECORDINGS_DIR = Path("recordings")
 TIMERS_FILE = RECORDINGS_DIR / "timers.json"
+
 
 @dataclass
 class TimerEntry:
@@ -55,6 +56,7 @@ class RecordingScheduler:
 
     def __init__(self, manager: DongleManager) -> None:
         self.manager = manager
+        self._rec_lock = threading.RLock()
         self.recording_active: bool = False
         self.recording_path: Path | None = None
         self.recording_file: Any = None
@@ -76,19 +78,29 @@ class RecordingScheduler:
             return
         try:
             data = json.loads(TIMERS_FILE.read_text(encoding="utf-8"))
+            changed = False
+            now = time.time()
             with self.timers_lock:
                 self.timers = []
                 for item in data:
+                    status = item.get("status", "scheduled")
+                    start_t = float(item["start_time"])
+                    dur_m = int(item["duration_minutes"])
+                    if status == "recording":
+                        status = "completed" if now >= start_t + dur_m * 60 else "failed"
+                        changed = True
                     self.timers.append(TimerEntry(
                         id=item["id"],
                         prog_idx=item["prog_idx"],
                         channel_name=item.get("channel_name", ""),
                         title=item.get("title", "Aufnahme"),
-                        start_time=float(item["start_time"]),
-                        duration_minutes=int(item["duration_minutes"]),
-                        status=item.get("status", "scheduled"),
+                        start_time=start_t,
+                        duration_minutes=dur_m,
+                        status=status,
                         filename=item.get("filename", ""),
                     ))
+            if changed:
+                self._save_timers()
             log.info("%d Timer aus %s geladen.", len(self.timers), TIMERS_FILE)
         except Exception as e:
             log.warning("Konnte Timer nicht laden: %s", e)
@@ -156,64 +168,77 @@ class RecordingScheduler:
 
     def write_chunk(self, chunk: bytes) -> None:
         """Wird aus dem Streamer-Worker aufgerufen, wenn Aufnahme aktiv ist."""
-        if self.recording_active and self.recording_file:
-            try:
-                self.recording_file.write(chunk)
-                self.recording_bytes += len(chunk)
-            except Exception as rec_err:
-                log.error("Aufnahmefehler: %s", rec_err)
+        with self._rec_lock:
+            if self.recording_active and self.recording_file:
+                try:
+                    self.recording_file.write(chunk)
+                    self.recording_bytes += len(chunk)
+                except Exception as rec_err:
+                    log.error("Aufnahmefehler: %s", rec_err)
 
     def start_recording(self, prog_idx: int | None = None, filename: str | None = None) -> tuple[bool, str]:
-        if prog_idx and (not self.manager.active_service or self.manager.active_service.prog_idx != prog_idx):
-            self.manager.start_stream(prog_idx)
-            time.sleep(0.5)
+        with self._rec_lock:
+            if self.recording_active:
+                return False, "Es läuft bereits eine Aufnahme"
 
-        if not self.manager.active_service:
-            return False, "Kein aktiver Kanal zum Aufnehmen"
+            if prog_idx and (not self.manager.active_service or self.manager.active_service.prog_idx != prog_idx):
+                if not self.manager.start_stream(prog_idx):
+                    return False, "Konnte Stream für Aufnahme nicht starten (Dongle nicht erreichbar)"
+                time.sleep(0.5)
 
-        RECORDINGS_DIR.mkdir(parents=True, exist_ok=True)
-        if not filename:
-            safe_name = "".join(c if c.isalnum() or c in " -_" else "_" for c in self.manager.active_service.name)
-            timestamp = time.strftime("%Y%m%d_%H%M%S")
-            filename = f"{safe_name}_{timestamp}.ts"
+            if not self.manager.active_service:
+                return False, "Kein aktiver Kanal zum Aufnehmen"
 
-        rec_path = RECORDINGS_DIR / filename
-        try:
-            self.recording_file = open(rec_path, "wb")
-            self.recording_path = rec_path
-            self.recording_active = True
-            self.recording_start_time = time.time()
-            self.recording_bytes = 0
-            log.info("Aufnahme gestartet: %s", rec_path)
-            return True, f"Aufnahme gestartet: {filename}"
-        except OSError as e:
-            return False, f"Konnte Datei nicht öffnen: {e}"
+            RECORDINGS_DIR.mkdir(parents=True, exist_ok=True)
+            if not filename:
+                safe_name = "".join(c if c.isalnum() or c in " -_" else "_" for c in self.manager.active_service.name)
+                timestamp = time.strftime("%Y%m%d_%H%M%S")
+                safe_filename = f"{safe_name}_{timestamp}.ts"
+            else:
+                safe_filename = os.path.basename(filename)
+                if not safe_filename:
+                    return False, "Ungültiger Dateiname"
+
+            rec_path = RECORDINGS_DIR / safe_filename
+            try:
+                self.recording_file = open(rec_path, "wb")  # noqa: SIM115
+                self.recording_path = rec_path
+                self.recording_active = True
+                self.recording_start_time = time.time()
+                self.recording_bytes = 0
+                log.info("Aufnahme gestartet: %s", rec_path)
+                return True, f"Aufnahme gestartet: {safe_filename}"
+            except OSError as e:
+                return False, f"Konnte Datei nicht öffnen: {e}"
 
     def stop_recording(self) -> tuple[bool, str]:
-        if not self.recording_active:
-            return False, "Keine Aufnahme aktiv"
+        with self._rec_lock:
+            if not self.recording_active:
+                return False, "Keine Aufnahme aktiv"
 
-        self.recording_active = False
-        path = self.recording_path
-        if self.recording_file:
-            try:
-                self.recording_file.flush()
-                self.recording_file.close()
-            except Exception:
-                pass
-            self.recording_file = None
+            self.recording_active = False
+            path = self.recording_path
+            if self.recording_file:
+                try:
+                    self.recording_file.flush()
+                    self.recording_file.close()
+                except Exception:
+                    pass
+                self.recording_file = None
 
-        dur = time.time() - self.recording_start_time
-        mb = self.recording_bytes / 1_048_576
-        msg = f"Aufnahme beendet: {path.name if path else ''} ({mb:.1f} MB in {dur:.0f} s)"
-        log.info(msg)
-        return True, msg
+            dur = time.time() - self.recording_start_time
+            mb = self.recording_bytes / 1_048_576
+            msg = f"Aufnahme beendet: {path.name if path else ''} ({mb:.1f} MB in {dur:.0f} s)"
+            log.info(msg)
+            return True, msg
 
     def list_recordings(self) -> list[dict[str, Any]]:
         RECORDINGS_DIR.mkdir(parents=True, exist_ok=True)
-        files = []
+        files: list[dict[str, Any]] = []
         all_recs = list(RECORDINGS_DIR.glob("*.ts")) + list(RECORDINGS_DIR.glob("*.mp4"))
         for p in all_recs:
+            if p.name.startswith("_timeshift"):
+                continue
             stat = p.stat()
             files.append({
                 "filename": p.name,
@@ -222,7 +247,7 @@ class RecordingScheduler:
                 "created": time.strftime("%Y-%m-%d %H:%M:%S", time.localtime(stat.st_mtime)),
                 "path": str(p.resolve()),
             })
-        files.sort(key=lambda x: x["created"], reverse=True)
+        files.sort(key=lambda x: str(x["created"]), reverse=True)
         return files
 
     def delete_recording(self, filename: str) -> tuple[bool, str]:

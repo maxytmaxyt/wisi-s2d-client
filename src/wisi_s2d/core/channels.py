@@ -111,7 +111,7 @@ def parse_chlist_xml(xml_bytes: bytes) -> list[Channel]:
 # ---------------------------------------------------------------------------
 def fetch_channel_list(
     sock,
-    lock: threading.Lock,
+    lock: threading.Lock | threading.RLock,
     session_token: bytes = b"",
     timeout: float = 15.0,
 ) -> list[Channel]:

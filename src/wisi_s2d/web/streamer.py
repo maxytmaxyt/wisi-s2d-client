@@ -256,6 +256,13 @@ class DongleManager:
     def _disconnect_internal(self) -> None:
         self.stop_stream()
         self._signal_stop.set()
+        if self._signal_thread is not None and threading.current_thread() is not self._signal_thread:
+            self._signal_thread.join(timeout=2.0)
+            self._signal_thread = None
+        self.signal_locked = False
+        self.signal_strength = 0
+        self.signal_quality = 0
+
         if self.keepalive_thread is not None:
             self.keepalive_stop.set()
             self.keepalive_thread.join(timeout=2.0)
@@ -271,13 +278,15 @@ class DongleManager:
                 break
             try:
                 with self.lock:
+                    if not self.tcp_sock:
+                        break
                     r = protocol.send_recv(self.tcp_sock, protocol.cmd_signal(), 17, "0x02 signal")
                 if len(r) >= 5:
                     self.signal_locked = bool(r[2] & 0x01)
                     self.signal_strength = min(100, round(r[3] * 100 / 255))
                     self.signal_quality = min(100, round(r[4] * 100 / 255))
-            except Exception:
-                pass
+            except Exception as exc:
+                log.debug("Signal-Poll fehlgeschlagen: %s", exc)
 
 
 __all__ = [

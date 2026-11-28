@@ -27,20 +27,15 @@ def align_ts_packets(
 
     if len(data) >= protocol.UDP_REQUEST_LEN + 64:
         seq = data[protocol.UDP_REQUEST_LEN + 12]
-        if last_seq < seq:
+        if last_seq < 0:
             last_seq = seq
-        elif seq == 0 and last_seq == 255:
-            # Normaler Wraparound 255 → 0: Sequenz zurücksetzen
-            last_seq = -1
-        elif last_seq == 255 and seq != 0:
-            # Wraparound übersprungen (255 → >0): akzeptieren und weiter
-            last_seq = seq
-        elif seq == 0 and last_seq != 255:
-            # Wraparound ohne vorherigen 255er: akzeptieren
-            last_seq = -1
         else:
-            # Duplikat oder Rücksprung: Block verwerfen
-            return b"", last_seq, True
+            diff = (seq - last_seq) & 0xFF
+            if 1 <= diff < 128:
+                last_seq = seq
+            else:
+                # Duplikat oder Rücksprung: Block verwerfen
+                return b"", last_seq, True
         payload = data[:protocol.UDP_REQUEST_LEN]
     elif len(data) > protocol.UDP_REQUEST_LEN:
         payload = data[:protocol.UDP_REQUEST_LEN]

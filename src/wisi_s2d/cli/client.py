@@ -27,6 +27,8 @@ _pkg = str(Path(__file__).resolve().parent)
 sys.path = [p for p in sys.path if Path(p).resolve() != Path(_pkg).resolve()]
 if _src not in sys.path:
     sys.path.insert(0, _src)
+if not __package__:
+    __package__ = "wisi_s2d.cli"
 
 from ..protocol import protocol
 from ..core.channels import channels_to_services, fetch_channel_list, fetch_service_db
